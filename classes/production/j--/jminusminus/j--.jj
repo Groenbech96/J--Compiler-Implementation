@@ -527,39 +527,35 @@ private JMember memberDecl( ArrayList<String>  mods ): {
 {
     try {
         LOOKAHEAD( <IDENTIFIER> <LPAREN> )
-        (
-            <IDENTIFIER> 
-            { 
-                line = token.beginLine; 
-                name = token.image; 
-            } 
-            params = formalParameters() 
-            body = block()
-            { 
-                memberDecl = 
-                new JConstructorDeclaration( line, mods, 
-                                             name, params, body );
-            }
-        ) |     
+        <IDENTIFIER>
+        {
+            line = token.beginLine;
+            name = token.image;
+        }
+        params = formalParameters()
+        body = block()
+        {
+            memberDecl =
+            new JConstructorDeclaration( line, mods,
+                                         name, params, body );
+        } |
         LOOKAHEAD( ( <VOID> | type() ) <IDENTIFIER> <LPAREN> )
         (
-            ( 
-                <VOID> { type = Type.VOID; } | 
-                type = type() 
-            ) 
-            { line = token.beginLine; }
-            <IDENTIFIER> { name = token.image; } 
-            params = formalParameters() 
-            ( 
-                body = block() | 
-                <SEMI> 
-            )
-            { 
-                memberDecl = 
-                   new JMethodDeclaration( line, mods, name, 
-                                           type, params, body ); 
-            } 
-        ) | 
+            <VOID> { type = Type.VOID; } |
+            type = type()
+        )
+        { line = token.beginLine; }
+        <IDENTIFIER> { name = token.image; }
+        params = formalParameters()
+        (
+            body = block() |
+            <SEMI>
+        )
+        {
+            memberDecl =
+               new JMethodDeclaration( line, mods, name,
+                                       type, params, body );
+        } |
         ( 
             type = type() { line = token.beginLine; }
             variableDeclarators = variableDeclarators( type )
