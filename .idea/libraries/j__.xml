@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="j--">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/j--.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/j2h.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javacc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/junit.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/spim.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
