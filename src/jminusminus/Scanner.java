@@ -119,7 +119,7 @@ class Scanner {
                         nextCh();
                     }
                 } else {
-                    reportScannerError("Operator / is not supported in j--.");
+                    return new TokenInfo(DIVIDE, line);
                 }
             } else {
                 moreWhiteSpace = false;
@@ -165,6 +165,9 @@ class Scanner {
             case '*':
                 nextCh();
                 return new TokenInfo(STAR, line);
+            case '%':
+                nextCh();
+                return new TokenInfo(REMAINDER, line);
             case '+':
                 nextCh();
                 if (ch == '=') {

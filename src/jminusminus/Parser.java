@@ -1123,7 +1123,12 @@ public class Parser {
         while (more) {
             if (have(STAR)) {
                 lhs = new JMultiplyOp(line, lhs, unaryExpression());
-            } else {
+            } else if (have(DIVIDE)){
+                lhs = new JDivideOp(line, lhs, unaryExpression());
+            } else if (have(REMAINDER)){
+                lhs = new JRemainderOp(line, lhs, unaryExpression());
+            }
+            else {
                 more = false;
             }
         }
