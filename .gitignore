@@ -27,8 +27,6 @@ bin/
 hs_err_pid*
 classes/production/j--/j--.jar
 
-*.jar
-
 java2html/
 
 javadoc/
