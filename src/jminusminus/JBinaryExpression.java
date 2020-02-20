@@ -101,8 +101,8 @@ class JPlusOp extends JBinaryExpression {
      */
 
     public JExpression analyze(Context context) {
-        lhs = (JExpression) lhs.analyze(context);
-        rhs = (JExpression) rhs.analyze(context);
+        lhs = lhs.analyze(context);
+        rhs = rhs.analyze(context);
         if (lhs.type() == Type.STRING || rhs.type() == Type.STRING) {
             return (new JStringConcatenationOp(line, lhs, rhs))
                     .analyze(context);
@@ -165,8 +165,8 @@ class JSubtractOp extends JBinaryExpression {
      */
 
     public JExpression analyze(Context context) {
-        lhs = (JExpression) lhs.analyze(context);
-        rhs = (JExpression) rhs.analyze(context);
+        lhs = lhs.analyze(context);
+        rhs = rhs.analyze(context);
         lhs.type().mustMatchExpected(line(), Type.INT);
         rhs.type().mustMatchExpected(line(), Type.INT);
         type = Type.INT;
@@ -218,8 +218,8 @@ class JMultiplyOp extends JBinaryExpression {
      */
 
     public JExpression analyze(Context context) {
-        lhs = (JExpression) lhs.analyze(context);
-        rhs = (JExpression) rhs.analyze(context);
+        lhs = lhs.analyze(context);
+        rhs = rhs.analyze(context);
         lhs.type().mustMatchExpected(line(), Type.INT);
         rhs.type().mustMatchExpected(line(), Type.INT);
         type = Type.INT;
@@ -249,8 +249,8 @@ public JDivideOp(int line, JExpression lhs, JExpression rhs){
 
     @Override
     public JExpression analyze(Context context) {
-        lhs = (JExpression) lhs.analyze(context);
-        rhs = (JExpression) rhs.analyze(context);
+        lhs = lhs.analyze(context);
+        rhs = rhs.analyze(context);
         lhs.type().mustMatchExpected(line(), Type.INT);
         rhs.type().mustMatchExpected(line(), Type.INT);
         type = Type.INT;
@@ -272,8 +272,8 @@ class JRemainderOp extends JBinaryExpression{
 
     @Override
     public JExpression analyze(Context context) {
-        lhs = (JExpression) lhs.analyze(context);
-        rhs = (JExpression) rhs.analyze(context);
+        lhs = lhs.analyze(context);
+        rhs = rhs.analyze(context);
         lhs.type().mustMatchExpected(line(), Type.INT);
         rhs.type().mustMatchExpected(line(), Type.INT);
         type = Type.INT;
