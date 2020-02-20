@@ -184,7 +184,7 @@ public class CLAbsorber {
      * Read the attributes from the specified stream, and return them as a list
      *
      * @param in             input stream.
-     * @param attributeCount number of attributes.
+     * @param attributesCount number of attributes.
      * @return list of attributes.
      */
 
