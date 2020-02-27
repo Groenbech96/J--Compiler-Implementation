@@ -130,22 +130,24 @@ class Conversions {
 
         // Populate the table
 
+        // Int to Char
         put(Type.CHAR, Type.INT, Converter.Identity);
         put(Type.INT, Type.CHAR, new I2C());
+        // Int to Double
+        put(Type.INT, Type.DOUBLE, Converter.Identity);
+        put(Type.DOUBLE, Type.INT, new DoubleToInt());
 
         // Boxing
+        put(Type.DOUBLE, Type.BOXED_DOUBLE, new Boxing(Type.DOUBLE, Type.BOXED_DOUBLE));
         put(Type.CHAR, Type.BOXED_CHAR, new Boxing(Type.CHAR, Type.BOXED_CHAR));
         put(Type.INT, Type.BOXED_INT, new Boxing(Type.INT, Type.BOXED_INT));
-        put(Type.BOOLEAN, Type.BOXED_BOOLEAN, new Boxing(Type.BOOLEAN,
-                Type.BOXED_BOOLEAN));
+        put(Type.BOOLEAN, Type.BOXED_BOOLEAN, new Boxing(Type.BOOLEAN, Type.BOXED_BOOLEAN));
 
         // Un-boxing
-        put(Type.BOXED_CHAR, Type.CHAR, new UnBoxing(Type.BOXED_CHAR,
-                Type.CHAR, "charValue"));
-        put(Type.BOXED_INT, Type.INT, new UnBoxing(Type.BOXED_INT, Type.INT,
-                "intValue"));
-        put(Type.BOXED_BOOLEAN, Type.BOOLEAN, new UnBoxing(Type.BOXED_BOOLEAN,
-                Type.BOOLEAN, "booleanValue"));
+        put(Type.BOXED_DOUBLE, Type.DOUBLE, new UnBoxing(Type.BOXED_DOUBLE, Type.DOUBLE, "doubleValue"));
+        put(Type.BOXED_CHAR, Type.CHAR, new UnBoxing(Type.BOXED_CHAR, Type.CHAR, "charValue"));
+        put(Type.BOXED_INT, Type.INT, new UnBoxing(Type.BOXED_INT, Type.INT, "intValue"));
+        put(Type.BOXED_BOOLEAN, Type.BOOLEAN, new UnBoxing(Type.BOXED_BOOLEAN, Type.BOOLEAN, "booleanValue"));
     }
 
     /**
@@ -352,6 +354,23 @@ class I2C implements Converter {
 
     public void codegen(CLEmitter output) {
         output.addNoArgInstruction(I2C);
+    }
+
+}
+
+
+/**
+ * Converting from an int to a char requires an I2C instruction.
+ */
+
+class DoubleToInt implements Converter {
+
+    /**
+     * @inheritDoc
+     */
+
+    public void codegen(CLEmitter output) {
+        output.addNoArgInstruction(D2I);
     }
 
 }
