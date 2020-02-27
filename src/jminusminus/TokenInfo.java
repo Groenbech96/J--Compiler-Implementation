@@ -20,9 +20,9 @@ enum TokenKind {
             "+"), ASSIGN("="), DEC("--"), EQUAL("=="), GT(">"), INC("++"), LAND(
             "&&"), LE("<="), LNOT("!"), MINUS("-"), PLUS_ASSIGN("+="), STAR("*"),DIVIDE("/"),
             REMAINDER("%"), LPAREN("("), RPAREN(")"), LCURLY("{"), RCURLY("}"), LBRACK("["),
-    RBRACK("]"), SEMI(";"), COMMA(","), DOT("."), IDENTIFIER("<IDENTIFIER>"), INT_LITERAL(
+            RBRACK("]"), SEMI(";"), COMMA(","), DOT("."), IDENTIFIER("<IDENTIFIER>"), INT_LITERAL(
             "<INT_LITERAL>"), CHAR_LITERAL("<CHAR_LITERAL>"), STRING_LITERAL(
-            "<STRING_LITERAL>");
+            "<STRING_LITERAL>"), SHIFT_AR_LEFT("<SHIFT_AR_LEFT"), SHIFT_AR_RIGHT("<SHIFT_AT_RIGHT");
 
     /**
      * The token's string representation.

@@ -88,6 +88,10 @@ additiveExpression ::= multiplicativeExpression // level 3
 multiplicativeExpression ::= unaryExpression       // level 2
                                {(STAR|DIVIDE|REMAINDER) unaryExpression}
 
+bitwiseExpression ::= unaryExpression // level 2
+                        {(SHIFT_AR_LEFT|SHIFT_AR_RIGHT) unaryExpression}
+
+
 unaryExpression ::= INC unaryExpression  // level 1
                   | MINUS unaryExpression
                   | simpleUnaryExpression
