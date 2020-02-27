@@ -40,6 +40,11 @@ class Type {
     public final static Type INT = typeFor(int.class);
 
     /**
+     * The primitive type, double.
+     */
+    public final static Type DOUBLE = typeFor(double.class);
+
+    /**
      * The primitive type, char.
      */
     public final static Type CHAR = typeFor(char.class);
@@ -53,6 +58,11 @@ class Type {
      * java.lang.Integer.
      */
     public final static Type BOXED_INT = typeFor(java.lang.Integer.class);
+
+    /**
+     * java.lang.Character.
+     */
+    public final static Type BOXED_DOUBLE = typeFor(java.lang.Double.class);
 
     /**
      * java.lang.Character.
