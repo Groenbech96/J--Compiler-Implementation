@@ -47,7 +47,6 @@ abstract class JBinaryExpression extends JExpression {
     void sidesMustMatchNumerical() {
         if (!isNumericalType(lhs.type()))
             JAST.compilationUnit.reportSemanticError(line, "LHS %s is not numerical", lhs.type());
-        lhs.type().mustMatchExpected(line(), lhs.type());
         rhs.type().mustMatchExpected(line(), lhs.type());
     }
 

@@ -894,6 +894,8 @@ public class Parser {
             return Type.BOOLEAN;
         } else if (have(CHAR)) {
             return Type.CHAR;
+        } else if (have(DOUBLE)) {
+            return Type.DOUBLE;
         } else if (have(INT)) {
             return Type.INT;
         } else {
@@ -1395,10 +1397,13 @@ public class Parser {
 
     private JExpression literal() {
         int line = scanner.token().line();
+        System.out.println(scanner.token().toString());
         if (have(INT_LITERAL)) {
             return new JLiteralInt(line, scanner.previousToken().image());
         } else if (have(CHAR_LITERAL)) {
             return new JLiteralChar(line, scanner.previousToken().image());
+        } else if (have(DOUBLE)) {
+            return new JLiteralDouble(line, scanner.previousToken().image());
         } else if (have(STRING_LITERAL)) {
             return new JLiteralString(line, scanner.previousToken().image());
         } else if (have(TRUE)) {

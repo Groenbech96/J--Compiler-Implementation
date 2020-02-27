@@ -53,6 +53,15 @@ abstract class JUnaryExpression extends JExpression {
         p.printf("</JUnaryExpression>\n");
     }
 
+    void mustBeNumerical(JExpression arg) {
+        if (!isNumericalType(arg.type()))
+            JAST.compilationUnit.reportSemanticError(line, "arg %s is not numerical", arg.type());
+    }
+
+    boolean isNumericalType(Type type) {
+        return type == Type.INT || type == Type.DOUBLE;
+    }
+
 }
 
 /**
@@ -84,8 +93,8 @@ class JNegateOp extends JUnaryExpression {
 
     public JExpression analyze(Context context) {
         arg = arg.analyze(context);
-        arg.type().mustMatchExpected(line(), Type.INT);
-        type = Type.INT;
+        mustBeNumerical(arg);
+        type = arg.type();
         return this;
     }
 
@@ -204,8 +213,8 @@ class JPostDecrementOp extends JUnaryExpression {
             type = Type.ANY;
         } else {
             arg = (JExpression) arg.analyze(context);
-            arg.type().mustMatchExpected(line(), Type.INT);
-            type = Type.INT;
+            mustBeNumerical(arg);
+            type = arg.type();
         }
         return this;
     }
@@ -282,8 +291,8 @@ class JPreIncrementOp extends JUnaryExpression {
             type = Type.ANY;
         } else {
             arg = (JExpression) arg.analyze(context);
-            arg.type().mustMatchExpected(line(), Type.INT);
-            type = Type.INT;
+            mustBeNumerical(arg);
+            type = arg.type();
         }
         return this;
     }

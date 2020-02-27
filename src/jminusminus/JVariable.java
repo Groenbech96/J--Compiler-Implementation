@@ -150,8 +150,11 @@ class JVariable extends JExpression implements JLhs {
                 }
             } else {
                 // Primitive types
-                if (type == Type.INT || type == Type.BOOLEAN
-                        || type == Type.CHAR) {
+                if (type == Type.INT
+                        || type == Type.BOOLEAN
+                        || type == Type.CHAR
+                        || type == Type.DOUBLE
+                ) {
                     switch (offset) {
                         case 0:
                             output.addNoArgInstruction(ILOAD_0);
@@ -270,8 +273,11 @@ class JVariable extends JExpression implements JLhs {
                 }
             } else {
                 // Primitive types
-                if (type == Type.INT || type == Type.BOOLEAN
-                        || type == Type.CHAR) {
+                if (type == Type.INT
+                        || type == Type.BOOLEAN
+                        || type == Type.CHAR
+                        || type == Type.DOUBLE
+                ) {
                     switch (offset) {
                         case 0:
                             output.addNoArgInstruction(ISTORE_0);
