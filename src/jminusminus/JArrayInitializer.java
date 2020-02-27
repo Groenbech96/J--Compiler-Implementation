@@ -6,13 +6,7 @@ import java.util.ArrayList;
 
 import static jminusminus.CLConstants.*;
 
-/**
- * The AST node for an array initializer. Basically a list of
- * initializing expressions.
- */
-
-class JArrayInitializer
-        extends JExpression {
+class JArrayInitializer extends JExpression {
 
     /**
      * The initializations.
@@ -98,17 +92,22 @@ class JArrayInitializer
 
             // Code to compute the initial value.
             initExpr.codegen(output);
+            addStoreOperator(output, componentType);
+        }
+    }
 
-            // Code to store the initial value in the array
-            if (componentType == Type.INT) {
-                output.addNoArgInstruction(IASTORE);
-            } else if (componentType == Type.BOOLEAN) {
-                output.addNoArgInstruction(BASTORE);
-            } else if (componentType == Type.CHAR) {
-                output.addNoArgInstruction(CASTORE);
-            } else if (!componentType.isPrimitive()) {
-                output.addNoArgInstruction(AASTORE);
-            }
+    private void addStoreOperator(CLEmitter output, Type componentType) {
+        // Code to store the initial value in the array
+        if (componentType == Type.INT) {
+            output.addNoArgInstruction(IASTORE);
+        } else if (componentType == Type.DOUBLE) {
+            output.addNoArgInstruction(DASTORE);
+        } else if (componentType == Type.BOOLEAN) {
+            output.addNoArgInstruction(BASTORE);
+        } else if (componentType == Type.CHAR) {
+            output.addNoArgInstruction(CASTORE);
+        } else if (!componentType.isPrimitive()) {
+            output.addNoArgInstruction(AASTORE);
         }
     }
 

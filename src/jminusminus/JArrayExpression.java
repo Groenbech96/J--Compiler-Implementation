@@ -85,15 +85,7 @@ class JArrayExpression
     public void codegen(CLEmitter output) {
         theArray.codegen(output);
         indexExpr.codegen(output);
-        if (type == Type.INT) {
-            output.addNoArgInstruction(IALOAD);
-        } else if (type == Type.BOOLEAN) {
-            output.addNoArgInstruction(BALOAD);
-        } else if (type == Type.CHAR) {
-            output.addNoArgInstruction(CALOAD);
-        } else if (!type.isPrimitive()) {
-            output.addNoArgInstruction(AALOAD);
-        }
+        addLoadOperator(output);
     }
 
     /**
@@ -130,15 +122,7 @@ class JArrayExpression
         } else {
             output.addNoArgInstruction(DUP2);
         }
-        if (type == Type.INT) {
-            output.addNoArgInstruction(IALOAD);
-        } else if (type == Type.BOOLEAN) {
-            output.addNoArgInstruction(BALOAD);
-        } else if (type == Type.CHAR) {
-            output.addNoArgInstruction(CALOAD);
-        } else if (!type.isPrimitive()) {
-            output.addNoArgInstruction(AALOAD);
-        }
+        addLoadOperator(output);
     }
 
     /**
@@ -166,16 +150,7 @@ class JArrayExpression
      */
 
     public void codegenStore(CLEmitter output) {
-        if (type == Type.INT) {
-            output.addNoArgInstruction(IASTORE);
-        } else if (type == Type.BOOLEAN) {
-            output.addNoArgInstruction(BASTORE);
-        } else if (type == Type.CHAR) {
-            output.addNoArgInstruction(CASTORE);
-        } else if (!type.isPrimitive()) {
-            output.addNoArgInstruction(AASTORE);
-        }
-
+        addLoadOperator(output);
     }
 
     /**
@@ -201,5 +176,19 @@ class JArrayExpression
         }
         p.indentLeft();
         p.println("</JArrayExpression>");
+    }
+
+    private void addLoadOperator(CLEmitter output) {
+        if (type == Type.INT) {
+            output.addNoArgInstruction(IALOAD);
+        } else if (type == Type.BOOLEAN) {
+            output.addNoArgInstruction(BALOAD);
+        } else if (type == Type.CHAR) {
+            output.addNoArgInstruction(CALOAD);
+        } else if (type == Type.DOUBLE) {
+            output.addNoArgInstruction(DALOAD);
+        } else if (!type.isPrimitive()) {
+            output.addNoArgInstruction(AALOAD);
+        }
     }
 }
