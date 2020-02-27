@@ -30,3 +30,7 @@ classes/production/j--/j--.jar
 java2html/
 
 javadoc/
+
+*.kotlin_module
+
+classes/production/j--/spim.jar
