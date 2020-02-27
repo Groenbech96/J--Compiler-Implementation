@@ -264,6 +264,9 @@ class Scanner {
             case '0':
                 // Handle only simple decimal integers for now.
                 nextCh();
+                if (ch == '.') {
+                    return new TokenInfo(DOUBLE, "0" + getDouble().toString(), line);
+                }
                 return new TokenInfo(INT_LITERAL, "0", line);
             case '1':
             case '2':
@@ -278,6 +281,10 @@ class Scanner {
                 while (isDigit(ch)) {
                     buffer.append(ch);
                     nextCh();
+                }
+                if (ch == '.') {
+                    StringBuffer doubleBuffer = getDouble();
+                    return new TokenInfo(DOUBLE, buffer.toString() + doubleBuffer.toString(), line);
                 }
                 return new TokenInfo(INT_LITERAL, buffer.toString(), line);
             default:
@@ -367,6 +374,16 @@ class Scanner {
         System.err.printf("%s:%d: ", fileName, line);
         System.err.printf(message, args);
         System.err.println();
+    }
+
+    private StringBuffer getDouble() {
+        StringBuffer buffer = new StringBuffer().append(".");
+        nextCh();
+        while (isDigit(ch)) {
+            buffer.append(ch);
+            nextCh();
+        }
+        return buffer;
     }
 
     /**
