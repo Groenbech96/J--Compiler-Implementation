@@ -2,6 +2,8 @@
 
 package jminusminus;
 
+import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
+
 import static jminusminus.CLConstants.*;
 
 /**
@@ -53,6 +55,30 @@ abstract class JUnaryExpression extends JExpression {
         p.printf("</JUnaryExpression>\n");
     }
 
+}
+
+/**
+ * The AST node for a unary positive (+) expression.
+ */
+
+class JPositiveOp extends JUnaryExpression{
+
+    public JPositiveOp(int line, JExpression arg) {
+        super(line, "+", arg);
+    }
+
+    @Override
+    public JExpression analyze(Context context) {
+        arg = arg.analyze(context);
+        arg.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    @Override
+    public void codegen(CLEmitter output) {
+        arg.codegen(output);
+    }
 }
 
 /**
@@ -248,6 +274,7 @@ class JPostDecrementOp extends JUnaryExpression {
     }
 
 }
+
 
 /**
  * The AST node for a ++expr expression.
