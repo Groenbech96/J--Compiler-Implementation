@@ -1402,6 +1402,7 @@ public class Parser {
             return new JLiteralInt(line, scanner.previousToken().image());
         } else if (have(CHAR_LITERAL)) {
             return new JLiteralChar(line, scanner.previousToken().image());
+            // TODO: this should be DOUBLE_LITERAL
         } else if (have(DOUBLE)) {
             return new JLiteralDouble(line, scanner.previousToken().image());
         } else if (have(STRING_LITERAL)) {
