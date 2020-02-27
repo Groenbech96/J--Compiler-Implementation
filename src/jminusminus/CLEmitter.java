@@ -852,7 +852,6 @@ public class CLEmitter {
     /**
      * Construct and return a Synthetic attribute.
      *
-     * @param a Synthetic attribute.
      */
 
     private CLAttributeInfo syntheticAttribute() {

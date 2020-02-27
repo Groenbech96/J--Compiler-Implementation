@@ -101,8 +101,8 @@ class JPlusOp extends JBinaryExpression {
      */
 
     public JExpression analyze(Context context) {
-        lhs = (JExpression) lhs.analyze(context);
-        rhs = (JExpression) rhs.analyze(context);
+        lhs = lhs.analyze(context);
+        rhs = rhs.analyze(context);
         if (lhs.type() == Type.STRING || rhs.type() == Type.STRING) {
             return (new JStringConcatenationOp(line, lhs, rhs))
                     .analyze(context);
@@ -165,8 +165,8 @@ class JSubtractOp extends JBinaryExpression {
      */
 
     public JExpression analyze(Context context) {
-        lhs = (JExpression) lhs.analyze(context);
-        rhs = (JExpression) rhs.analyze(context);
+        lhs = lhs.analyze(context);
+        rhs = rhs.analyze(context);
         lhs.type().mustMatchExpected(line(), Type.INT);
         rhs.type().mustMatchExpected(line(), Type.INT);
         type = Type.INT;
@@ -218,8 +218,8 @@ class JMultiplyOp extends JBinaryExpression {
      */
 
     public JExpression analyze(Context context) {
-        lhs = (JExpression) lhs.analyze(context);
-        rhs = (JExpression) rhs.analyze(context);
+        lhs = lhs.analyze(context);
+        rhs = rhs.analyze(context);
         lhs.type().mustMatchExpected(line(), Type.INT);
         rhs.type().mustMatchExpected(line(), Type.INT);
         type = Type.INT;
@@ -240,4 +240,50 @@ class JMultiplyOp extends JBinaryExpression {
         output.addNoArgInstruction(IMUL);
     }
 
+}
+
+class JDivideOp extends JBinaryExpression{
+public JDivideOp(int line, JExpression lhs, JExpression rhs){
+    super(line, "/", lhs, rhs);
+}
+
+    @Override
+    public JExpression analyze(Context context) {
+        lhs = lhs.analyze(context);
+        rhs = rhs.analyze(context);
+        lhs.type().mustMatchExpected(line(), Type.INT);
+        rhs.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    @Override
+    public void codegen(CLEmitter output) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IDIV);
+    }
+}
+
+class JRemainderOp extends JBinaryExpression{
+    public JRemainderOp(int line, JExpression lhs, JExpression rhs){
+        super(line, "%", lhs, rhs);
+    }
+
+    @Override
+    public JExpression analyze(Context context) {
+        lhs = lhs.analyze(context);
+        rhs = rhs.analyze(context);
+        lhs.type().mustMatchExpected(line(), Type.INT);
+        rhs.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    @Override
+    public void codegen(CLEmitter output) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IREM);
+    }
 }
