@@ -2,8 +2,6 @@
 
 package jminusminus;
 
-import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
-
 import static jminusminus.CLConstants.*;
 
 /**
