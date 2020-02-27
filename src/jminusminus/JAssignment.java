@@ -137,9 +137,11 @@ class JPlusAssignOp extends JAssignment {
             lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
         }
         rhs = (JExpression) rhs.analyze(context);
+
         if (lhs.type().equals(Type.INT)) {
-            rhs.type().mustMatchExpected(line(), Type.INT);
-            type = Type.INT;
+            mustMatch(Type.INT);
+        } else if (lhs.type().equals(Type.DOUBLE)) {
+            mustMatch(Type.DOUBLE);
         } else if (lhs.type().equals(Type.STRING)) {
             rhs = (new JStringConcatenationOp(line, lhs, rhs)).analyze(context);
             type = Type.STRING;
@@ -148,6 +150,11 @@ class JPlusAssignOp extends JAssignment {
                     "Invalid lhs type for +=: " + lhs.type());
         }
         return this;
+    }
+
+    private void mustMatch(Type mustMatch){
+        rhs.type().mustMatchExpected(line(), mustMatch);
+        type = mustMatch;
     }
 
     /**
