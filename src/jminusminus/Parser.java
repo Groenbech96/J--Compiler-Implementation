@@ -1127,6 +1127,10 @@ public class Parser {
                 lhs = new JDivideOp(line, lhs, unaryExpression());
             } else if (have(REMAINDER)){
                 lhs = new JRemainderOp(line, lhs, unaryExpression());
+            } else if(have(SHIFT_AR_LEFT)) {
+                lhs = new JShiftArLeftOp(line, lhs, unaryExpression());
+            } else if (have(SHIFT_AR_RIGHT)) {
+                lhs = new JShiftArRightOp(line, lhs, unaryExpression());
             }
             else {
                 more = false;
