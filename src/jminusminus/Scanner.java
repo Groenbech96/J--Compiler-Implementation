@@ -193,9 +193,18 @@ class Scanner {
                     nextCh();
                     return new TokenInfo(LAND, line);
                 } else {
-                    reportScannerError("Operator & is not supported in j--.");
-                    return getNextToken();
+                    nextCh();
+                    return new TokenInfo(BITWISE_AND, line);
                 }
+            case '|':
+                nextCh();
+                return new TokenInfo(BITWISE_OR, line);
+            case '^':
+                nextCh();
+                return new TokenInfo(BITWISE_XOR, line);
+            case '~':
+                nextCh();
+                return new TokenInfo(BITWISE_NOT, line);
             case '>':
                 nextCh();
                 if (ch == '>') {

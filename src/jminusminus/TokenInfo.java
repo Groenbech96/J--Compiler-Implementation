@@ -22,7 +22,8 @@ enum TokenKind {
             REMAINDER("%"), LPAREN("("), RPAREN(")"), LCURLY("{"), RCURLY("}"), LBRACK("["),
             RBRACK("]"), SEMI(";"), COMMA(","), DOT("."), IDENTIFIER("<IDENTIFIER>"), INT_LITERAL(
             "<INT_LITERAL>"), CHAR_LITERAL("<CHAR_LITERAL>"), STRING_LITERAL(
-            "<STRING_LITERAL>"), SHIFT_AR_LEFT("<SHIFT_AR_LEFT"), SHIFT_AR_RIGHT("<SHIFT_AT_RIGHT");
+            "<STRING_LITERAL>"), SHIFT_AR_LEFT("<SHIFT_AR_LEFT"), SHIFT_AR_RIGHT("<SHIFT_AT_RIGHT"),
+            BITWISE_AND("&"), BITWISE_OR("|"), BITWISE_XOR("^"), BITWISE_NOT("~");
 
     /**
      * The token's string representation.

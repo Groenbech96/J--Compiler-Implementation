@@ -326,3 +326,24 @@ class JPreIncrementOp extends JUnaryExpression {
     }
 
 }
+
+class JBitwiseNotOp extends JUnaryExpression {
+    public JBitwiseNotOp(int line, JExpression arg) {
+        super(line, "~", arg);
+    }
+
+    public JExpression analyze(Context context) {
+        arg = arg.analyze(context);
+        arg.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    // Probably doesn't work
+    public void codegen(CLEmitter output) {
+        arg.codegen(output);
+        output.addLDCInstruction(-1);
+        output.addNoArgInstruction(IXOR);
+    }
+
+}

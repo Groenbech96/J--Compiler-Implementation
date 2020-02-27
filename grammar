@@ -89,11 +89,11 @@ multiplicativeExpression ::= unaryExpression       // level 2
                                {(STAR|DIVIDE|REMAINDER) unaryExpression}
 
 bitwiseExpression ::= unaryExpression // level 2
-                        {(SHIFT_AR_LEFT|SHIFT_AR_RIGHT) unaryExpression}
-
+                        {(SHIFT_AR_LEFT|SHIFT_AR_RIGHT|BITWISE_AND|BITWISE_OR|BITWISE_XOR) unaryExpression}
 
 unaryExpression ::= INC unaryExpression  // level 1
                   | MINUS unaryExpression
+                  | BITWISE_NOT unaryExpression
                   | simpleUnaryExpression
 
 simpleUnaryExpression ::= LNOT unaryExpression
