@@ -34,3 +34,5 @@ javadoc/
 *.kotlin_module
 
 classes/production/j--/spim.jar
+
+lib/j--.jar

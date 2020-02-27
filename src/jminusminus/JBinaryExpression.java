@@ -288,5 +288,57 @@ class JRemainderOp extends JBinaryExpression{
     }
 }
 
+class JShiftArLeftOp extends JBinaryExpression {
+
+    /**
+     * Construct an AST node for a binary expression given its line number, the
+     * binary operator, and lhs and rhs operands.
+     *
+     * @param line     line in which the binary expression occurs in the source file.
+     * @param lhs      the lhs operand.
+     * @param rhs      the rhs operand.
+     */
+    protected JShiftArLeftOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "<<", lhs, rhs);
+    }
+
+    @Override
+    public JExpression analyze(Context context) {
+        return this;
+    }
+
+    @Override
+    public void codegen(CLEmitter output) {
+
+    }
+}
+
+
+class JShiftArRightOp extends JBinaryExpression {
+
+
+    /**
+     * Construct an AST node for a binary expression given its line number, the
+     * binary operator, and lhs and rhs operands.
+     *
+     * @param line     line in which the binary expression occurs in the source file.
+     * @param lhs      the lhs operand.
+     * @param rhs      the rhs operand.
+     */
+    protected JShiftArRightOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, ">>", lhs, rhs);
+    }
+
+    @Override
+    public JExpression analyze(Context context) {
+        return this;
+    }
+
+    @Override
+    public void codegen(CLEmitter output) {
+
+    }
+}
+
 
 
