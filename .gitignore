@@ -41,6 +41,8 @@ lib/j--.jar
 
 lib/spim.jar
 
+classes
+
 src/jminusminus/JavaCCParser.java
 
 src/jminusminus/JavaCCParserConstants.java
