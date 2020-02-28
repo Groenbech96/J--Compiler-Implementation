@@ -65,6 +65,30 @@ abstract class JUnaryExpression extends JExpression {
 }
 
 /**
+ * The AST node for a unary positive (+) expression.
+ */
+
+class JPositiveOp extends JUnaryExpression{
+
+    public JPositiveOp(int line, JExpression arg) {
+        super(line, "+", arg);
+    }
+
+    @Override
+    public JExpression analyze(Context context) {
+        arg = arg.analyze(context);
+        arg.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    @Override
+    public void codegen(CLEmitter output) {
+        arg.codegen(output);
+    }
+}
+
+/**
  * The AST node for a unary negation (-) expression.
  */
 
@@ -257,6 +281,7 @@ class JPostDecrementOp extends JUnaryExpression {
     }
 
 }
+
 
 /**
  * The AST node for a ++expr expression.
