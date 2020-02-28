@@ -80,6 +80,7 @@ class Scanner {
         reserved.put(IMPORT.image(), IMPORT);
         reserved.put(INSTANCEOF.image(), INSTANCEOF);
         reserved.put(INT.image(), INT);
+        reserved.put(DOUBLE.image(), DOUBLE);
         reserved.put(NEW.image(), NEW);
         reserved.put(NULL.image(), NULL);
         reserved.put(PACKAGE.image(), PACKAGE);
@@ -264,9 +265,10 @@ class Scanner {
             case '0':
                 // Handle only simple decimal integers for now.
                 nextCh();
-                if (ch == '.') {
-                    return new TokenInfo(DOUBLE, "0" + getDouble().toString(), line);
-                }
+                if (ch == '.')
+                    return new TokenInfo(DOUBLE_LITERAL,
+                            "0" + getDoublePart(),
+                            line);
                 return new TokenInfo(INT_LITERAL, "0", line);
             case '1':
             case '2':
@@ -282,10 +284,10 @@ class Scanner {
                     buffer.append(ch);
                     nextCh();
                 }
-                if (ch == '.') {
-                    StringBuffer doubleBuffer = getDouble();
-                    return new TokenInfo(DOUBLE, buffer.toString() + doubleBuffer.toString(), line);
-                }
+                if (ch == '.')
+                    return new TokenInfo(DOUBLE_LITERAL,
+                            buffer.toString() + getDoublePart(),
+                            line);
                 return new TokenInfo(INT_LITERAL, buffer.toString(), line);
             default:
                 if (isIdentifierStart(ch)) {
@@ -376,14 +378,14 @@ class Scanner {
         System.err.println();
     }
 
-    private StringBuffer getDouble() {
-        StringBuffer buffer = new StringBuffer().append(".");
+    private String getDoublePart() {
+        StringBuilder buffer = new StringBuilder().append(".");
         nextCh();
         while (isDigit(ch)) {
             buffer.append(ch);
             nextCh();
         }
-        return buffer;
+        return buffer.toString();
     }
 
     /**

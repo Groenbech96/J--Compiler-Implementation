@@ -279,7 +279,7 @@ public class Parser {
      */
 
     private boolean seeBasicType() {
-        if (see(BOOLEAN) || see(CHAR) || see(INT)) {
+        if (see(BOOLEAN) || see(CHAR) || see(INT) || see(DOUBLE)) {
             return true;
         } else {
             return false;
@@ -948,7 +948,8 @@ public class Parser {
     private JStatement statementExpression() {
         int line = scanner.token().line();
         JExpression expr = expression();
-        if (expr instanceof JAssignment || expr instanceof JPreIncrementOp
+        if (expr instanceof JAssignment
+                || expr instanceof JPreIncrementOp
                 || expr instanceof JPostDecrementOp
                 || expr instanceof JMessageExpression
                 || expr instanceof JSuperConstruction
@@ -1388,7 +1389,7 @@ public class Parser {
      * Parse a literal.
      *
      * <pre>
-     *   literal ::= INT_LITERAL | CHAR_LITERAL | STRING_LITERAL
+     *   literal ::= INT_LITERAL | CHAR_LITERAL | STRING_LITERAL | DOUBLE_LITERAL
      *             | TRUE        | FALSE        | NULL
      * </pre>
      *
@@ -1397,13 +1398,11 @@ public class Parser {
 
     private JExpression literal() {
         int line = scanner.token().line();
-        System.out.println(scanner.token().toString());
         if (have(INT_LITERAL)) {
             return new JLiteralInt(line, scanner.previousToken().image());
         } else if (have(CHAR_LITERAL)) {
             return new JLiteralChar(line, scanner.previousToken().image());
-            // TODO: this should be DOUBLE_LITERAL
-        } else if (have(DOUBLE)) {
+        } else if (have(DOUBLE_LITERAL)) {
             return new JLiteralDouble(line, scanner.previousToken().image());
         } else if (have(STRING_LITERAL)) {
             return new JLiteralString(line, scanner.previousToken().image());
