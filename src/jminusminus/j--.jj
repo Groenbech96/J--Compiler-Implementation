@@ -1646,7 +1646,7 @@ private JNewArrayOp newArrayDeclarator( Type type ): {
  * Parse a literal.
  * 
  * <pre>
- *   literal ::= INT_LITERAL | CHAR_LITERAL | STRING_LITERAL
+ *   literal ::= INT_LITERAL | CHAR_LITERAL | STRING_LITERAL | DOUBLE_LITERAL
  *             | TRUE        | FALSE        | NULL
  * </pre>
  * 
@@ -1659,7 +1659,9 @@ private JExpression literal(): {
 {       
     try {
         <INT_LITERAL> 
-        { expr = new JLiteralInt( token.beginLine, token.image ); } | 
+        { expr = new JLiteralInt( token.beginLine, token.image ); } |
+        <DOUBLE_LITERAL>
+        { expr = new JLiteralDouble( token.beginLine, token.image ); }|
         <CHAR_LITERAL> 
         { expr = new JLiteralChar( token.beginLine, token.image ); } |
         <STRING_LITERAL> 

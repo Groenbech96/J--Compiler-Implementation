@@ -3,10 +3,20 @@ package pass;
 import java.lang.System;
 
 public class DoubleTest {
+
+    public static double getDouble(double d){
+        return 0.;
+    }
+
     public static void main(String[] args) {
-        int c = 5;
-        double a = 5.0;
-        double b = 5.0;
-        System.out.println("a: "+ a + "\tb: " + b);
+        int i = 1;
+        double a = 5.;
+        double b = 0.7;
+        double c = 5.7;
+        double castI = (double) c;
+        double implicitI = i;
+        double fun = getDouble(0.0);
+
+        System.out.println("a: "+ castI + "\tb: " + implicitI);
     }
 }
