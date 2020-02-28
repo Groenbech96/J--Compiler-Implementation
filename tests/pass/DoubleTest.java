@@ -5,7 +5,7 @@ import java.lang.System;
 public class DoubleTest {
 
     public static double getDouble(double d){
-        return 0.;
+        return 0.0;
     }
 
     public static void main(String[] args) {
