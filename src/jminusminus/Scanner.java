@@ -79,6 +79,7 @@ class Scanner {
         reserved.put(IF.image(), IF);
         reserved.put(IMPORT.image(), IMPORT);
         reserved.put(INSTANCEOF.image(), INSTANCEOF);
+        reserved.put(DOUBLE.image(), DOUBLE);
         reserved.put(INT.image(), INT);
         reserved.put(NEW.image(), NEW);
         reserved.put(NULL.image(), NULL);
