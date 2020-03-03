@@ -1124,9 +1124,9 @@ public class Parser {
         while (more) {
             if (have(STAR)) {
                 lhs = new JMultiplyOp(line, lhs, unaryExpression());
-            } else if (have(DIVIDE)){
+            } else if (have(DIVIDE)) {
                 lhs = new JDivideOp(line, lhs, unaryExpression());
-            } else if (have(REMAINDER)){
+            } else if (have(REMAINDER)) {
                 lhs = new JRemainderOp(line, lhs, unaryExpression());
             } else if(have(SHIFT_AR_LEFT)) {
                 lhs = new JShiftArLeftOp(line, lhs, unaryExpression());
@@ -1158,7 +1158,9 @@ public class Parser {
 
     private JExpression unaryExpression() {
         int line = scanner.token().line();
-        if (have(INC)) {
+        if (have(PLUS)) {
+            return new JPositiveOp(line, unaryExpression());
+        } else if (have(INC)) {
             return new JPreIncrementOp(line, unaryExpression());
         } else if (have(MINUS)) {
             return new JNegateOp(line, unaryExpression());
