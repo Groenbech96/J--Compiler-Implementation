@@ -1117,6 +1117,7 @@ public class Parser {
      */
 
     private JExpression multiplicativeExpression() {
+
         int line = scanner.token().line();
         boolean more = true;
         JExpression lhs = unaryExpression();
@@ -1131,12 +1132,16 @@ public class Parser {
                 lhs = new JShiftArLeftOp(line, lhs, unaryExpression());
             } else if (have(SHIFT_AR_RIGHT)) {
                 lhs = new JShiftArRightOp(line, lhs, unaryExpression());
+            } else if (have(SHIFT_LG_RIGHT)) {
+                lhs = new JShiftLgRightOp(line, lhs, unaryExpression());
             }
             else {
                 more = false;
             }
         }
         return lhs;
+
+
     }
 
     /**

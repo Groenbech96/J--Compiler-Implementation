@@ -200,7 +200,12 @@ class Scanner {
                 nextCh();
                 if (ch == '>') {
                     nextCh();
-                    return new TokenInfo(SHIFT_AR_RIGHT, line);
+                    if(ch == '>') {
+                        nextCh();
+                        return new TokenInfo(SHIFT_LG_RIGHT, line);
+                    } else {
+                        return new TokenInfo(SHIFT_AR_RIGHT, line);
+                    }
                 } else {
                     return new TokenInfo(GT, line);
                 }

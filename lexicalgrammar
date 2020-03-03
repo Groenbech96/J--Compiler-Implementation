@@ -76,8 +76,7 @@ DIVIDE      ::= "/"
 REMAINDER   ::= "%"
 SHIFT_AR_LEFT  ::= "<<"
 SHIFT_AR_RIGHT ::= ">>"
-SHIFT_LO_LEFT  ::= "<<<"
-SHIFT_LO_RIGHT ::= ">>>"
+SHIFT_LG_RIGHT ::= ">>>"
 
 // Separators
 COMMA       ::= ","
