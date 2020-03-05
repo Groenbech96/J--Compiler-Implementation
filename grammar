@@ -72,7 +72,7 @@ basicType ::= BOOLEAN | CHAR | INT | DOUBLE
 referenceType ::= basicType LBRACK RBRACK {LBRACK RBRACK}
                 | qualifiedIdentifier {LBRACK RBRACK}
 
-conditionalExpression ::= expression COLON expression QUESTION expression
+conditionalExpression ::= expression COLON expression QUESTION_MARK expression
 
 statementExpression ::= expression // but must have side-effect, eg i++
 

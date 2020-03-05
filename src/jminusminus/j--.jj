@@ -201,7 +201,7 @@ TOKEN:
 | < SEMI: ";" >
 | < COMMA: "," >
 | < DOT: "." >
-| < QUESTION: "?" >
+| < QUESTION_MARK: "?" >
 | < COLON: ":" >
 }
 
@@ -1065,7 +1065,7 @@ private JStatement ternaryExpression(): {
         condition = assignmentExpression() { line = condition.line() }
         <COLON>
         ifTrue = assignmentExpression() { line = condition.line() }
-        <QUESTION>
+        <QUESTION_MARK>
         ifFalse = assignmentExpression() { line = condition.line() }
     } catch (Exception e) {
         recoverFromError( new int[] { SEMI, EOF }, e );

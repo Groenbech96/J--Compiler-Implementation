@@ -87,7 +87,7 @@ RCURLY      ::= "}"
 RPAREN      ::= ")"
 SEMI        ::= ";"
 COLON       ::= ":"
-QUESTION    ::= "?"
+QUESTION_MARK ::= "?"
 
 // Identifiers
 IDENTIFIER ::= ("a"-"z"|"A"-"Z"|"_"|"$") {"a"-"z"|"A"-"Z"|"_"|"0"-"9"|"$"}
