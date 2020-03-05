@@ -40,6 +40,11 @@ class Type {
     public final static Type INT = typeFor(int.class);
 
     /**
+     * The primitive type, double.
+     */
+    public final static Type DOUBLE = typeFor(double.class);
+
+    /**
      * The primitive type, char.
      */
     public final static Type CHAR = typeFor(char.class);
@@ -48,6 +53,11 @@ class Type {
      * The primitive type, boolean.
      */
     public final static Type BOOLEAN = typeFor(boolean.class);
+
+    /**
+     * java.lang.Double.
+     */
+    public final static Type BOXED_DOUBLE = typeFor(java.lang.Double.class);
 
     /**
      * java.lang.Integer.
@@ -88,6 +98,8 @@ class Type {
      * A type marker indicating a constructor (having no return type).
      */
     public final static Type CONSTRUCTOR = new Type(null);
+
+    public final static Type STATIC_BLOCK = new Type(null);
 
     /**
      * The "any" type (denotes wild expressions).
@@ -456,6 +468,9 @@ class Type {
      */
 
     private static String toJava(Class classRep) {
+        if(classRep == null){
+            return "Null";
+        }
         return classRep.isArray() ? toJava(classRep.getComponentType()) + "[]"
                 : classRep.getName();
     }

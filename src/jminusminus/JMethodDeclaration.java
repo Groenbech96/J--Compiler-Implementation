@@ -114,7 +114,7 @@ class JMethodDeclaration
                     "abstract method cannot have a body");
         } else if (body == null && !isAbstract) {
             JAST.compilationUnit.reportSemanticError(line(),
-                    "Method with null body must be abstarct");
+                    "Method with null body must be abstract");
         } else if (isAbstract && isPrivate) {
             JAST.compilationUnit.reportSemanticError(line(),
                     "private method cannot be declared abstract");
