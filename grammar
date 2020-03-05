@@ -65,9 +65,11 @@ basicType ::= BOOLEAN | CHAR | INT | DOUBLE
 referenceType ::= basicType LBRACK RBRACK {LBRACK RBRACK}
                 | qualifiedIdentifier {LBRACK RBRACK}
 
+conditionalExpression ::= expression COLON expression QUESTION expression
+
 statementExpression ::= expression // but must have side-effect, eg i++
 
-expression ::= assignmentExpression
+expression ::= assignmentExpression | conditionalExpression
 
 assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
                            [(ASSIGN | PLUS_ASSIGN) assignmentExpression]
