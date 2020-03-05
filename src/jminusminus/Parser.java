@@ -285,14 +285,14 @@ public class Parser {
      * Are we looking at a basic type? ie.
      *
      * <pre>
-     * BOOLEAN | CHAR | INT
+     * BOOLEAN | CHAR | INT | DOUBLE
      * </pre>
      *
      * @return true iff we're looking at a basic type; false otherwise.
      */
 
     private boolean seeBasicType() {
-        if (see(BOOLEAN) || see(CHAR) || see(INT)) {
+        if (see(BOOLEAN) || see(CHAR) || see(INT) || see(DOUBLE)) {
             return true;
         } else {
             return false;
@@ -315,7 +315,7 @@ public class Parser {
             return true;
         } else {
             scanner.recordPosition();
-            if (have(BOOLEAN) || have(CHAR) || have(INT)) {
+            if (have(BOOLEAN) || have(CHAR) || have(INT) || have(DOUBLE)) {
                 if (have(LBRACK) && see(RBRACK)) {
                     scanner.returnToPosition();
                     return true;
@@ -971,7 +971,7 @@ public class Parser {
      * Parse a basic type.
      *
      * <pre>
-     *   basicType ::= BOOLEAN | CHAR | INT
+     *   basicType ::= BOOLEAN | CHAR | INT | DOUBLE
      * </pre>
      *
      * @return an instance of Type.
@@ -982,6 +982,8 @@ public class Parser {
             return Type.BOOLEAN;
         } else if (have(CHAR)) {
             return Type.CHAR;
+        } else if (have(DOUBLE)) {
+            return Type.DOUBLE;
         } else if (have(INT)) {
             return Type.INT;
         } else {
@@ -1475,7 +1477,7 @@ public class Parser {
      * Parse a literal.
      *
      * <pre>
-     *   literal ::= INT_LITERAL | CHAR_LITERAL | STRING_LITERAL
+     *   literal ::= INT_LITERAL | CHAR_LITERAL | STRING_LITERAL | DOUBLE_LITERAL
      *             | TRUE        | FALSE        | NULL
      * </pre>
      *
@@ -1486,6 +1488,8 @@ public class Parser {
         int line = scanner.token().line();
         if (have(INT_LITERAL)) {
             return new JLiteralInt(line, scanner.previousToken().image());
+        } else if (have(DOUBLE_LITERAL)) {
+            return new JLIteralDouble(line, scanner.previousToken().image());
         } else if (have(CHAR_LITERAL)) {
             return new JLiteralChar(line, scanner.previousToken().image());
         } else if (have(STRING_LITERAL)) {
