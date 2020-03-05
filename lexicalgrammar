@@ -4,8 +4,9 @@
 // Whitespace -- ignored
 " "|"\t"|"\n"|"\r"|"\f"
 
-// Single line comment -- ignored
+// Comments -- ignored
 "//" {~("\n"|"\r")} ("\n"|"\r"["\n"])
+"/*" {~("*/")} ("*/")
 
 // Reserved words
 ABSTRACT    ::= "abstract"
