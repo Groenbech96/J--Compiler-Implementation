@@ -258,12 +258,15 @@ class Scanner {
                 return new TokenInfo(STRING_LITERAL, buffer.toString(), line);
             case '.':
                 nextCh();
+                if (isDigit(ch))
+                    return findDouble("", Character.toString(ch));
                 return new TokenInfo(DOT, line);
             case EOFCH:
                 return new TokenInfo(EOF, line);
             case '0':
                 // Handle only simple decimal integers for now.
                 nextCh();
+                if (ch == '.') return findDouble("0");
                 return new TokenInfo(INT_LITERAL, "0", line);
             case '1':
             case '2':
@@ -279,6 +282,7 @@ class Scanner {
                     buffer.append(ch);
                     nextCh();
                 }
+                if (ch == '.') return findDouble(buffer.toString());
                 return new TokenInfo(INT_LITERAL, buffer.toString(), line);
             default:
                 if (isIdentifierStart(ch)) {
@@ -351,6 +355,28 @@ class Scanner {
         } catch (Exception e) {
             reportScannerError("Unable to read characters from input");
         }
+    }
+
+    /**
+     * Assumes the previous char was a dot, finds the remaining decimal part of a number
+     */
+    private TokenInfo findDouble(String intPart) {
+        return findDouble(intPart, "");
+    }
+
+    /**
+     * Continues from a random spot and find all digits, formats it in decimal form
+     */
+    private TokenInfo findDouble(String intPart, String doublePart) {
+        StringBuilder sb = new StringBuilder(doublePart);
+        nextCh();
+        while (isDigit(ch)) {
+            sb.append(ch);
+            nextCh();
+        }
+        if (sb.length() == 0 && intPart.length() == 0)
+            reportScannerError("Double requires more than just a dot");
+        return new TokenInfo(DOUBLE_LITERAL, intPart + "." + sb.toString(), line);
     }
 
     /**

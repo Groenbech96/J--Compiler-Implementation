@@ -155,6 +155,7 @@ TOKEN:
 | < IF: "if" >
 | < IMPORT: "import" >
 | < INSTANCEOF: "instanceof" >
+| < DOUBLE: "double" >
 | < INT: "int" >
 | < NEW: "new" >
 | < NULL: "null" >
@@ -214,7 +215,8 @@ TOKEN:
 // Literals
 TOKEN:
 {
-  < INT_LITERAL: ("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) >
+  < DOUBLE_LITERAL: <INT_LITERAL> "." (<DIGIT>)* | "." (<DIGIT>)+ >
+| < INT_LITERAL: ("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) >
 | < CHAR_LITERAL: "'" (<ESC> | ~["'","\\","\n","\r"]) "'" >
 | < STRING_LITERAL: "\"" (<ESC> | ~["\"","\\","\n","\r"])* "\"" >   
 | < #ESC: "\\" ["n","t","b","r","f","\\","'","\""] >
