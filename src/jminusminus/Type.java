@@ -99,6 +99,8 @@ class Type {
      */
     public final static Type CONSTRUCTOR = new Type(null);
 
+    public final static Type STATIC_BLOCK = new Type(null);
+
     /**
      * The "any" type (denotes wild expressions).
      */
@@ -466,6 +468,9 @@ class Type {
      */
 
     private static String toJava(Class classRep) {
+        if(classRep == null){
+            return "Null";
+        }
         return classRep.isArray() ? toJava(classRep.getComponentType()) + "[]"
                 : classRep.getName();
     }
