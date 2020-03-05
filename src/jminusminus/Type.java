@@ -99,7 +99,15 @@ class Type {
      */
     public final static Type CONSTRUCTOR = new Type(null);
 
+    /**
+     * A type for indicating a static code block
+     */
     public final static Type STATIC_BLOCK = new Type(null);
+
+    /**
+     * A type for indicating an instance code block
+     */
+    public static final Type INSTANCE_BLOCK = new Type(null);
 
     /**
      * The "any" type (denotes wild expressions).

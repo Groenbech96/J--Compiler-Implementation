@@ -2,7 +2,7 @@ package jminusminus;
 
 import java.util.ArrayList;
 
-public class JStaticBlockDeclaration extends JMethodDeclaration implements JMember {
+public class JInitializationBlockDeclaration extends JMethodDeclaration implements JMember {
     /**
      * Construct an AST node for a method declaration given the
      * line number, method name, return type, formal parameters,
@@ -14,7 +14,11 @@ public class JStaticBlockDeclaration extends JMethodDeclaration implements JMemb
      * @param name       method name.
      * @param body       method body.
      */
-    public JStaticBlockDeclaration(int line, ArrayList<String> mods, String name, JBlock body) {
-        super(line, mods, name, Type.STATIC_BLOCK, new ArrayList<>(), body);
+    public JInitializationBlockDeclaration(int line, ArrayList<String> mods, String name, JBlock body) {
+            super(line, mods, name, Type.STATIC_BLOCK, new ArrayList<>(), body);
+    }
+
+    public JInitializationBlockDeclaration(int line, String name, JBlock body) {
+        super(line, new ArrayList<>(), name, Type.INSTANCE_BLOCK, new ArrayList<>(), body);
     }
 }
