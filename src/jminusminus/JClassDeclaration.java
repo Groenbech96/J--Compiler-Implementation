@@ -15,6 +15,7 @@ import static jminusminus.CLConstants.*;
 
 class JClassDeclaration extends JAST implements JTypeDecl {
 
+
     /**
      * Class modifiers.
      */
@@ -34,6 +35,11 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      * Super class type.
      */
     private Type superType;
+
+    /**
+     * Interface types.
+     */
+    private final ArrayList<Type> interfaces;
 
     /**
      * This class type.
@@ -69,15 +75,17 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      * @param mods       class modifiers.
      * @param name       class name.
      * @param superType  super class type.
+     * @param interfaces interfaces of the class
      * @param classBlock class block.
      */
 
     public JClassDeclaration(int line, ArrayList<String> mods, String name,
-                             Type superType, ArrayList<JMember> classBlock) {
+                             Type superType, ArrayList<Type> interfaces, ArrayList<JMember> classBlock) {
         super(line);
         this.mods = mods;
         this.name = name;
         this.superType = superType;
+        this.interfaces = interfaces;
         this.classBlock = classBlock;
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();

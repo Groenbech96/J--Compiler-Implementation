@@ -26,6 +26,13 @@ abstract class JAssignment extends JBinaryExpression {
         super(line, operator, lhs, rhs);
     }
 
+    int numericAdd() {
+        if (type == Type.INT) return IADD;
+        if (type == Type.DOUBLE) return DADD;
+        JAST.compilationUnit.reportSemanticError(line(), "Illegal type for adding " + type.toString());
+        return -1;
+    }
+
 }
 
 /**
@@ -140,6 +147,9 @@ class JPlusAssignOp extends JAssignment {
         if (lhs.type().equals(Type.INT)) {
             rhs.type().mustMatchExpected(line(), Type.INT);
             type = Type.INT;
+        } else if (lhs.type().equals(Type.DOUBLE)) {
+            rhs.type().mustMatchExpected(line(), Type.DOUBLE);
+            type = Type.DOUBLE;
         } else if (lhs.type().equals(Type.STRING)) {
             rhs = (new JStringConcatenationOp(line, lhs, rhs)).analyze(context);
             type = Type.STRING;
@@ -167,7 +177,7 @@ class JPlusAssignOp extends JAssignment {
         } else {
             ((JLhs) lhs).codegenLoadLhsRvalue(output);
             rhs.codegen(output);
-            output.addNoArgInstruction(IADD);
+            output.addNoArgInstruction(numericAdd());
         }
         if (!isStatementExpression) {
             // Generate code to leave the r-value atop stack

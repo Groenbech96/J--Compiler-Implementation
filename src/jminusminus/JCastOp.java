@@ -129,23 +129,22 @@ class Conversions {
         table = new Hashtable<String, Converter>();
 
         // Populate the table
-
         put(Type.CHAR, Type.INT, Converter.Identity);
         put(Type.INT, Type.CHAR, new I2C());
+        put(Type.DOUBLE, Type.INT, new D2I());
+        put(Type.INT, Type.DOUBLE, new I2D());
 
         // Boxing
+        put(Type.DOUBLE, Type.BOXED_DOUBLE, new Boxing(Type.DOUBLE, Type.BOXED_DOUBLE));
         put(Type.CHAR, Type.BOXED_CHAR, new Boxing(Type.CHAR, Type.BOXED_CHAR));
         put(Type.INT, Type.BOXED_INT, new Boxing(Type.INT, Type.BOXED_INT));
-        put(Type.BOOLEAN, Type.BOXED_BOOLEAN, new Boxing(Type.BOOLEAN,
-                Type.BOXED_BOOLEAN));
+        put(Type.BOOLEAN, Type.BOXED_BOOLEAN, new Boxing(Type.BOOLEAN, Type.BOXED_BOOLEAN));
 
         // Un-boxing
-        put(Type.BOXED_CHAR, Type.CHAR, new UnBoxing(Type.BOXED_CHAR,
-                Type.CHAR, "charValue"));
-        put(Type.BOXED_INT, Type.INT, new UnBoxing(Type.BOXED_INT, Type.INT,
-                "intValue"));
-        put(Type.BOXED_BOOLEAN, Type.BOOLEAN, new UnBoxing(Type.BOXED_BOOLEAN,
-                Type.BOOLEAN, "booleanValue"));
+        put(Type.BOXED_DOUBLE, Type.DOUBLE, new UnBoxing(Type.BOXED_DOUBLE, Type.DOUBLE, "doubleValue"));
+        put(Type.BOXED_CHAR, Type.CHAR, new UnBoxing(Type.BOXED_CHAR, Type.CHAR, "charValue"));
+        put(Type.BOXED_INT, Type.INT, new UnBoxing(Type.BOXED_INT, Type.INT, "intValue"));
+        put(Type.BOXED_BOOLEAN, Type.BOOLEAN, new UnBoxing(Type.BOXED_BOOLEAN, Type.BOOLEAN, "booleanValue"));
     }
 
     /**
@@ -352,6 +351,38 @@ class I2C implements Converter {
 
     public void codegen(CLEmitter output) {
         output.addNoArgInstruction(I2C);
+    }
+
+}
+
+/**
+ * Converting from an int to a char requires an I2C instruction.
+ */
+
+class D2I implements Converter {
+
+    /**
+     * @inheritDoc
+     */
+
+    public void codegen(CLEmitter output) {
+        output.addNoArgInstruction(D2I);
+    }
+
+}
+
+/**
+ * Converting from an int to a char requires an I2C instruction.
+ */
+
+class I2D implements Converter {
+
+    /**
+     * @inheritDoc
+     */
+
+    public void codegen(CLEmitter output) {
+        output.addNoArgInstruction(I2D);
     }
 
 }
