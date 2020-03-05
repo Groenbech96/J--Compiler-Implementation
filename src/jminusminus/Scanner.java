@@ -118,10 +118,21 @@ class Scanner {
                     while (ch != '\n' && ch != EOFCH) {
                         nextCh();
                     }
+                } else if (ch == '*') {
+                    // Read until end of multi-line comment
+                    nextCh();
+                    char prevCh;
+                    do {
+                        prevCh = ch;
+                        nextCh();
+                    } while (prevCh != '*' || ch != '/');
+
+                    // Consume last character
+                    nextCh();
                 } else {
                     return new TokenInfo(DIVIDE, line);
                 }
-            } else {
+            }else {
                 moreWhiteSpace = false;
             }
         }
