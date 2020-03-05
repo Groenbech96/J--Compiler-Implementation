@@ -15,6 +15,8 @@ public class DoubleTest {
         raw += boxed;
         raw += i;
         raw = raw + i + boxed;
+        double[] arr = new double[5];
+        raw = arr[2];
     }
 
 }
