@@ -171,6 +171,19 @@ public class Parser {
     }
 
     /**
+     * Are we looking at STATIC followed by a LCURLY? Look ahead to find
+     * out.
+     *
+     * @return true iff we're looking at STATIC LCURLY; false otherwise.
+     */
+    private boolean seeStaticLCurly() {
+        scanner.recordPosition();
+        boolean result = have(STATIC) && see(LCURLY);
+        scanner.returnToPosition();
+        return result;
+    }
+
+    /**
      * Are we looking at a cast? ie.
      *
      * <pre>
@@ -401,7 +414,10 @@ public class Parser {
 
     private JAST typeDeclaration() {
         ArrayList<String> mods = modifiers();
-        return classDeclaration(mods);
+        if(see(CLASS)) {
+            return classDeclaration(mods);
+        }
+        return interfaceDeclaration(mods);
     }
 
     /**
@@ -478,6 +494,7 @@ public class Parser {
      * <pre>
      *   classDeclaration ::= CLASS IDENTIFIER
      *                        [EXTENDS qualifiedIdentifier]
+     *                        [IMPLEMENTS qualifiedIdentifier {COMMA qualifiedIdentifier}]
      *                        classBody
      * </pre>
      * <p>
@@ -494,12 +511,46 @@ public class Parser {
         mustBe(IDENTIFIER);
         String name = scanner.previousToken().image();
         Type superClass;
+        ArrayList<Type> interfaces = new ArrayList<>();
         if (have(EXTENDS)) {
             superClass = qualifiedIdentifier();
         } else {
             superClass = Type.OBJECT;
         }
-        return new JClassDeclaration(line, mods, name, superClass, classBody());
+        if (have(IMPLEMENTS)) {
+            interfaces.add(qualifiedIdentifier());
+            while(!see(LCURLY)) {
+                mustBe(COMMA);
+                interfaces.add(qualifiedIdentifier());
+            }
+        }
+        return new JClassDeclaration(line, mods, name, superClass,interfaces, classBody());
+    }
+
+    /**
+     * Parse an interface declaration
+     * <pre>
+     *     INTERFACE IDENTIFIER
+     *      [EXTENDS qualifiedIdentifier {COMMA qualifiedIdentifier}]
+     *      interfaceBody
+     * </pre>
+     * @param mods the modifiers for the interface
+     * @return an AST for the interfaceDeclaration
+     */
+    private JInterfaceDeclaration interfaceDeclaration(ArrayList<String> mods) {
+        int line = scanner.token().line();
+        mustBe(INTERFACE);
+        mustBe(IDENTIFIER);
+        String name = scanner.previousToken().image();
+        ArrayList<Type> interfaces = new ArrayList<>();
+        if(have(EXTENDS)) {
+            interfaces.add(qualifiedIdentifier());
+            while(!see(LCURLY)){
+                mustBe(COMMA);
+                interfaces.add(qualifiedIdentifier());
+            }
+        }
+        return new JInterfaceDeclaration(line,mods,name,interfaces, interfaceBody());
     }
 
     /**
@@ -507,7 +558,7 @@ public class Parser {
      *
      * <pre>
      *   classBody ::= LCURLY
-     *                   {modifiers memberDecl}
+     *                   { ({modifiers memberDecl}| STATIC block) }
      *                 RCURLY
      * </pre>
      *
@@ -518,10 +569,46 @@ public class Parser {
         ArrayList<JMember> members = new ArrayList<JMember>();
         mustBe(LCURLY);
         while (!see(RCURLY) && !see(EOF)) {
-            members.add(memberDecl(modifiers()));
+
+            if(seeStaticLCurly()){
+                mustBe(STATIC);
+                int line = scanner.token().line();
+                JBlock body = block();
+                ArrayList<String> mods = new ArrayList<>();
+                mods.add("static");
+                members.add(new JStaticBlockDeclaration(line,mods,"static block " + line, body));
+
+            }else {
+                members.add(memberDecl(modifiers()));
+            }
         }
         mustBe(RCURLY);
         return members;
+    }
+
+    /**
+     * Parse an interface body
+     * <pre>
+     *      classBody ::= LCURLY
+     *                     {(VOID | type) IDENTIFIER formalParameters SEMI}
+     *                    RCURLY
+     * </pre>
+     * @return methods founds
+     */
+    private ArrayList<JMember> interfaceBody() {
+        ArrayList<JMember> methods = new ArrayList<>();
+        mustBe(LCURLY);
+        while(!see(RCURLY) && !see(EOF)){
+            int line = scanner.token().line();
+            Type type = have(VOID) ? Type.VOID : type();
+            mustBe(IDENTIFIER);
+            String name = scanner.previousToken().image();
+            ArrayList<JFormalParameter> params = formalParameters();
+            methods.add(new JMethodInterface(line, name, type, params));
+            mustBe(SEMI);
+        }
+        mustBe(RCURLY);
+        return methods;
     }
 
     /**
@@ -552,7 +639,8 @@ public class Parser {
             JBlock body = block();
             memberDecl = new JConstructorDeclaration(line, mods, name, params,
                     body);
-        } else {
+        }
+        else {
             Type type = null;
             if (have(VOID)) {
                 // void method
