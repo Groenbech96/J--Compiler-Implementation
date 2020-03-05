@@ -127,6 +127,12 @@ class Scanner {
         }
         line = input.line();
         switch (ch) {
+            case ':':
+                nextCh();
+                return new TokenInfo(COLON, line);
+            case '?':
+                nextCh();
+                return new TokenInfo(QUESTION, line);
             case '(':
                 nextCh();
                 return new TokenInfo(LPAREN, line);
