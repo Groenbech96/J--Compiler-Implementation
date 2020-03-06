@@ -20,7 +20,7 @@ interfaceDeclaration ::= INTERFACE IDENTIFIER
                             [EXTENDS qualifiedIdentifier {COMMA qualifiedIdentifier}]
                             interfaceBody
 
-classBody ::= LCURLY {({modifiers memberDecl} | STATIC block)} RCURLY
+classBody ::= LCURLY {({modifiers memberDecl} | [STATIC] block)} RCURLY
 
 interfaceBody ::= LCURLY {(VOID | type) IDENTIFIER formalParameters SEMI} RCURLY
 

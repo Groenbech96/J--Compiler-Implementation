@@ -558,7 +558,7 @@ public class Parser {
      *
      * <pre>
      *   classBody ::= LCURLY
-     *                   { ({modifiers memberDecl}| STATIC block) }
+     *                   { ({modifiers memberDecl}| [STATIC] block) }
      *                 RCURLY
      * </pre>
      *
@@ -569,14 +569,17 @@ public class Parser {
         ArrayList<JMember> members = new ArrayList<JMember>();
         mustBe(LCURLY);
         while (!see(RCURLY) && !see(EOF)) {
-
-            if(seeStaticLCurly()){
+            if (see(LCURLY)){
+                int line = scanner.token().line();
+                JBlock body = block();
+                members.add(new JInitializationBlockDeclaration(line,"instance block" + line, body));
+            } else if(seeStaticLCurly()){
                 mustBe(STATIC);
                 int line = scanner.token().line();
                 JBlock body = block();
                 ArrayList<String> mods = new ArrayList<>();
                 mods.add("static");
-                members.add(new JStaticBlockDeclaration(line,mods,"static block " + line, body));
+                members.add(new JInitializationBlockDeclaration(line,mods,"static block " + line, body));
 
             }else {
                 members.add(memberDecl(modifiers()));
