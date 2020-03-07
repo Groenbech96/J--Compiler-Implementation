@@ -301,15 +301,15 @@ class Scanner {
                         if (ch == '=') {
                             nextCh();
                             return new TokenInfo(RSHIFT_ZERO_ASSIGN, line);
-                        } else {
-                            return new TokenInfo(RSHIFT_ZERO, line);
                         }
+                        return new TokenInfo(RSHIFT_ZERO, line);
                     } else {
                         return new TokenInfo(RSHIFT, line);
                     }
                 } else {
                     return new TokenInfo(GT, line);
                 }
+
             case '<':
                 nextCh();
                 if (ch == '=') {

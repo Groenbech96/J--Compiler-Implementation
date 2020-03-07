@@ -75,6 +75,9 @@ PLUS_ASSIGN ::= "+="
 STAR        ::= "*"
 DIVIDE      ::= "/"
 REMAINDER   ::= "%"
+LSHIFT      ::= "<<"
+RSHIFT      ::= ">>"
+RSHIFT_ZERO ::= ">>>"
 
 // Separators
 COMMA       ::= ","
