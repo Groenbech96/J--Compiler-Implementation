@@ -1131,6 +1131,12 @@ public class Parser {
                 lhs = new JShiftArLeftOp(line, lhs, unaryExpression());
             } else if (have(SHIFT_AR_RIGHT)) {
                 lhs = new JShiftArRightOp(line, lhs, unaryExpression());
+            } else if(have(BITWISE_AND)) {
+                lhs = new JBitwiseAndOp(line, lhs, unaryExpression());
+            } else if(have(BITWISE_OR)) {
+                lhs = new JBitwiseInclusiveOrOp(line, lhs, unaryExpression());
+            } else if(have(BITWISE_XOR)) {
+                lhs = new JBitwiseExclusiveOrOp(line, lhs, unaryExpression());
             }
             else {
                 more = false;
@@ -1157,6 +1163,8 @@ public class Parser {
             return new JPreIncrementOp(line, unaryExpression());
         } else if (have(MINUS)) {
             return new JNegateOp(line, unaryExpression());
+        } else if(have(BITWISE_NOT)) {
+            return new JBitwiseNotOp(line, unaryExpression());
         } else {
             return simpleUnaryExpression();
         }

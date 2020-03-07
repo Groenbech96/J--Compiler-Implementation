@@ -334,8 +334,8 @@ class JBitwiseExclusiveOrOp extends JBinaryExpression {
     }
 }
 
-class JBitwiseInclusiveOr extends JBinaryExpression {
-    public JBitwiseInclusiveOr(int line, JExpression lhs, JExpression rhs) {
+class JBitwiseInclusiveOrOp extends JBinaryExpression {
+    public JBitwiseInclusiveOrOp(int line, JExpression lhs, JExpression rhs) {
         super(line, "|", lhs, rhs);
     }
 

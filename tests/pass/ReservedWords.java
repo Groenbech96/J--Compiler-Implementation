@@ -12,5 +12,5 @@ public class ReservedWords extends SomeClass implements  SomeInterface {
             }
         }
         final int x;
-    } 
+    }
 }
