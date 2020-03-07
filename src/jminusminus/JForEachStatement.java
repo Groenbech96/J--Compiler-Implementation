@@ -89,4 +89,5 @@ class JForEachStatement extends JStatement {
         p.indentLeft();
         p.printf("</JForEachStatement>\n");
     }
+
 }
