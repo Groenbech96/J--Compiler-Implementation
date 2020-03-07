@@ -65,6 +65,28 @@ class JForEachStatement extends JStatement {
      */
 
     public void writeToStdOut(PrettyPrinter p) {
-    }
+        p.printf("<JForEachStatement line=\"%d\">\n", line());
+        p.indentRight();
 
+        p.printf("<FormalParameter>\n");
+        p.indentRight();
+        parameter.writeToStdOut(p);
+        p.indentLeft();
+        p.printf("</FormalParameter>\n");
+
+        p.printf("<Array>\n");
+        p.indentRight();
+        array.writeToStdOut(p);
+        p.indentLeft();
+        p.printf("</Array>\n");
+
+        p.printf("<Body>\n");
+        p.indentRight();
+        body.writeToStdOut(p);
+        p.indentLeft();
+        p.printf("</Body>\n");
+
+        p.indentLeft();
+        p.printf("</JForEachStatement>\n");
+    }
 }

@@ -74,6 +74,44 @@ class JForStatement extends JStatement {
      */
 
     public void writeToStdOut(PrettyPrinter p) {
-    }
+        p.printf("<JForStatement line=\"%d\">\n", line());
+        p.indentRight();
 
+        p.printf("<InitialVariableDeclarations>");
+        p.indentRight();
+        initVariableDecls.writeToStdOut(p);
+        p.indentLeft();
+        p.printf("</InitialVariableDeclarations>\n");
+
+        p.printf("<InitialStatements>\n");
+        p.indentRight();
+        for(JStatement statement : initStatements) {
+            statement.writeToStdOut(p);
+        }
+        p.indentLeft();
+        p.printf("</InitialStatements>\n");
+
+        p.printf("<ConditionExpression>\n");
+        p.indentRight();
+        condition.writeToStdOut(p);
+        p.indentLeft();
+        p.printf("</ConditionExpression>\n");
+
+        p.printf("<UpdateStatements>\n");
+        p.indentRight();
+        for(JStatement statement : updateStatements) {
+            statement.writeToStdOut(p);
+        }
+        p.indentLeft();
+        p.printf("</UpdateStatements>\n");
+
+        p.printf("<Body>\n");
+        p.indentRight();
+        body.writeToStdOut(p);
+        p.indentLeft();
+        p.printf("</Body>\n");
+
+        p.indentLeft();
+        p.printf("</JForStatement>\n");
+    }
 }
