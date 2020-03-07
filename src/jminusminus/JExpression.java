@@ -45,7 +45,7 @@ abstract class JExpression extends JStatement {
     }
 
     /**
-     * Is this a statementRxpression?
+     * Is this a statementExpression?
      *
      * @return whether or not this is being used as a statement.
      */
