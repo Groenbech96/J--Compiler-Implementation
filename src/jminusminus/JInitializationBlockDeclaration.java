@@ -15,10 +15,10 @@ public class JInitializationBlockDeclaration extends JMethodDeclaration implemen
      * @param body       method body.
      */
     public JInitializationBlockDeclaration(int line, ArrayList<String> mods, String name, JBlock body) {
-            super(line, mods, name, Type.STATIC_BLOCK, new ArrayList<>(), body);
+            super(line, mods, name, Type.STATIC_BLOCK, new ArrayList<>(), new ArrayList<>(), body);
     }
 
     public JInitializationBlockDeclaration(int line, String name, JBlock body) {
-        super(line, new ArrayList<>(), name, Type.INSTANCE_BLOCK, new ArrayList<>(), body);
+        super(line, new ArrayList<>(), name, Type.INSTANCE_BLOCK, new ArrayList<>(), new ArrayList<>(), body);
     }
 }
