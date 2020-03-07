@@ -4,6 +4,8 @@ package jminusminus;
 
 import static jminusminus.CLConstants.*;
 
+// TODO: code gen for double
+
 /**
  * The AST node for a unary expression. A unary expression has a single operand.
  */
@@ -56,6 +58,30 @@ abstract class JUnaryExpression extends JExpression {
 }
 
 /**
+ * The AST node for a unary positive (+) expression.
+ */
+
+class JPositiveOp extends JUnaryExpression{
+
+    public JPositiveOp(int line, JExpression arg) {
+        super(line, "+", arg);
+    }
+
+    @Override
+    public JExpression analyze(Context context) {
+        arg = arg.analyze(context);
+        arg.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+        type = arg.type();
+        return this;
+    }
+
+    @Override
+    public void codegen(CLEmitter output) {
+        arg.codegen(output);
+    }
+}
+
+/**
  * The AST node for a unary negation (-) expression.
  */
 
@@ -84,8 +110,8 @@ class JNegateOp extends JUnaryExpression {
 
     public JExpression analyze(Context context) {
         arg = arg.analyze(context);
-        arg.type().mustMatchExpected(line(), Type.INT);
-        type = Type.INT;
+        arg.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+        type = arg.type();
         return this;
     }
 
@@ -204,8 +230,8 @@ class JPostDecrementOp extends JUnaryExpression {
             type = Type.ANY;
         } else {
             arg = (JExpression) arg.analyze(context);
-            arg.type().mustMatchExpected(line(), Type.INT);
-            type = Type.INT;
+            arg.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+            type = arg.type();
         }
         return this;
     }
@@ -249,6 +275,7 @@ class JPostDecrementOp extends JUnaryExpression {
 
 }
 
+
 /**
  * The AST node for a ++expr expression.
  */
@@ -282,8 +309,8 @@ class JPreIncrementOp extends JUnaryExpression {
             type = Type.ANY;
         } else {
             arg = (JExpression) arg.analyze(context);
-            arg.type().mustMatchExpected(line(), Type.INT);
-            type = Type.INT;
+            arg.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+            type = arg.type();
         }
         return this;
     }

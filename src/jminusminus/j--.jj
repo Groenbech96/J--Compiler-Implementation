@@ -155,6 +155,7 @@ TOKEN:
 | < IF: "if" >
 | < IMPORT: "import" >
 | < INSTANCEOF: "instanceof" >
+| < DOUBLE: "double" >
 | < INT: "int" >
 | < NEW: "new" >
 | < NULL: "null" >
@@ -200,6 +201,8 @@ TOKEN:
 | < SEMI: ";" >
 | < COMMA: "," >
 | < DOT: "." >
+| < QUESTION_MARK: "?" >
+| < COLON: ":" >
 }
 
 // Identifiers
@@ -214,7 +217,8 @@ TOKEN:
 // Literals
 TOKEN:
 {
-  < INT_LITERAL: ("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) >
+  < DOUBLE_LITERAL: <INT_LITERAL> "." (<DIGIT>)* | "." (<DIGIT>)+ >
+| < INT_LITERAL: ("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) >
 | < CHAR_LITERAL: "'" (<ESC> | ~["'","\\","\n","\r"]) "'" >
 | < STRING_LITERAL: "\"" (<ESC> | ~["\"","\\","\n","\r"])* "\"" >   
 | < #ESC: "\\" ["n","t","b","r","f","\\","'","\""] >
@@ -1053,6 +1057,22 @@ private Type referenceType(): {
     { return type; }       
 }
 
+private JStatement ternaryExpression(): {
+    int line = 0;
+    JExpression condition, ifTrue, ifFalse;
+}{
+    try {
+        condition = assignmentExpression() { line = condition.line() }
+        <COLON>
+        ifTrue = assignmentExpression() { line = condition.line() }
+        <QUESTION_MARK>
+        ifFalse = assignmentExpression() { line = condition.line() }
+    } catch (Exception e) {
+        recoverFromError( new int[] { SEMI, EOF }, e );
+    }
+    { return new TernaryExpression(line, condition, ifTrue, ifFalse); }
+}
+
 /**
  * Parse a statement expression. 
  * 
@@ -1100,7 +1120,7 @@ private JStatement statementExpression(): {
  * An expression.
  * 
  * <pre>
- *   expression ::= assignmentExpression 
+ *   expression ::= assignmentExpression | conditionalExpression
  * </pre>
  * 
  * @return an AST for an expression.
@@ -1111,7 +1131,7 @@ private JExpression expression(): {
 }
 {
     try {
-        expr = assignmentExpression()
+        (expr = assignmentExpression() | expr = ternaryExpression())
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
