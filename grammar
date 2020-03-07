@@ -95,10 +95,11 @@ additiveExpression ::= multiplicativeExpression // level 3
                          {(PLUS | MINUS) multiplicativeExpression}
 
 multiplicativeExpression ::= unaryExpression       // level 2
-                               {(STAR|DIVIDE|REMAINDER|LSHIFT|RSHIFT|RSHIFT_ZERO) unaryExpression}
+                               {(STAR|DIVIDE|REMAINDER|LSHIFT|RSHIFT|RSHIFT_ZERO|BITWISE_AND|BITWISE_OR|BITWISE_XOR) unaryExpression}
 
 unaryExpression ::= INC unaryExpression  // level 1
                   | MINUS unaryExpression
+                  | BITWISE_NOT unaryExpression
                   | simpleUnaryExpression
 
 simpleUnaryExpression ::= LNOT unaryExpression
