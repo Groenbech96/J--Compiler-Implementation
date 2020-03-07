@@ -414,7 +414,7 @@ public class Parser {
 
     private JAST typeDeclaration() {
         ArrayList<String> mods = modifiers();
-        if(see(CLASS)) {
+        if (see(CLASS)) {
             return classDeclaration(mods);
         }
         return interfaceDeclaration(mods);
@@ -519,12 +519,12 @@ public class Parser {
         }
         if (have(IMPLEMENTS)) {
             interfaces.add(qualifiedIdentifier());
-            while(!see(LCURLY)) {
+            while (!see(LCURLY)) {
                 mustBe(COMMA);
                 interfaces.add(qualifiedIdentifier());
             }
         }
-        return new JClassDeclaration(line, mods, name, superClass,interfaces, classBody());
+        return new JClassDeclaration(line, mods, name, superClass, interfaces, classBody());
     }
 
     /**
@@ -534,6 +534,7 @@ public class Parser {
      *      [EXTENDS qualifiedIdentifier {COMMA qualifiedIdentifier}]
      *      interfaceBody
      * </pre>
+     *
      * @param mods the modifiers for the interface
      * @return an AST for the interfaceDeclaration
      */
@@ -543,14 +544,14 @@ public class Parser {
         mustBe(IDENTIFIER);
         String name = scanner.previousToken().image();
         ArrayList<Type> interfaces = new ArrayList<>();
-        if(have(EXTENDS)) {
+        if (have(EXTENDS)) {
             interfaces.add(qualifiedIdentifier());
-            while(!see(LCURLY)){
+            while (!see(LCURLY)) {
                 mustBe(COMMA);
                 interfaces.add(qualifiedIdentifier());
             }
         }
-        return new JInterfaceDeclaration(line,mods,name,interfaces, interfaceBody());
+        return new JInterfaceDeclaration(line, mods, name, interfaces, interfaceBody());
     }
 
     /**
@@ -569,19 +570,19 @@ public class Parser {
         ArrayList<JMember> members = new ArrayList<JMember>();
         mustBe(LCURLY);
         while (!see(RCURLY) && !see(EOF)) {
-            if (see(LCURLY)){
+            if (see(LCURLY)) {
                 int line = scanner.token().line();
                 JBlock body = block();
-                members.add(new JInitializationBlockDeclaration(line,"instance block" + line, body));
-            } else if(seeStaticLCurly()){
+                members.add(new JInitializationBlockDeclaration(line, "instance block" + line, body));
+            } else if (seeStaticLCurly()) {
                 mustBe(STATIC);
                 int line = scanner.token().line();
                 JBlock body = block();
                 ArrayList<String> mods = new ArrayList<>();
                 mods.add("static");
-                members.add(new JInitializationBlockDeclaration(line,mods,"static block " + line, body));
+                members.add(new JInitializationBlockDeclaration(line, mods, "static block " + line, body));
 
-            }else {
+            } else {
                 members.add(memberDecl(modifiers()));
             }
         }
@@ -596,12 +597,13 @@ public class Parser {
      *                     {(VOID | type) IDENTIFIER formalParameters SEMI}
      *                    RCURLY
      * </pre>
+     *
      * @return methods founds
      */
     private ArrayList<JMember> interfaceBody() {
         ArrayList<JMember> methods = new ArrayList<>();
         mustBe(LCURLY);
-        while(!see(RCURLY) && !see(EOF)){
+        while (!see(RCURLY) && !see(EOF)) {
             int line = scanner.token().line();
             Type type = have(VOID) ? Type.VOID : type();
             mustBe(IDENTIFIER);
@@ -642,8 +644,7 @@ public class Parser {
             JBlock body = block();
             memberDecl = new JConstructorDeclaration(line, mods, name, params,
                     body);
-        }
-        else {
+        } else {
             Type type = null;
             if (have(VOID)) {
                 // void method
@@ -753,6 +754,20 @@ public class Parser {
             }
         } else if (have(SEMI)) {
             return new JEmptyStatement(line);
+        } else if (have(TRY)) {
+            JBlock tryBlock = block();
+            JBlock finalBlock = null;
+            ArrayList<ArrayList<JFormalParameter>> catchParamslist = new ArrayList<>();
+            ArrayList<JBlock> catchBlocks = new ArrayList<>();
+            while (see(CATCH)) {
+                mustBe(CATCH);
+                catchParamslist.add(formalParameters());
+                catchBlocks.add(block());
+            }
+            if(have(FINALLY)) {
+                finalBlock = block();
+            }
+            return new JExceptionStatement(line, tryBlock, catchBlocks, catchParamslist, finalBlock);
         } else { // Must be a statementExpression
             JStatement statement = statementExpression();
             mustBe(SEMI);
@@ -1221,20 +1236,19 @@ public class Parser {
                 lhs = new JDivideOp(line, lhs, unaryExpression());
             } else if (have(REMAINDER)) {
                 lhs = new JRemainderOp(line, lhs, unaryExpression());
-            } else if(have(LSHIFT)) {
+            } else if (have(LSHIFT)) {
                 lhs = new JShiftArLeftOp(line, lhs, unaryExpression());
             } else if (have(RSHIFT)) {
                 lhs = new JShiftArRightOp(line, lhs, unaryExpression());
             } else if (have(RSHIFT_ZERO)) {
                 lhs = new JShiftLgRightOp(line, lhs, unaryExpression());
-            } else if(have(AND)) {
+            } else if (have(AND)) {
                 lhs = new JBitwiseAndOp(line, lhs, unaryExpression());
-            } else if(have(OR)) {
+            } else if (have(OR)) {
                 lhs = new JBitwiseInclusiveOrOp(line, lhs, unaryExpression());
-            } else if(have(XOR)) {
+            } else if (have(XOR)) {
                 lhs = new JBitwiseExclusiveOrOp(line, lhs, unaryExpression());
-            }
-            else {
+            } else {
                 more = false;
             }
         }
@@ -1263,7 +1277,7 @@ public class Parser {
             return new JPreIncrementOp(line, unaryExpression());
         } else if (have(MINUS)) {
             return new JNegateOp(line, unaryExpression());
-        } else if(have(BITWISE_COMPLEMENT)) {
+        } else if (have(BITWISE_COMPLEMENT)) {
             return new JBitwiseNotOp(line, unaryExpression());
         } else {
             return simpleUnaryExpression();

@@ -42,6 +42,7 @@ statement ::= block
             | RETURN [expression] SEMI
             | SEMI 
             | statementExpression SEMI
+            | TRY block {CATCH formalParameters block} [FINALLY block]
 
 formalParameters ::= LPAREN 
                        [formalParameter {COMMA formalParameter}]
