@@ -71,15 +71,34 @@ class Scanner {
         reserved = new Hashtable<String, TokenKind>();
         reserved.put(ABSTRACT.image(), ABSTRACT);
         reserved.put(BOOLEAN.image(), BOOLEAN);
+        reserved.put(BREAK.image(), BREAK);
+        reserved.put(BYTE.image(), BYTE);
+        reserved.put(CASE.image(), CASE);
+        reserved.put(CATCH.image(), CATCH);
         reserved.put(CHAR.image(), CHAR);
         reserved.put(CLASS.image(), CLASS);
+        reserved.put(CONST.image(), CONST);
+        reserved.put(CONTINUE.image(), CONTINUE);
+        reserved.put(DEFAULT.image(), DEFAULT);
+        reserved.put(DO.image(), DO);
+        reserved.put(DOUBLE.image(), DOUBLE);
         reserved.put(ELSE.image(), ELSE);
         reserved.put(EXTENDS.image(), EXTENDS);
         reserved.put(FALSE.image(), FALSE);
+        reserved.put(FINAL.image(), FINAL);
+        reserved.put(FINALLY.image(), FINALLY);
+        reserved.put(FLOAT.image(), FLOAT);
+        reserved.put(FOR.image(), FOR);
+        reserved.put(GOTO.image(), GOTO);
         reserved.put(IF.image(), IF);
+        reserved.put(IMPLEMENTS.image(), IMPLEMENTS);
         reserved.put(IMPORT.image(), IMPORT);
         reserved.put(INSTANCEOF.image(), INSTANCEOF);
+        reserved.put(DOUBLE.image(), DOUBLE);
         reserved.put(INT.image(), INT);
+        reserved.put(INTERFACE.image(), INTERFACE);
+        reserved.put(LONG.image(), LONG);
+        reserved.put(NATIVE.image(), NATIVE);
         reserved.put(NEW.image(), NEW);
         reserved.put(NULL.image(), NULL);
         reserved.put(PACKAGE.image(), PACKAGE);
@@ -87,11 +106,20 @@ class Scanner {
         reserved.put(PROTECTED.image(), PROTECTED);
         reserved.put(PUBLIC.image(), PUBLIC);
         reserved.put(RETURN.image(), RETURN);
+        reserved.put(SHORT.image(), SHORT);
         reserved.put(STATIC.image(), STATIC);
+        reserved.put(STRICTFP.image(), STRICTFP);
         reserved.put(SUPER.image(), SUPER);
+        reserved.put(SWITCH.image(), SWITCH);
+        reserved.put(SYNCHRONIZED.image(), SYNCHRONIZED);
         reserved.put(THIS.image(), THIS);
+        reserved.put(THROW.image(), THROW);
+        reserved.put(THROWS.image(), THROWS);
+        reserved.put(TRANSIENT.image(), TRANSIENT);
         reserved.put(TRUE.image(), TRUE);
+        reserved.put(TRY.image(), TRY);
         reserved.put(VOID.image(), VOID);
+        reserved.put(VOLATILE.image(), VOLATILE);
         reserved.put(WHILE.image(), WHILE);
 
         // Prime the pump.
@@ -118,10 +146,24 @@ class Scanner {
                     while (ch != '\n' && ch != EOFCH) {
                         nextCh();
                     }
+                } else if (ch == '*') {
+                    // Read until end of multi-line comment
+                    nextCh();
+                    char prevCh;
+                    do {
+                        prevCh = ch;
+                        nextCh();
+                    } while (prevCh != '*' || ch != '/');
+
+                    // Consume last character
+                    nextCh();
+                } else if (ch == '=') {
+                    nextCh();
+                    return new TokenInfo(DIVIDE_ASSIGN, line);
                 } else {
                     return new TokenInfo(DIVIDE, line);
                 }
-            } else {
+            }else {
                 moreWhiteSpace = false;
             }
         }
@@ -145,6 +187,9 @@ class Scanner {
             case ']':
                 nextCh();
                 return new TokenInfo(RBRACK, line);
+            case ':':
+                nextCh();
+                return new TokenInfo(COLON, line);
             case ';':
                 nextCh();
                 return new TokenInfo(SEMI, line);
@@ -161,13 +206,34 @@ class Scanner {
                 }
             case '!':
                 nextCh();
-                return new TokenInfo(LNOT, line);
+                if (ch == '=') {
+                    nextCh();
+                    return new TokenInfo(NEQUAL, line);
+                } else {
+                    return new TokenInfo(LNOT, line);
+                }
+            case '~':
+                nextCh();
+                return new TokenInfo(BITWISE_COMPLEMENT, line);
+            case '?':
+                nextCh();
+                return new TokenInfo(QUESTION_MARK, line);
             case '*':
                 nextCh();
-                return new TokenInfo(STAR, line);
+                if (ch == '=') {
+                    nextCh();
+                    return new TokenInfo(STAR_ASSIGN, line);
+                } else {
+                    return new TokenInfo(STAR, line);
+                }
             case '%':
                 nextCh();
-                return new TokenInfo(REMAINDER, line);
+                if (ch == '=') {
+                    nextCh();
+                    return new TokenInfo(REMAINDER_ASSIGN, line);
+                } else {
+                    return new TokenInfo(REMAINDER, line);
+                }
             case '+':
                 nextCh();
                 if (ch == '=') {
@@ -181,7 +247,10 @@ class Scanner {
                 }
             case '-':
                 nextCh();
-                if (ch == '-') {
+                if (ch == '=') {
+                    nextCh();
+                    return new TokenInfo(MINUS_ASSIGN, line);
+                } else if (ch == '-') {
                     nextCh();
                     return new TokenInfo(DEC, line);
                 } else {
@@ -189,26 +258,58 @@ class Scanner {
                 }
             case '&':
                 nextCh();
-                if (ch == '&') {
+                if (ch == '=') {
+                    nextCh();
+                    return new TokenInfo(AND_ASSIGN, line);
+                } else if (ch == '&') {
                     nextCh();
                     return new TokenInfo(LAND, line);
                 } else {
-                    reportScannerError("Operator & is not supported in j--.");
-                    return getNextToken();
+                    return new TokenInfo(AND, line);
+                }
+            case '|':
+                nextCh();
+                if (ch == '=') {
+                    nextCh();
+                    return new TokenInfo(OR_ASSIGN, line);
+                } else if (ch == '|') {
+                    nextCh();
+                    return new TokenInfo(LOR, line);
+                } else {
+                    return new TokenInfo(OR, line);
+                }
+            case '^':
+                nextCh();
+                if (ch == '=') {
+                    nextCh();
+                    return new TokenInfo(XOR_ASSIGN, line);
+                } else {
+                    return new TokenInfo(XOR, line);
                 }
             case '>':
                 nextCh();
-                if (ch == '>') {
+                if (ch == '=') {
                     nextCh();
-                    if(ch == '>') {
+                    return new TokenInfo(GE, line);
+                } else if (ch == '>') {
+                    nextCh();
+                    if (ch == '=') {
                         nextCh();
-                        return new TokenInfo(SHIFT_LG_RIGHT, line);
+                        return new TokenInfo(RSHIFT_ASSIGN, line);
+                    } else if (ch == '>') {
+                        nextCh();
+                        if (ch == '=') {
+                            nextCh();
+                            return new TokenInfo(RSHIFT_ZERO_ASSIGN, line);
+                        }
+                        return new TokenInfo(RSHIFT_ZERO, line);
                     } else {
-                        return new TokenInfo(SHIFT_AR_RIGHT, line);
+                        return new TokenInfo(RSHIFT, line);
                     }
                 } else {
                     return new TokenInfo(GT, line);
                 }
+
             case '<':
                 nextCh();
                 if (ch == '=') {
@@ -216,10 +317,14 @@ class Scanner {
                     return new TokenInfo(LE, line);
                 } else if (ch == '<') {
                     nextCh();
-                    return new TokenInfo(SHIFT_AR_LEFT, line);
-                }else {
-                    reportScannerError("Operator < is not supported in j--.");
-                    return getNextToken();
+                    if (ch == '=') {
+                        nextCh();
+                        return new TokenInfo(LSHIFT_ASSIGN, line);
+                    } else {
+                        return new TokenInfo(LSHIFT, line);
+                    }
+                } else {
+                    return new TokenInfo(LT, line);
                 }
             case '\'':
                 buffer = new StringBuffer();
@@ -271,12 +376,15 @@ class Scanner {
                 return new TokenInfo(STRING_LITERAL, buffer.toString(), line);
             case '.':
                 nextCh();
+                if (isDigit(ch))
+                    return findDouble("", Character.toString(ch));
                 return new TokenInfo(DOT, line);
             case EOFCH:
                 return new TokenInfo(EOF, line);
             case '0':
                 // Handle only simple decimal integers for now.
                 nextCh();
+                if (ch == '.') return findDouble("0");
                 return new TokenInfo(INT_LITERAL, "0", line);
             case '1':
             case '2':
@@ -292,6 +400,7 @@ class Scanner {
                     buffer.append(ch);
                     nextCh();
                 }
+                if (ch == '.') return findDouble(buffer.toString());
                 return new TokenInfo(INT_LITERAL, buffer.toString(), line);
             default:
                 if (isIdentifierStart(ch)) {
@@ -364,6 +473,28 @@ class Scanner {
         } catch (Exception e) {
             reportScannerError("Unable to read characters from input");
         }
+    }
+
+    /**
+     * Assumes the previous char was a dot, finds the remaining decimal part of a number
+     */
+    private TokenInfo findDouble(String intPart) {
+        return findDouble(intPart, "");
+    }
+
+    /**
+     * Continues from a random spot and find all digits, formats it in decimal form
+     */
+    private TokenInfo findDouble(String intPart, String doublePart) {
+        StringBuilder sb = new StringBuilder(doublePart);
+        nextCh();
+        while (isDigit(ch)) {
+            sb.append(ch);
+            nextCh();
+        }
+        if (sb.length() == 0 && intPart.length() == 0)
+            reportScannerError("Double requires more than just a dot");
+        return new TokenInfo(DOUBLE_LITERAL, intPart + "." + sb.toString(), line);
     }
 
     /**

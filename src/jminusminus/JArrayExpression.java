@@ -87,6 +87,8 @@ class JArrayExpression
         indexExpr.codegen(output);
         if (type == Type.INT) {
             output.addNoArgInstruction(IALOAD);
+        } else if (type == Type.DOUBLE) {
+            output.addNoArgInstruction(DALOAD);
         } else if (type == Type.BOOLEAN) {
             output.addNoArgInstruction(BALOAD);
         } else if (type == Type.CHAR) {
@@ -132,6 +134,8 @@ class JArrayExpression
         }
         if (type == Type.INT) {
             output.addNoArgInstruction(IALOAD);
+        } else if (type == Type.DOUBLE) {
+            output.addNoArgInstruction(DALOAD);
         } else if (type == Type.BOOLEAN) {
             output.addNoArgInstruction(BALOAD);
         } else if (type == Type.CHAR) {
@@ -168,6 +172,8 @@ class JArrayExpression
     public void codegenStore(CLEmitter output) {
         if (type == Type.INT) {
             output.addNoArgInstruction(IASTORE);
+        } else if (type == Type.DOUBLE) {
+            output.addNoArgInstruction(DASTORE);
         } else if (type == Type.BOOLEAN) {
             output.addNoArgInstruction(BASTORE);
         } else if (type == Type.CHAR) {

@@ -2,7 +2,7 @@
 // Copyright 2013 Bill Campbell, Swami Iyer and Bahar Akbal-Delibas
 -->
 
-<project default="runCompilerTests">
+<project default="testParser">
 
     <property name="APP_FULL_NAME" value="j-- (A Non-trivial Subset of Java)" />
     <property name="SRC_DIR" value="src" />
