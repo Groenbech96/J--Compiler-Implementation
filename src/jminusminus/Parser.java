@@ -157,6 +157,28 @@ public class Parser {
     // ////////////////////////////////////////////////
 
     /**
+     * Are we looking at a for-each loop? Look ahead to find
+     * out.
+     *
+     * @return true iff we're looking at a for-each loop; false otherwise.
+     */
+
+    private boolean seeForEachLoop() {
+        scanner.recordPosition();
+        if(seeBasicType() || seeReferenceType()) {
+            type();
+            if(have(IDENTIFIER)) {
+                if(see(COLON)) {
+                    scanner.returnToPosition();
+                    return true;
+                }
+            }
+        }
+        scanner.returnToPosition();
+        return false;
+    }
+
+    /**
      * Are we looking at an IDENTIFIER followed by a LPAREN? Look ahead to find
      * out.
      *
@@ -748,48 +770,43 @@ public class Parser {
             mustBe(LPAREN);
 
             // Try to parse the for loop as a for-each
-            // Record the scanner position in case its not a for-each loop
-            scanner.recordPosition();
-            if(seeBasicType()) {
-                Type type = type();
-                if(have(IDENTIFIER)) {
-                    String formalParameterName = scanner.previousToken().image();
-                    if(have(COLON)) {
-                        JFormalParameter parameter = new JFormalParameter(line, formalParameterName, type);
-
-                        mustBe(IDENTIFIER);
-                        String arrayName = scanner.previousToken().image();
-                        JVariable array = new JVariable(line, arrayName);
-
-                        mustBe(RPAREN);
-                        JStatement body = statement();
-                        return new JForEachStatement(line, parameter, array, body);
-                    }
-                }
+            if(seeForEachLoop()) {
+                JFormalParameter parameter = formalParameter();
+                mustBe(COLON);
+                Type array = type();
+                mustBe(RPAREN);
+                JStatement body = statement();
+                return new JForEachStatement(line, parameter, array, body);
             }
-
-            // Return to the original scanner position as this is a regular for-loop
-            scanner.returnToPosition();
 
             // Parse the initial expression in the for-loop,
             // it can either be variable declarations statement expressions
             JVariableDeclaration initVariableDecls = new JVariableDeclaration(line, new ArrayList<>(), new ArrayList<>());
             ArrayList<JStatement> initStatements = new ArrayList<>();
-            if(seeBasicType()) {
-                // Note: A semicolon is parsed at the end of the declarations
-                initVariableDecls = localVariableDeclarationStatement();
-            } else {
-                initStatements = parseStatements();
+            if(!have(SEMI)) {
+                if(seeLocalVariableDeclaration()) {
+                    ArrayList<String> mods = new ArrayList<>();
+                    ArrayList<JVariableDeclarator> declarators = variableDeclarators(type());
+                    initVariableDecls = new JVariableDeclaration(line, mods, declarators);
+                }
+                else {
+                    initStatements = parseStatements();
+                }
                 mustBe(SEMI);
             }
 
-            JExpression condition = expression();
-            mustBe(SEMI);
+            JExpression condition = null;
+            if(!have(SEMI)) {
+                condition = expression();
+                mustBe(SEMI);
+            }
 
-            // Parse the update statements
-            ArrayList<JStatement> updateStatements = parseStatements();
+            ArrayList<JStatement> updateStatements = new ArrayList<>();
+            if(!have(RPAREN)) {
+                updateStatements = parseStatements();
+                mustBe(RPAREN);
+            }
 
-            mustBe(RPAREN);
             JStatement body = statement();
             return new JForStatement(line, initVariableDecls, initStatements, condition, updateStatements, body);
         } else if (have(RETURN)) {

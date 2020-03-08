@@ -15,7 +15,7 @@ class JForEachStatement extends JStatement {
      */
 
     private JFormalParameter parameter;
-    private JVariable array;
+    private Type array;
 
     /**
      * The body.
@@ -28,11 +28,11 @@ class JForEachStatement extends JStatement {
      *
      * @param line      line in which the while-statement occurs in the source file.
      * @param parameter the formal parameter on the left side of the for-each expression
-     * @param array     the array parameter on teh right side of the for-each expression
+     * @param array     the array parameter on the right side of the for-each expression
      * @param body      the body
      */
 
-    public JForEachStatement(int line, JFormalParameter parameter, JVariable array, JStatement body) {
+    public JForEachStatement(int line, JFormalParameter parameter, Type array, JStatement body) {
         super(line);
         this.parameter = parameter;
         this.array = array;
@@ -76,7 +76,7 @@ class JForEachStatement extends JStatement {
 
         p.printf("<Array>\n");
         p.indentRight();
-        array.writeToStdOut(p);
+        p.printf("%s\n", array.simpleName());
         p.indentLeft();
         p.printf("</Array>\n");
 

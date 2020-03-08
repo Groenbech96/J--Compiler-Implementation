@@ -93,7 +93,12 @@ class JForStatement extends JStatement {
 
         p.printf("<ConditionExpression>\n");
         p.indentRight();
-        condition.writeToStdOut(p);
+        if(condition == null) {
+            p.printf("null\n");
+        }
+        else {
+            condition.writeToStdOut(p);
+        }
         p.indentLeft();
         p.printf("</ConditionExpression>\n");
 
