@@ -7,15 +7,22 @@ compilationUnit ::= [PACKAGE qualifiedIdentifier SEMI]
 
 qualifiedIdentifier ::= IDENTIFIER {DOT IDENTIFIER}
 
-typeDeclaration ::= modifiers classDeclaration
+typeDeclaration ::= modifiers (classDeclaration | interfaceBody)
 
 modifiers ::= {PUBLIC | PROTECTED | PRIVATE | STATIC | ABSTRACT}
 
 classDeclaration ::= CLASS IDENTIFIER 
-                       [EXTENDS qualifiedIdentifier] 
+                       [EXTENDS qualifiedIdentifier]
+                       [IMPLEMENTS qualifiedIdentifier {COMMA qualifiedIdentifier}]
                        classBody
 
-classBody ::= LCURLY {modifiers memberDecl} RCURLY
+interfaceDeclaration ::= INTERFACE IDENTIFIER
+                            [EXTENDS qualifiedIdentifier {COMMA qualifiedIdentifier}]
+                            interfaceBody
+
+classBody ::= LCURLY {({modifiers memberDecl} | [STATIC] block)} RCURLY
+
+interfaceBody ::= LCURLY {(VOID | type) IDENTIFIER formalParameters SEMI} RCURLY
 
 memberDecl ::= IDENTIFIER            // constructor
                  formalParameters block
@@ -65,9 +72,11 @@ basicType ::= BOOLEAN | CHAR | INT | DOUBLE
 referenceType ::= basicType LBRACK RBRACK {LBRACK RBRACK}
                 | qualifiedIdentifier {LBRACK RBRACK}
 
+conditionalExpression ::= expression COLON expression QUESTION_MARK expression
+
 statementExpression ::= expression // but must have side-effect, eg i++
 
-expression ::= assignmentExpression
+expression ::= assignmentExpression | conditionalExpression
 
 assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
                            [(ASSIGN | PLUS_ASSIGN) assignmentExpression]
@@ -86,10 +95,11 @@ additiveExpression ::= multiplicativeExpression // level 3
                          {(PLUS | MINUS) multiplicativeExpression}
 
 multiplicativeExpression ::= unaryExpression       // level 2
-                               {(STAR|DIVIDE|REMAINDER) unaryExpression}
+                               {(STAR|DIVIDE|REMAINDER|LSHIFT|RSHIFT|RSHIFT_ZERO|BITWISE_AND|BITWISE_OR|BITWISE_XOR) unaryExpression}
 
 unaryExpression ::= INC unaryExpression  // level 1
                   | MINUS unaryExpression
+                  | BITWISE_NOT unaryExpression
                   | simpleUnaryExpression
 
 simpleUnaryExpression ::= LNOT unaryExpression

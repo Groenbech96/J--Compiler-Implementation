@@ -331,3 +331,175 @@ class JRemainderOp extends JBinaryExpression {
         output.addNoArgInstruction(rem());
     }
 }
+
+class JBitwiseAndOp extends JBinaryExpression {
+    public JBitwiseAndOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "&", lhs, rhs);
+    }
+
+    @Override
+    public JExpression analyze(Context context) {
+        lhs = lhs.analyze(context);
+        rhs = rhs.analyze(context);
+        lhs.type().mustMatchExpected(line(), Type.INT);
+        rhs.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    @Override
+    public void codegen(CLEmitter output) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IAND);
+    }
+}
+
+class JBitwiseExclusiveOrOp extends JBinaryExpression {
+    public JBitwiseExclusiveOrOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "^", lhs, rhs);
+    }
+
+    @Override
+    public JExpression analyze(Context context) {
+        lhs = lhs.analyze(context);
+        rhs = rhs.analyze(context);
+        lhs.type().mustMatchExpected(line(), Type.INT);
+        rhs.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    @Override
+    public void codegen(CLEmitter output) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IXOR);
+    }
+}
+
+class JBitwiseInclusiveOrOp extends JBinaryExpression {
+    public JBitwiseInclusiveOrOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "|", lhs, rhs);
+    }
+
+    @Override
+    public JExpression analyze(Context context) {
+        lhs = lhs.analyze(context);
+        rhs = rhs.analyze(context);
+        lhs.type().mustMatchExpected(line(), Type.INT);
+        rhs.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    @Override
+    public void codegen(CLEmitter output) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IOR);
+    }
+}
+
+
+
+
+
+class JShiftArRightOp extends JBinaryExpression {
+
+
+    /**
+     * Construct an AST node for a binary expression given its line number, the
+     * binary operator, and lhs and rhs operands.
+     *
+     * @param line     line in which the binary expression occurs in the source file.
+     * @param lhs      the lhs operand.
+     * @param rhs      the rhs operand.
+     */
+    protected JShiftArRightOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, ">>", lhs, rhs);
+    }
+
+    @Override
+    public JExpression analyze(Context context) {
+        lhs = (JExpression) lhs.analyze(context);
+        rhs = (JExpression) rhs.analyze(context);
+        lhs.type().mustMatchExpected(line(), Type.INT);
+        rhs.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    @Override
+    public void codegen(CLEmitter output) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(ISHR);
+    }
+}
+
+class JShiftArLeftOp extends JBinaryExpression {
+    /**
+     * Construct an AST node for a binary expression given its line number, the
+     * binary operator, and lhs and rhs operands.
+     *
+     * @param line     line in which the binary expression occurs in the source file.
+     * @param lhs      the lhs operand.
+     * @param rhs      the rhs operand.
+     */
+    protected JShiftArLeftOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "<<", lhs, rhs);
+    }
+    
+    @Override
+    public JExpression analyze(Context context) {
+        lhs = (JExpression) lhs.analyze(context);
+        rhs = (JExpression) rhs.analyze(context);
+        lhs.type().mustMatchExpected(line(), Type.INT);
+        rhs.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    @Override
+    public void codegen(CLEmitter output) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(ISHL);
+    }
+}
+
+class JShiftLgRightOp extends JBinaryExpression {
+
+
+    /**
+     * Construct an AST node for a binary expression given its line number, the
+     * binary operator, and lhs and rhs operands.
+     *
+     * @param line     line in which the binary expression occurs in the source file.
+     * @param lhs      the lhs operand.
+     * @param rhs      the rhs operand.
+     */
+    protected JShiftLgRightOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, ">>>", lhs, rhs);
+    }
+
+    @Override
+    public JExpression analyze(Context context) {
+        lhs = (JExpression) lhs.analyze(context);
+        rhs = (JExpression) rhs.analyze(context);
+        lhs.type().mustMatchExpected(line(), Type.INT);
+        rhs.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    @Override
+    public void codegen(CLEmitter output) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IUSHR);
+    }
+}
+
+

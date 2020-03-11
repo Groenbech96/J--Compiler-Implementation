@@ -56,3 +56,6 @@ src/jminusminus/SimpleCharStream.java
 src/jminusminus/Token.java
 
 src/jminusminus/TokenMgrError.java
+
+classes/production/j--/spim.jar
+*.kotlin_module
