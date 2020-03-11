@@ -94,7 +94,6 @@ class Scanner {
         reserved.put(IMPLEMENTS.image(), IMPLEMENTS);
         reserved.put(IMPORT.image(), IMPORT);
         reserved.put(INSTANCEOF.image(), INSTANCEOF);
-        reserved.put(DOUBLE.image(), DOUBLE);
         reserved.put(INT.image(), INT);
         reserved.put(INTERFACE.image(), INTERFACE);
         reserved.put(LONG.image(), LONG);
