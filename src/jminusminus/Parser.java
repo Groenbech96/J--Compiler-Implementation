@@ -157,6 +157,28 @@ public class Parser {
     // ////////////////////////////////////////////////
 
     /**
+     * Are we looking at a for-each loop? Look ahead to find
+     * out.
+     *
+     * @return true iff we're looking at a for-each loop; false otherwise.
+     */
+
+    private boolean seeForEachLoop() {
+        scanner.recordPosition();
+        if(seeBasicType() || seeReferenceType()) {
+            type();
+            if(have(IDENTIFIER)) {
+                if(see(COLON)) {
+                    scanner.returnToPosition();
+                    return true;
+                }
+            }
+        }
+        scanner.returnToPosition();
+        return false;
+    }
+
+    /**
      * Are we looking at an IDENTIFIER followed by a LPAREN? Look ahead to find
      * out.
      *
@@ -722,6 +744,7 @@ public class Parser {
      *   statement ::= block
      *               | IF parExpression statement [ELSE statement]
      *               | WHILE parExpression statement
+     *               | FOR forExpression statement
      *               | RETURN [expression] SEMI
      *               | SEMI
      *               | statementExpression SEMI
@@ -743,6 +766,49 @@ public class Parser {
             JExpression test = parExpression();
             JStatement statement = statement();
             return new JWhileStatement(line, test, statement);
+        } else if (have(FOR)) {
+            mustBe(LPAREN);
+
+            // Try to parse the for loop as a for-each
+            if(seeForEachLoop()) {
+                JFormalParameter parameter = formalParameter();
+                mustBe(COLON);
+                Type array = type();
+                mustBe(RPAREN);
+                JStatement body = statement();
+                return new JForEachStatement(line, parameter, array, body);
+            }
+
+            // Parse the initial expression in the for-loop,
+            // it can either be variable declarations statement expressions
+            JVariableDeclaration initVariableDecls = new JVariableDeclaration(line, new ArrayList<>(), new ArrayList<>());
+            ArrayList<JStatement> initStatements = new ArrayList<>();
+            if(!have(SEMI)) {
+                if(seeLocalVariableDeclaration()) {
+                    ArrayList<String> mods = new ArrayList<>();
+                    ArrayList<JVariableDeclarator> declarators = variableDeclarators(type());
+                    initVariableDecls = new JVariableDeclaration(line, mods, declarators);
+                }
+                else {
+                    initStatements = parseStatements();
+                }
+                mustBe(SEMI);
+            }
+
+            JExpression condition = null;
+            if(!have(SEMI)) {
+                condition = expression();
+                mustBe(SEMI);
+            }
+
+            ArrayList<JStatement> updateStatements = new ArrayList<>();
+            if(!have(RPAREN)) {
+                updateStatements = parseStatements();
+                mustBe(RPAREN);
+            }
+
+            JStatement body = statement();
+            return new JForStatement(line, initVariableDecls, initStatements, condition, updateStatements, body);
         } else if (have(RETURN)) {
             if (have(SEMI)) {
                 return new JReturnStatement(line, null);
@@ -818,6 +884,24 @@ public class Parser {
         JExpression expr = expression();
         mustBe(RPAREN);
         return expr;
+    }
+
+    /**
+     * Parse comma separated statements.
+     *
+     * <pre>
+     *   statementExpression {COMMA statementExpression}
+     * </pre>
+     *
+     * @return a list of statements
+     */
+
+    private ArrayList<JStatement> parseStatements() {
+        ArrayList<JStatement> statements = new ArrayList<>();
+        do {
+            statements.add(statementExpression());
+        } while (have(COMMA));
+        return statements;
     }
 
     /**
