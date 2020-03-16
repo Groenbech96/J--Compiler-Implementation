@@ -643,7 +643,7 @@ public class Parser {
             ArrayList<JFormalParameter> params = formalParameters();
             ArrayList<Type> exceptions = null;
             if(see(THROWS)) {
-                exceptions = parseThrow();
+                exceptions = parseThrows();
             }
             JBlock body = block();
             memberDecl = new JConstructorDeclaration(line, mods, name, params,
@@ -658,7 +658,7 @@ public class Parser {
                 ArrayList<JFormalParameter> params = formalParameters();
                 ArrayList<Type> exceptions = null;
                 if(see(THROWS)) {
-                    exceptions = parseThrow();
+                    exceptions = parseThrows();
                 }
                 JBlock body = have(SEMI) ? null : block();
                 memberDecl = new JMethodDeclaration(line, mods, name, type,
@@ -672,7 +672,7 @@ public class Parser {
                     ArrayList<JFormalParameter> params = formalParameters();
                     ArrayList<Type> exceptions = null;
                     if(see(THROWS)) {
-                        exceptions = parseThrow();
+                        exceptions = parseThrows();
                     }
                     JBlock body = have(SEMI) ? null : block();
                     memberDecl = new JMethodDeclaration(line, mods, name, type,
@@ -688,7 +688,7 @@ public class Parser {
         return memberDecl;
     }
 
-    private ArrayList<Type> parseThrow() {
+    private ArrayList<Type> parseThrows() {
         ArrayList<Type> exceptionTypes = new ArrayList();
         mustBe(THROWS);
         exceptionTypes.add(type());
