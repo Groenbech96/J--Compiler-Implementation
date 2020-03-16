@@ -56,21 +56,21 @@ public class JTernaryExpression extends JExpression {
     public void writeToStdOut(PrettyPrinter p) {
         p.printf("<JTernaryExpression line=\"%d\" type=\"%s\">\n", line(),  ((type == null) ? "" : type.toString()));
             p.indentRight();
-                p.printf("<condition>\n");
+                p.printf("<Condition>\n");
                     p.indentRight();
                     condition.writeToStdOut(p);
                     p.indentLeft();
-                p.printf("</condition>\n");
-                p.printf("<ifTrue>\n");
+                p.printf("</Condition>\n");
+                p.printf("<IfTrue>\n");
                     p.indentRight();
                     ifTrue.writeToStdOut(p);
                     p.indentLeft();
-                p.printf("</ifTrue>\n");
-                p.printf("<ifFalse>\n");
+                p.printf("</IfTrue>\n");
+                p.printf("<IfFalse>\n");
                     p.indentRight();
                     ifFalse.writeToStdOut(p);
                     p.indentLeft();
-                p.printf("</ifFalse>\n");
+                p.printf("</IfFalse>\n");
             p.indentLeft();
         p.printf("</JTernaryExpression>\n");
     }
