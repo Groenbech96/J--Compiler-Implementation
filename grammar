@@ -25,9 +25,12 @@ classBody ::= LCURLY {({modifiers memberDecl} | [STATIC] block)} RCURLY
 interfaceBody ::= LCURLY {(VOID | type) IDENTIFIER formalParameters SEMI} RCURLY
 
 memberDecl ::= IDENTIFIER            // constructor
-                 formalParameters block
+                 formalParameters
+                 [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
+                 block
              | (VOID | type) IDENTIFIER  // method
                  formalParameters
+                 [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
                  (block | SEMI)
              | type variableDeclarators SEMI // field
 
@@ -38,10 +41,15 @@ blockStatement ::= localVariableDeclarationStatement
 
 statement ::= block
             | IF parExpression statement [ELSE statement]
-            | WHILE parExpression statement 
+            | WHILE parExpression statement
+            | FOR forExpression statement
             | RETURN [expression] SEMI
-            | SEMI 
+            | SEMI
+            | TRY block {CATCH formalParameters block} [FINALLY block]
+            | THROW expression SEMI
             | statementExpression SEMI
+
+
 
 formalParameters ::= LPAREN 
                        [formalParameter {COMMA formalParameter}]
@@ -73,6 +81,10 @@ referenceType ::= basicType LBRACK RBRACK {LBRACK RBRACK}
                 | qualifiedIdentifier {LBRACK RBRACK}
 
 conditionalExpression ::= expression COLON expression QUESTION_MARK expression
+
+forInit ::= statementExpression {COMMA statementExpression} | [final] type variableDeclarators
+forUpdate ::= statementExpression {COMMA statementExpression}
+forExpression ::= LPAREN [forInit] SEMI expression SEMI [forUpdate] RPAREN
 
 statementExpression ::= expression // but must have side-effect, eg i++
 
