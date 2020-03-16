@@ -527,6 +527,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
     ArrayList<JFormalParameter> params = null;
     JBlock body = null;
     ArrayList<JVariableDeclarator> variableDeclarators = null;
+    ArrayList<Type> exceptions = null;
     JMember memberDecl = null;
 }
 {
@@ -541,8 +542,8 @@ private JMember memberDecl( ArrayList<String>  mods ): {
         body = block()
         {
             memberDecl =
-            new JConstructorDeclaration( line, mods,
-                                         name, params, body );
+            new JConstructorDeclaration( line, mods, name,
+                                         params, exceptions, body );
         } |
         LOOKAHEAD( ( <VOID> | type() ) <IDENTIFIER> <LPAREN> )
         (
@@ -559,7 +560,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
         {
             memberDecl =
                new JMethodDeclaration( line, mods, name,
-                                       type, params, body );
+                                       type, params, exceptions, body );
         } |
         ( 
             type = type() { line = token.beginLine; }
