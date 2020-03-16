@@ -63,6 +63,12 @@ class JMethodDeclaration
      */
     protected boolean isPrivate;
 
+
+    /**
+     * Exceptions thrown from methid
+     */
+    protected ArrayList<Type> exceptions;
+
     /**
      * Construct an AST node for a method declaration given the
      * line number, method name, return type, formal parameters,
@@ -79,12 +85,13 @@ class JMethodDeclaration
 
     public JMethodDeclaration(int line, ArrayList<String> mods,
                               String name, Type returnType,
-                              ArrayList<JFormalParameter> params, JBlock body) {
+                              ArrayList<JFormalParameter> params, ArrayList<Type> exceptions, JBlock body) {
         super(line);
         this.mods = mods;
         this.name = name;
         this.returnType = returnType;
         this.params = params;
+        this.exceptions = exceptions;
         this.body = body;
         this.isAbstract = mods.contains("abstract");
         this.isStatic = mods.contains("static");
@@ -250,6 +257,15 @@ class JMethodDeclaration
                 p.indentLeft();
             }
             p.println("</FormalParameters>");
+        }
+        if (exceptions != null) {
+            p.println("<Exceptions>");
+            p.indentRight();
+            for (Type t : exceptions) {
+                p.printf("<Exception type=\"%s\"/>\n", t.toString());
+            }
+            p.indentLeft();
+            p.println("</Exceptions>");
         }
         if (body != null) {
             p.println("<Body>");

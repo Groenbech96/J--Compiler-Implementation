@@ -25,9 +25,12 @@ classBody ::= LCURLY {({modifiers memberDecl} | [STATIC] block)} RCURLY
 interfaceBody ::= LCURLY {(VOID | type) IDENTIFIER formalParameters SEMI} RCURLY
 
 memberDecl ::= IDENTIFIER            // constructor
-                 formalParameters block
+                 formalParameters
+                 [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
+                 block
              | (VOID | type) IDENTIFIER  // method
                  formalParameters
+                 [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
                  (block | SEMI)
              | type variableDeclarators SEMI // field
 
@@ -41,8 +44,12 @@ statement ::= block
             | WHILE parExpression statement
             | FOR forExpression statement
             | RETURN [expression] SEMI
-            | SEMI 
+            | SEMI
+            | TRY block {CATCH formalParameters block} [FINALLY block]
+            | THROW expression SEMI
             | statementExpression SEMI
+
+
 
 formalParameters ::= LPAREN 
                        [formalParameter {COMMA formalParameter}]

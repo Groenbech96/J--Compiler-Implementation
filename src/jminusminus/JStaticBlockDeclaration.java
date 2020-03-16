@@ -15,6 +15,6 @@ public class JStaticBlockDeclaration extends JMethodDeclaration implements JMemb
      * @param body       method body.
      */
     public JStaticBlockDeclaration(int line, ArrayList<String> mods, String name, JBlock body) {
-        super(line, mods, name, Type.STATIC_BLOCK, new ArrayList<>(), body);
+        super(line, mods, name, Type.STATIC_BLOCK, new ArrayList<>(),new ArrayList<>(),  body);
     }
 }
