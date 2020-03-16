@@ -153,7 +153,9 @@ TOKEN:
 | < EXTENDS: "extends" >
 | < FALSE: "false" >
 | < IF: "if" >
+| < IMPLEMENTS: "implements" >
 | < IMPORT: "import" >
+| < INTERFACE: "interface" >
 | < INSTANCEOF: "instanceof" >
 | < DOUBLE: "double" >
 | < INT: "int" >
@@ -451,6 +453,7 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
     String name = "";
     Type superClass = Type.OBJECT;
     ArrayList<JMember> classBody = null;
+    ArrayList<Type> interfaces = null;
 }
 {
     try {
@@ -466,7 +469,7 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
     }
     { 
         return new JClassDeclaration( line, mods, 
-            name, superClass, classBody ); 
+            name, superClass, interfaces, classBody );
     }
 }
 
@@ -1057,7 +1060,7 @@ private Type referenceType(): {
     { return type; }       
 }
 
-private JStatement ternaryExpression(): {
+/*private JStatement ternaryExpression(): {
     int line = 0;
     JExpression condition, ifTrue, ifFalse;
 }{
@@ -1071,7 +1074,7 @@ private JStatement ternaryExpression(): {
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
     { return new TernaryExpression(line, condition, ifTrue, ifFalse); }
-}
+}*/
 
 /**
  * Parse a statement expression. 
@@ -1131,7 +1134,8 @@ private JExpression expression(): {
 }
 {
     try {
-        (expr = assignmentExpression() | expr = ternaryExpression())
+        expr = assignmentExpression()
+        //(expr = assignmentExpression() | expr = ternaryExpression())
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
