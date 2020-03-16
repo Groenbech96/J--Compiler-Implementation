@@ -6,9 +6,9 @@ package jminusminus;
 
 public class JTernaryExpression extends JExpression {
 
-    private final JExpression condition;
-    private final JExpression ifTrue;
-    private final JExpression ifFalse;
+    private JExpression condition;
+    private JExpression ifTrue;
+    private JExpression ifFalse;
 
     /**
      *
@@ -32,6 +32,10 @@ public class JTernaryExpression extends JExpression {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
     public JExpression analyze(Context context) {
+        condition = condition.analyze(context);
+        ifTrue = ifTrue.analyze(context);
+        ifFalse = ifFalse.analyze(context);
+
         if (condition.type() != Type.BOOLEAN)
             JAST.compilationUnit.reportSemanticError(line(), "Ternary condition must evaluate to bool, evaluated to " + condition.type());
 
@@ -50,7 +54,24 @@ public class JTernaryExpression extends JExpression {
 
     @Override
     public void writeToStdOut(PrettyPrinter p) {
-        // TODO: this
-        System.err.println("Error in writeToStdOut for ternary");
+        p.printf("<JTernaryExpression line=\"%d\" type=\"%s\">\n", line(),  ((type == null) ? "" : type.toString()));
+            p.indentRight();
+                p.printf("<condition>\n");
+                    p.indentRight();
+                    condition.writeToStdOut(p);
+                    p.indentLeft();
+                p.printf("</condition>\n");
+                p.printf("<ifTrue>\n");
+                    p.indentRight();
+                    ifTrue.writeToStdOut(p);
+                    p.indentLeft();
+                p.printf("</ifTrue>\n");
+                p.printf("<ifFalse>\n");
+                    p.indentRight();
+                    ifFalse.writeToStdOut(p);
+                    p.indentLeft();
+                p.printf("</ifFalse>\n");
+            p.indentLeft();
+        p.printf("</JTernaryExpression>\n");
     }
 }
