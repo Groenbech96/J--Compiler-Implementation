@@ -3,7 +3,7 @@ package jminusminus;
 import static jminusminus.CLConstants.DCONST_0;
 import static jminusminus.CLConstants.DCONST_1;
 
-public class JLIteralDouble extends JExpression {
+public class JLiteralDouble extends JExpression {
     /**
      * String representation of the int.
      */
@@ -17,7 +17,7 @@ public class JLIteralDouble extends JExpression {
      * @param text string representation of the literal.
      */
 
-    public JLIteralDouble(int line, String text) {
+    public JLiteralDouble(int line, String text) {
         super(line);
         this.text = text;
     }

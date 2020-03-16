@@ -149,13 +149,13 @@ TOKEN:
 | < BOOLEAN: "boolean" >
 | < CHAR: "char" >
 | < CLASS: "class" >
+| < DOUBLE: "double" >
 | < ELSE: "else" >
 | < EXTENDS: "extends" >
 | < FALSE: "false" >
 | < IF: "if" >
 | < IMPORT: "import" >
 | < INSTANCEOF: "instanceof" >
-| < DOUBLE: "double" >
 | < INT: "int" >
 | < NEW: "new" >
 | < NULL: "null" >
@@ -450,6 +450,7 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
     int line = 0;
     String name = "";
     Type superClass = Type.OBJECT;
+    ArrayList<Type> interfaces = null;
     ArrayList<JMember> classBody = null;
 }
 {
@@ -466,7 +467,7 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
     }
     { 
         return new JClassDeclaration( line, mods, 
-            name, superClass, classBody ); 
+            name, superClass, interfaces, classBody );
     }
 }
 
@@ -1015,7 +1016,8 @@ private Type basicType(): {
     try {
         <BOOLEAN> { type = Type.BOOLEAN; } |
         <CHAR> { type = Type.CHAR; } |
-        <INT> { type = Type.INT; }
+        <INT> { type = Type.INT; } |
+        <DOUBLE> { type = Type.DOUBLE; }
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
@@ -1057,21 +1059,24 @@ private Type referenceType(): {
     { return type; }       
 }
 
+/*
 private JStatement ternaryExpression(): {
     int line = 0;
-    JExpression condition, ifTrue, ifFalse;
-}{
+    JExpression condition = null, ifTrue = null, ifFalse = null;
+}
+{
     try {
-        condition = assignmentExpression() { line = condition.line() }
+        condition = assignmentExpression() { line = condition.line(); }
         <COLON>
-        ifTrue = assignmentExpression() { line = condition.line() }
+        ifTrue = assignmentExpression() { line = condition.line(); }
         <QUESTION_MARK>
-        ifFalse = assignmentExpression() { line = condition.line() }
+        ifFalse = assignmentExpression() { line = condition.line(); }
     } catch (Exception e) {
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
     { return new TernaryExpression(line, condition, ifTrue, ifFalse); }
 }
+*/
 
 /**
  * Parse a statement expression. 
@@ -1131,7 +1136,7 @@ private JExpression expression(): {
 }
 {
     try {
-        (expr = assignmentExpression() | expr = ternaryExpression())
+        (expr = assignmentExpression() /* | expr = ternaryExpression() */)
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
@@ -1678,7 +1683,9 @@ private JExpression literal(): {
 {       
     try {
         <INT_LITERAL> 
-        { expr = new JLiteralInt( token.beginLine, token.image ); } | 
+        { expr = new JLiteralInt( token.beginLine, token.image ); } |
+        <DOUBLE_LITERAL>
+        { expr = new JLiteralDouble( token.beginLine, token.image ); } |
         <CHAR_LITERAL> 
         { expr = new JLiteralChar( token.beginLine, token.image ); } |
         <STRING_LITERAL> 
