@@ -1187,7 +1187,23 @@ public class Parser {
      */
 
     private JExpression expression() {
-        return assignmentExpression();
+        return ternaryExpression();
+    }
+
+    private JExpression ternaryExpression() {
+        int line = scanner.token().line();
+        JExpression condition = assignmentExpression();
+        if (have(QUESTION_MARK)) {
+            JExpression ifTrue = assignmentExpression();
+            if (have(COLON)) {
+                JExpression ifFalse = assignmentExpression();
+                return new JTernaryExpression(line, condition, ifTrue, ifFalse);
+            } else {
+                reportParserError(": sought where %s found", scanner.token().image());
+            }
+        }
+
+        return condition;
     }
 
     /**
