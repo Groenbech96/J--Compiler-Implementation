@@ -147,11 +147,24 @@ TOKEN:
 {
   < ABSTRACT: "abstract" >
 | < BOOLEAN: "boolean" >
+| <BREAK: "break" >
+| <BYTE: "byte" >
+| <CASE: "case" >
+| <CATCH: "catch" >
 | < CHAR: "char" >
 | < CLASS: "class" >
+| <CONST: "const" >
+| <CONTINUE: "continue" >
+| <DEFAULTT: "default" >
+| <DO: "do" >
 | < ELSE: "else" >
 | < EXTENDS: "extends" >
 | < FALSE: "false" >
+| <FINAL: "final" >
+| <FINALLY: "finally" >
+| <FLOAT: "float" >
+| <FOR: "for" >
+| <GOTO: "goto" >
 | < IF: "if" >
 | < IMPLEMENTS: "implements" >
 | < IMPORT: "import" >
@@ -159,6 +172,8 @@ TOKEN:
 | < INSTANCEOF: "instanceof" >
 | < DOUBLE: "double" >
 | < INT: "int" >
+| <LONG: "long" >
+| <NATIVE: "native" >
 | < NEW: "new" >
 | < NULL: "null" >
 | < PACKAGE: "package">
@@ -166,29 +181,50 @@ TOKEN:
 | < PROTECTED: "protected" >
 | < PUBLIC: "public" >
 | < RETURN: "return" >
+| <SHORT: "short" >
 | < STATIC: "static" >
+| <STRICTFP: "strictfp" >
 | < SUPER: "super" >
+| <SWITCH: "switch" >
+| <SYNCHRONIZED: "synchronized" >
 | < THIS: "this" >
+| < THROW: "throw" >
+| < THROWS: "throws" >
+| < TRANSIENT: "transient" >
 | < TRUE: "true" >
+| < TRY: "try" >
 | < VOID: "void" >
+| < VOLATILE: "volatile" >
 | < WHILE: "while" >
 }
 
 // Operators (these could be combined with the reserved words)
 TOKEN:
 {
-  < PLUS: "+" >
+ < BITWISE_AND : "&">
+| < BITWISE_OR: "|">
+| < BITWISE_XOR : "^">
+| < BITWISE_NOT: "~">
+| < PLUS: "+" >
 | < ASSIGN: "=" >
 | < DEC: "--" >
 | < EQUAL: "==" >
 | < GT: ">" >
+| < LT: "<" >
 | < INC: "++" >
 | < LAND: "&&" >
+| < LOR: "||" >
 | < LE: "<=" >
+| < GE: ">=" >
 | < LNOT: "!" >
 | < MINUS: "-" >
 | < PLUS_ASSIGN: "+=" >
+| < DIVIDE: "/">
+| < REMAINDER: "%">
 | < STAR: "*" >
+| < LSHIFT: "<<" >
+| < RSHIFT: ">>" >
+| < RSHIFT_ZERO: ">>>" >
 }
 
 // Separators (these could be combined with the reserved words)
