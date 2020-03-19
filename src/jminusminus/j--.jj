@@ -172,6 +172,30 @@ TOKEN:
 | < TRUE: "true" >
 | < VOID: "void" >
 | < WHILE: "while" >
+| < THROW       : "throw" >
+| < THROWS      : "throws" >
+| < TRANSIENT   : "transient" >
+| < TRY         : "try" >
+| < VOLATILE    : "volatile" >
+| <BREAK       : "break" >
+| <BYTE        : "byte" >
+| <CASE        : "case" >
+| <CATCH       : "catch" >
+| <CONST       : "const" >
+| <CONTINUE    : "continue" >
+| <DEFAULTT     : "default" >
+| <DO          : "do" >
+| <FINAL       : "final" >
+| <FINALLY     : "finally" >
+| <FLOAT       : "float" >
+| <FOR         : "for" >
+| <GOTO        : "goto" >
+| <LONG        : "long" >
+| <NATIVE      : "native" >
+| <SHORT       : "short" >
+| <STRICTFP    : "strictfp" >
+| <SWITCH      : "switch" >
+| <SYNCHRONIZED    : "synchronized" >
 }
 
 // Operators (these could be combined with the reserved words)
@@ -188,7 +212,16 @@ TOKEN:
 | < LNOT: "!" >
 | < MINUS: "-" >
 | < PLUS_ASSIGN: "+=" >
+| < DIVIDE      : "/">
+| < REMAINDER   : "%">
+| < BITWISE_AND : "&">
+| < BITWISE_OR  : "|">
+| < BITWISE_XOR : "^">
+| < BITWISE_NOT: "~">
 | < STAR: "*" >
+| < LSHIFT: "<<" >
+| < RSHIFT: ">>" >
+| < RSHIFT_ZERO: ">>>" >
 }
 
 // Separators (these could be combined with the reserved words)
