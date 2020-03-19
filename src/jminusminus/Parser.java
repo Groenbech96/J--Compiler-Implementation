@@ -546,7 +546,7 @@ public class Parser {
                 interfaces.add(qualifiedIdentifier());
             }
         }
-        return new JClassDeclaration(line, mods, name, superClass, interfaces, classBody());
+        return new JClassDeclaration(line, mods, name, superClass, interfaces, classBody(line));
     }
 
     /**
@@ -588,28 +588,33 @@ public class Parser {
      * @return list of members in the class body.
      */
 
-    private ArrayList<JMember> classBody() {
+    private JClassBody classBody(int classDeclarationLine) {
         ArrayList<JMember> members = new ArrayList<JMember>();
+        ArrayList<JBlock> staticBlocks = new ArrayList<JBlock>();
+        ArrayList<JBlock> instanceBlocks = new ArrayList<JBlock>();
         mustBe(LCURLY);
         while (!see(RCURLY) && !see(EOF)) {
             if (see(LCURLY)) {
                 int line = scanner.token().line();
                 JBlock body = block();
-                members.add(new JInitializationBlockDeclaration(line, "instance block" + line, body));
+                instanceBlocks.add(body);
+                // members.add(new JInitializationBlockDeclaration(line, "instance block" + line, body));
             } else if (seeStaticLCurly()) {
                 mustBe(STATIC);
                 int line = scanner.token().line();
                 JBlock body = block();
-                ArrayList<String> mods = new ArrayList<>();
-                mods.add("static");
-                members.add(new JInitializationBlockDeclaration(line, mods, "static block " + line, body));
+                staticBlocks.add(body);
+                //ArrayList<String> mods = new ArrayList<>();
+                // mods.add("static");
+                // members.add(new JInitializationBlockDeclaration(line, mods, "static block " + line, body));
 
             } else {
                 members.add(memberDecl(modifiers()));
             }
         }
         mustBe(RCURLY);
-        return members;
+        return new JClassBody(classDeclarationLine, staticBlocks, instanceBlocks, members);
+        // return members;
     }
 
     /**
