@@ -1213,15 +1213,15 @@ private Type referenceType(): {
 {
     try {
         type = basicType()
-        <LBRACK> <RBRACK> { type = new ArrayTypeName(); }
+        <LBRACK> <RBRACK> { type = new ArrayTypeName(type); }
         ( 
             <LBRACK> <RBRACK> 
-            { type = new ArrayTypeName(); }
+            { type = new ArrayTypeName(type); }
         )* |
         type = qualifiedIdentifier()
         ( 
             <LBRACK> <RBRACK> 
-            { type = new ArrayTypeName(); }
+            { type = new ArrayTypeName(type); }
         )*
     } 
     catch ( ParseException e ) { 

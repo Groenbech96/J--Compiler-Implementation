@@ -872,10 +872,6 @@ class TypeName extends Type {
 
 class ArrayTypeName extends Type {
 
-    public ArrayTypeName(){
-        super();
-    }
-
     /**
      * The array's base or component type.
      */
