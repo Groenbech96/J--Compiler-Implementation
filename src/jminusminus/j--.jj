@@ -31,7 +31,7 @@ class JavaCCParser {
     /**
      * Pull out the ambiguous part of a name and return it. 
      * 
-     * @param name with an ambiguos part (possibly).
+     * @param name with an ambiguous part (possibly).
      * @return ambiguous part or null.
      */
     
@@ -828,6 +828,7 @@ private JStatement statement(): {
     JStatement alternate = null;
     JStatement body = null;
     JExpression expr = null;
+
 }
 {       
     try {
@@ -850,13 +851,17 @@ private JStatement statement(): {
         test = parExpression() 
         body = statement()
         { statement = new JWhileStatement( line, test, body ); } |
+        <FOR> { line = token.beginLine;}
+        <LPAREN>
+        { statement = forOrForEachStatement(line); } |
         <RETURN> { line = token.beginLine; }
-        [ 
-            expr = expression() 
-        ] 
+        [
+            expr = expression()
+        ]
         <SEMI>
         { statement = new JReturnStatement( line, expr ); } |
-        <SEMI> 
+        <SEMI>
+
         { statement = new JEmptyStatement( line ); } |
         // Must be a statementExpression
         statement = statementExpression() 
@@ -866,6 +871,105 @@ private JStatement statement(): {
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
     { return statement; }
+}
+
+private JStatement forOrForEachStatement(int line):{
+JVariableDeclaration variableDeclaration = null;
+    ArrayList<JStatement> initStatements = null;
+    ArrayList<JStatement> updateStatements = null;
+    Type type = null;
+    JVariableDeclarator forEachVariable = null;
+    Type forEachCollection = null;
+    JExpression expr = null;
+    JStatement statement = null;
+    JStatement body = null;
+}
+{
+
+try{
+    LOOKAHEAD(<IDENTIFIER>  <IDENTIFIER> <COLON> )
+
+        //if it is for-each
+        type = type()
+        forEachVariable = variableDeclarator(type)
+        <COLON>
+        forEachCollection = type()
+        <RPAREN>
+        body = statement()
+        { statement = new JForEachStatement(line, new JFormalParameter(forEachVariable), forEachCollection, body); return statement;} |
+
+        // if it is for-i
+        LOOKAHEAD( <IDENTIFIER> )
+        variableDeclaration = forDeclarationVariable(line)
+        initStatements = forInits()
+        <SEMI>
+        expr = expression()
+        <SEMI>
+        updateStatements = forUpdates()
+        <RPAREN>
+        body = statement()
+        { statement = new JForStatement(line,variableDeclaration, initStatements, expr, updateStatements, body); return statement; }
+
+    } catch( ParseException e ) {
+        recoverFromError( new int[] { SEMI, EOF }, e );
+    }
+}
+
+private JVariableDeclaration forDeclarationVariable(int line): {
+    JVariableDeclaration variableDeclaration = null;
+}
+{
+    try{
+        [
+            variableDeclaration = localVariableDeclarationStatement()
+        ]
+    }
+    catch ( ParseException e ) {
+                return new JVariableDeclaration(line, new ArrayList<String>(), new ArrayList<JVariableDeclarator>());
+    }
+    {return variableDeclaration; }
+}
+
+private ArrayList<JStatement> forInits(): {
+    ArrayList<JStatement> initStatements = new ArrayList<JStatement>();
+    JStatement currentInitStatement = null;
+}
+{
+    try{
+        [
+            currentInitStatement = statement()
+            { initStatements.add(currentInitStatement); }
+            (
+                <COMMA> currentInitStatement = statement()
+                { initStatements.add(currentInitStatement); }
+            )*
+        ]
+    }
+    catch ( ParseException e ) {
+            recoverFromError( new int[] { SEMI, EOF }, e );
+        }
+    { return initStatements; }
+}
+
+private ArrayList<JStatement> forUpdates(): {
+    ArrayList<JStatement> updateStatements = new ArrayList<JStatement>();
+    JStatement currentUpdateStatement = null;
+}
+{
+    try{
+        [
+            currentUpdateStatement = statement()
+            { updateStatements.add(currentUpdateStatement); }
+            (
+                <COMMA> currentUpdateStatement = statement()
+                { updateStatements.add(currentUpdateStatement); }
+            )*
+        ]
+    }
+    catch ( ParseException e ) {
+            recoverFromError( new int[] { SEMI, EOF }, e );
+        }
+    { return updateStatements; }
 }
 
 /**
