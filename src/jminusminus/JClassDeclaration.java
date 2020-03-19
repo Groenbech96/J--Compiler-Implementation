@@ -78,8 +78,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
         // Set class body
         this.classBody = classBody;
-        this.classBody.setClassSuperType(superType);
-
+        if(classBody != null) {
+            this.classBody.setClassSuperType(superType);
+        }
     }
 
     /**
@@ -251,8 +252,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             p.indentLeft();
             p.println("</Modifiers>");
         }
-        classBody.writeToStdOut(p);
-
+        if(classBody != null) {
+            classBody.writeToStdOut(p);
+        }
         p.indentLeft();
         p.println("</JClassDeclaration>");
     }

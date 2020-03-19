@@ -132,6 +132,22 @@ public class JClassBody extends JAST  {
     @Override
     public void writeToStdOut(PrettyPrinter p) {
 
+        if(staticBlocks.size() > 0) {
+            p.println("<ClassBlock>");
+            for (JBlock member : staticBlocks) {
+                ((JAST) member).writeToStdOut(p);
+            }
+            p.println("</ClassBlock>");
+        }
+
+        if(instanceBlocks.size() > 0) {
+            p.println("<ClassBlock>");
+            for (JBlock member : staticBlocks) {
+                ((JAST) member).writeToStdOut(p);
+            }
+            p.println("</ClassBlock>");
+        }
+
         if (members.size() > 0) {
             p.println("<ClassBlock>");
             for (JMember member : members) {
