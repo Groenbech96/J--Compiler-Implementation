@@ -142,19 +142,6 @@ public class JClassBody extends JAST  {
 
     }
 
-
-    public ArrayList<JBlock> getStaticBlocks() {
-        return staticBlocks;
-    }
-
-    public ArrayList<JBlock> getInstanceBlocks() {
-        return instanceBlocks;
-    }
-
-    public ArrayList<JMember> getMembers() {
-        return members;
-    }
-
     /**
      * Generate code for an implicit empty constructor. (Necessary only if there
      * is not already an explicit one.
