@@ -519,7 +519,11 @@ private JInterfaceDeclaration interfaceDeclaration( ArrayList<String> mods ): {
  * 
  * <pre>
  *   classBody ::= LCURLY
- *                   {modifiers memberDecl}
+ *                   {
+                        static block |
+                        block |
+                        modifiers memberDecl
+                     }
  *                 RCURLY
  * </pre>
  * 
@@ -529,14 +533,18 @@ private JInterfaceDeclaration interfaceDeclaration( ArrayList<String> mods ): {
 private ArrayList<JMember> classBody(): {
     ArrayList<String> mods = null;
     JMember aMember = null;
+    JBlock body = null;
     ArrayList<JMember> members = new ArrayList<JMember>();
 }
 {
     try {
         <LCURLY>
-        ( 
+        (
+            <STATIC> body = block() |   // static block
+            body = block() |            // instance block
             mods = modifiers()
             aMember = memberDecl( mods ) { members.add( aMember ); }
+
         )*
         <RCURLY>
     } 
