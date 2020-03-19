@@ -52,20 +52,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      */
     private ClassContext context;
 
-    /**
-     * Whether this class has an explicit constructor.
-     */
-    private boolean hasExplicitConstructor;
 
-    /**
-     * Instance fields of this class.
-     */
-    private ArrayList<JFieldDeclaration> instanceFieldInitializations;
 
-    /**
-     * Static (class) fields of this class.
-     */
-    private ArrayList<JFieldDeclaration> staticFieldInitializations;
 
     /**
      * Construct an AST node for a class declaration given the line number, list
@@ -87,10 +75,11 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         this.name = name;
         this.superType = superType;
         this.interfaces = interfaces;
+
+        // Set class body
         this.classBody = classBody;
-        hasExplicitConstructor = false;
-        instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
-        staticFieldInitializations = new ArrayList<JFieldDeclaration>();
+        this.classBody.setClassSuperType(superType);
+
     }
 
     /**
@@ -131,7 +120,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      */
 
     public ArrayList<JFieldDeclaration> instanceFieldInitializations() {
-        return instanceFieldInitializations;
+        return classBody.instanceFieldInitializations();
     }
 
     /**
@@ -162,8 +151,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         // Construct a class context
         this.context = new ClassContext(this, context);
 
-        // Resolve superclass
+        // Resolve superclass and pass to class body
         superType = superType.resolve(this.context);
+        classBody.setClassSuperType(superType);
 
         // Creating a partial class in memory can result in a
         // java.lang.VerifyError if the semantics below are
@@ -182,20 +172,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
                 : JAST.compilationUnit.packageName() + "/" + name;
         partial.addClass(mods, qualifiedName, superType.jvmName(), null, false);
 
-        // Pre-analyze the members and add them to the partial
-        // class
-        for (JMember member : classBody.getMembers()) {
-            member.preAnalyze(this.context, partial);
-            if (member instanceof JConstructorDeclaration
-                    && ((JConstructorDeclaration) member).params.size() == 0) {
-                hasExplicitConstructor = true;
-            }
-        }
-
-        // Add the implicit empty constructor?
-        if (!hasExplicitConstructor) {
-            codegenPartialImplicitConstructor(partial);
-        }
+        // Pre analyze all members of this class
+        // Finds out if we have an explicit constructor
+        this.classBody.preAnalyzeMembers(this.context, partial);
 
         // Get the Class rep for the (partial) class and make it
         // the
@@ -216,22 +195,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      */
 
     public JAST analyze(Context context) {
-        // Analyze all members
-        for (JMember member : classBody.getMembers()) {
-            ((JAST) member).analyze(this.context);
-        }
 
-        // Copy declared fields for purposes of initialization.
-        for (JMember member : classBody.getMembers()) {
-            if (member instanceof JFieldDeclaration) {
-                JFieldDeclaration fieldDecl = (JFieldDeclaration) member;
-                if (fieldDecl.mods().contains("static")) {
-                    staticFieldInitializations.add(fieldDecl);
-                } else {
-                    instanceFieldInitializations.add(fieldDecl);
-                }
-            }
-        }
+        // Analyze body
+        this.classBody.analyze(context);
 
         // Finally, ensure that a non-abstract class has
         // no abstract methods.
@@ -261,20 +227,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
                 : JAST.compilationUnit.packageName() + "/" + name;
         output.addClass(mods, qualifiedName, superType.jvmName(), null, false);
 
-        // The implicit empty constructor?
-        if (!hasExplicitConstructor) {
-            codegenImplicitConstructor(output);
-        }
+        this.classBody.codegen(output);
 
-        // The members
-        for (JMember member : classBody.getMembers()) {
-            ((JAST) member).codegen(output);
-        }
-
-        // Generate a class initialization method?
-        if (staticFieldInitializations.size() > 0) {
-            codegenClassInit(output);
-        }
     }
 
     /**
@@ -297,87 +251,14 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             p.indentLeft();
             p.println("</Modifiers>");
         }
-        if (classBody.getMembers() != null) {
-            p.println("<ClassBlock>");
-            for (JMember member : classBody.getMembers()) {
-                ((JAST) member).writeToStdOut(p);
-            }
-            p.println("</ClassBlock>");
-        }
+        classBody.writeToStdOut(p);
+
         p.indentLeft();
         p.println("</JClassDeclaration>");
     }
 
-    /**
-     * Generate code for an implicit empty constructor. (Necessary only if there
-     * is not already an explicit one.)
-     *
-     * @param partial the code emitter (basically an abstraction for producing a
-     *                Java class).
-     */
 
-    private void codegenPartialImplicitConstructor(CLEmitter partial) {
-        // Invoke super constructor
-        ArrayList<String> mods = new ArrayList<String>();
-        mods.add("public");
-        partial.addMethod(mods, "<init>", "()V", null, false);
-        partial.addNoArgInstruction(ALOAD_0);
-        partial.addMemberAccessInstruction(INVOKESPECIAL, superType.jvmName(),
-                "<init>", "()V");
 
-        // Return
-        partial.addNoArgInstruction(RETURN);
-    }
 
-    /**
-     * Generate code for an implicit empty constructor. (Necessary only if there
-     * is not already an explicit one.
-     *
-     * @param output the code emitter (basically an abstraction for producing the
-     *               .class file).
-     */
-
-    private void codegenImplicitConstructor(CLEmitter output) {
-        // Invoke super constructor
-        ArrayList<String> mods = new ArrayList<String>();
-        mods.add("public");
-        output.addMethod(mods, "<init>", "()V", null, false);
-        output.addNoArgInstruction(ALOAD_0);
-        output.addMemberAccessInstruction(INVOKESPECIAL, superType.jvmName(),
-                "<init>", "()V");
-
-        // If there are instance field initializations, generate
-        // code for them
-        for (JFieldDeclaration instanceField : instanceFieldInitializations) {
-            instanceField.codegenInitializations(output);
-        }
-
-        // Return
-        output.addNoArgInstruction(RETURN);
-    }
-
-    /**
-     * Generate code for class initialization, in j-- this means static field
-     * initializations.
-     *
-     * @param output the code emitter (basically an abstraction for producing the
-     *               .class file).
-     */
-
-    private void codegenClassInit(CLEmitter output) {
-        ArrayList<String> mods = new ArrayList<String>();
-        mods.add("public");
-        mods.add("static");
-        output.addMethod(mods, "<clinit>", "()V", null, false);
-
-        // If there are instance initializations, generate code
-        // for them
-        for (JFieldDeclaration staticField : staticFieldInitializations) {
-            staticField.codegenInitializations(output);
-        }
-
-        // Return
-        output.addNoArgInstruction(RETURN);
-    }
 
 }

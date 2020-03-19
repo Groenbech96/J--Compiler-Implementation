@@ -462,7 +462,7 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
         [ 
             <EXTENDS> superClass = qualifiedIdentifier() 
         ]
-        classBody = classBody()           
+        classBody = classBody(line)
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
@@ -530,7 +530,7 @@ private JInterfaceDeclaration interfaceDeclaration( ArrayList<String> mods ): {
  * @return list of members in the class body.
  */
 
-private JClassBody classBody(): {
+private JClassBody classBody(int line): {
     ArrayList<String> mods = null;
     JMember aMember = null;
     JBlock body = null;
@@ -552,7 +552,7 @@ private JClassBody classBody(): {
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
-    { return new JClassBody(staticBLocks, instanceBlocks, members); }
+    { return new JClassBody(line, staticBLocks, instanceBlocks, members); }
 }
 
 /**
