@@ -3,7 +3,7 @@ package pass;
 class SomeClass{
 
 }
-interface SomeInterface{
+interface SomeInterface {
 
 }
 class SomeException extends Exception{
