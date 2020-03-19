@@ -681,7 +681,7 @@ private JMember interfaceMemberDecl( ArrayList<String>  mods ) : {
 }
 {
     try {
-        LOOKAHEAD( ( <VOID> | type() ) <IDENTIFIER> <LPAREN> )
+        LOOKAHEAD( ( <VOID> | <IDENTIFIER> ) <IDENTIFIER> <LPAREN> )
         (
             <VOID> { type = Type.VOID; } |
             type = type()
@@ -1168,15 +1168,15 @@ private Type referenceType(): {
 {
     try {
         type = basicType()
-        <LBRACK> <RBRACK> { type = new ArrayTypeName( type ); }
+        <LBRACK> <RBRACK> { type = new ArrayTypeName(); }
         ( 
             <LBRACK> <RBRACK> 
-            { type = new ArrayTypeName( type ); } 
+            { type = new ArrayTypeName(); }
         )* |
         type = qualifiedIdentifier()
         ( 
             <LBRACK> <RBRACK> 
-            { type = new ArrayTypeName( type ); } 
+            { type = new ArrayTypeName(); }
         )*
     } 
     catch ( ParseException e ) { 
