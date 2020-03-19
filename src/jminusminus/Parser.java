@@ -165,10 +165,10 @@ public class Parser {
 
     private boolean seeForEachLoop() {
         scanner.recordPosition();
-        if(seeBasicType() || seeReferenceType()) {
+        if (seeBasicType() || seeReferenceType()) {
             type();
-            if(have(IDENTIFIER)) {
-                if(see(COLON)) {
+            if (have(IDENTIFIER)) {
+                if (see(COLON)) {
                     scanner.returnToPosition();
                     return true;
                 }
@@ -664,7 +664,7 @@ public class Parser {
             String name = scanner.previousToken().image();
             ArrayList<JFormalParameter> params = formalParameters();
             ArrayList<Type> exceptions = null;
-            if(see(THROWS)) {
+            if (see(THROWS)) {
                 exceptions = parseThrows();
             }
             JBlock body = block();
@@ -679,12 +679,11 @@ public class Parser {
                 String name = scanner.previousToken().image();
                 ArrayList<JFormalParameter> params = formalParameters();
                 ArrayList<Type> exceptions = null;
-                if(see(THROWS)) {
+                if (see(THROWS)) {
                     exceptions = parseThrows();
                 }
                 JBlock body = have(SEMI) ? null : block();
-                memberDecl = new JMethodDeclaration(line, mods, name, type,
-                        params, exceptions, body);
+                memberDecl = new JMethodDeclaration(line, mods, name, type, params, exceptions, body);
             } else {
                 type = type();
                 if (seeIdentLParen()) {
@@ -693,12 +692,11 @@ public class Parser {
                     String name = scanner.previousToken().image();
                     ArrayList<JFormalParameter> params = formalParameters();
                     ArrayList<Type> exceptions = null;
-                    if(see(THROWS)) {
+                    if (see(THROWS)) {
                         exceptions = parseThrows();
                     }
                     JBlock body = have(SEMI) ? null : block();
-                    memberDecl = new JMethodDeclaration(line, mods, name, type,
-                            params, exceptions, body);
+                    memberDecl = new JMethodDeclaration(line, mods, name, type, params, exceptions, body);
                 } else {
                     // Field
                     memberDecl = new JFieldDeclaration(line, mods,
@@ -793,7 +791,7 @@ public class Parser {
             mustBe(LPAREN);
 
             // Try to parse the for loop as a for-each
-            if(seeForEachLoop()) {
+            if (seeForEachLoop()) {
                 JFormalParameter parameter = formalParameter();
                 mustBe(COLON);
                 Type array = type();
@@ -806,26 +804,25 @@ public class Parser {
             // it can either be variable declarations statement expressions
             JVariableDeclaration initVariableDecls = new JVariableDeclaration(line, new ArrayList<>(), new ArrayList<>());
             ArrayList<JStatement> initStatements = new ArrayList<>();
-            if(!have(SEMI)) {
-                if(seeLocalVariableDeclaration()) {
+            if (!have(SEMI)) {
+                if (seeLocalVariableDeclaration()) {
                     ArrayList<String> mods = new ArrayList<>();
                     ArrayList<JVariableDeclarator> declarators = variableDeclarators(type());
                     initVariableDecls = new JVariableDeclaration(line, mods, declarators);
-                }
-                else {
+                } else {
                     initStatements = parseStatements();
                 }
                 mustBe(SEMI);
             }
 
             JExpression condition = null;
-            if(!have(SEMI)) {
+            if (!have(SEMI)) {
                 condition = expression();
                 mustBe(SEMI);
             }
 
             ArrayList<JStatement> updateStatements = new ArrayList<>();
-            if(!have(RPAREN)) {
+            if (!have(RPAREN)) {
                 updateStatements = parseStatements();
                 mustBe(RPAREN);
             }
@@ -1190,7 +1187,23 @@ public class Parser {
      */
 
     private JExpression expression() {
-        return assignmentExpression();
+        return ternaryExpression();
+    }
+
+    private JExpression ternaryExpression() {
+        int line = scanner.token().line();
+        JExpression condition = assignmentExpression();
+        if (have(QUESTION_MARK)) {
+            JExpression ifTrue = assignmentExpression();
+            if (have(COLON)) {
+                JExpression ifFalse = assignmentExpression();
+                return new JTernaryExpression(line, condition, ifTrue, ifFalse);
+            } else {
+                reportParserError(": sought where %s found", scanner.token().image());
+            }
+        }
+
+        return condition;
     }
 
     /**
