@@ -147,11 +147,24 @@ TOKEN:
 {
   < ABSTRACT: "abstract" >
 | < BOOLEAN: "boolean" >
+| <BREAK: "break" >
+| <BYTE: "byte" >
+| <CASE: "case" >
+| <CATCH: "catch" >
 | < CHAR: "char" >
 | < CLASS: "class" >
+| <CONST: "const" >
+| <CONTINUE: "continue" >
+| <DEFAULTT: "default" >
+| <DO: "do" >
 | < ELSE: "else" >
 | < EXTENDS: "extends" >
 | < FALSE: "false" >
+| <FINAL: "final" >
+| <FINALLY: "finally" >
+| <FLOAT: "float" >
+| <FOR: "for" >
+| <GOTO: "goto" >
 | < IF: "if" >
 | < IMPLEMENTS: "implements" >
 | < IMPORT: "import" >
@@ -159,6 +172,8 @@ TOKEN:
 | < INSTANCEOF: "instanceof" >
 | < DOUBLE: "double" >
 | < INT: "int" >
+| <LONG: "long" >
+| <NATIVE: "native" >
 | < NEW: "new" >
 | < NULL: "null" >
 | < PACKAGE: "package">
@@ -166,29 +181,50 @@ TOKEN:
 | < PROTECTED: "protected" >
 | < PUBLIC: "public" >
 | < RETURN: "return" >
+| <SHORT: "short" >
 | < STATIC: "static" >
+| <STRICTFP: "strictfp" >
 | < SUPER: "super" >
+| <SWITCH: "switch" >
+| <SYNCHRONIZED: "synchronized" >
 | < THIS: "this" >
+| < THROW: "throw" >
+| < THROWS: "throws" >
+| < TRANSIENT: "transient" >
 | < TRUE: "true" >
+| < TRY: "try" >
 | < VOID: "void" >
+| < VOLATILE: "volatile" >
 | < WHILE: "while" >
 }
 
 // Operators (these could be combined with the reserved words)
 TOKEN:
 {
-  < PLUS: "+" >
+ < BITWISE_AND : "&">
+| < BITWISE_OR: "|">
+| < BITWISE_XOR : "^">
+| < BITWISE_NOT: "~">
+| < PLUS: "+" >
 | < ASSIGN: "=" >
 | < DEC: "--" >
 | < EQUAL: "==" >
 | < GT: ">" >
+| < LT: "<" >
 | < INC: "++" >
 | < LAND: "&&" >
+| < LOR: "||" >
 | < LE: "<=" >
+| < GE: ">=" >
 | < LNOT: "!" >
 | < MINUS: "-" >
 | < PLUS_ASSIGN: "+=" >
+| < DIVIDE: "/">
+| < REMAINDER: "%">
 | < STAR: "*" >
+| < LSHIFT: "<<" >
+| < RSHIFT: ">>" >
+| < RSHIFT_ZERO: ">>>" >
 }
 
 // Separators (these could be combined with the reserved words)
@@ -452,7 +488,7 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
     int line = 0;
     String name = "";
     Type superClass = Type.OBJECT;
-    ArrayList<JMember> classBody = null;
+    JClassBody classBody = null;
     ArrayList<Type> interfaces = null;
 }
 {
@@ -462,7 +498,7 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
         [ 
             <EXTENDS> superClass = qualifiedIdentifier() 
         ]
-        classBody = classBody()           
+        classBody = classBody(line)
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
@@ -519,23 +555,32 @@ private JInterfaceDeclaration interfaceDeclaration( ArrayList<String> mods ): {
  * 
  * <pre>
  *   classBody ::= LCURLY
- *                   {modifiers memberDecl}
+ *                   {
+                        static block |
+                        block |
+                        modifiers memberDecl
+                     }
  *                 RCURLY
  * </pre>
  * 
  * @return list of members in the class body.
  */
 
-private ArrayList<JMember> classBody(): {
+private JClassBody classBody(int line): {
     ArrayList<String> mods = null;
     JMember aMember = null;
+    JBlock body = null;
+    ArrayList<JBlock> staticBLocks = new ArrayList<JBlock>();
+    ArrayList<JBlock> instanceBlocks = new ArrayList<JBlock>();
     ArrayList<JMember> members = new ArrayList<JMember>();
 }
 {
     try {
         <LCURLY>
-        ( 
-            mods = modifiers()
+        (
+            <STATIC> body = block() { staticBLocks.add(body); } |    // static block
+            body = block() { instanceBlocks.add(body); } |           // instance block
+            mods = modifiers()                                       // modifiers memberDecl
             aMember = memberDecl( mods ) { members.add( aMember ); }
         )*
         <RCURLY>
@@ -543,7 +588,7 @@ private ArrayList<JMember> classBody(): {
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
-    { return members; }
+    { return new JClassBody(line, staticBLocks, instanceBlocks, members); }
 }
 
 /**

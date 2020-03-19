@@ -57,5 +57,7 @@ src/jminusminus/Token.java
 
 src/jminusminus/TokenMgrError.java
 
+lib/spim.jar
+
 classes/production/j--/spim.jar
 *.kotlin_module
