@@ -29,7 +29,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     /**
      * Class block.
      */
-    private ArrayList<JMember> classBlock;
+    // private ArrayList<JMember> classBlock;
+    private JClassBody classBody;
 
     /**
      * Super class type.
@@ -76,17 +77,17 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      * @param name       class name.
      * @param superType  super class type.
      * @param interfaces interfaces of the class
-     * @param classBlock class block.
+     * @param classBody class body.
      */
 
     public JClassDeclaration(int line, ArrayList<String> mods, String name,
-                             Type superType, ArrayList<Type> interfaces, ArrayList<JMember> classBlock) {
+                             Type superType, ArrayList<Type> interfaces, JClassBody classBody) {
         super(line);
         this.mods = mods;
         this.name = name;
         this.superType = superType;
         this.interfaces = interfaces;
-        this.classBlock = classBlock;
+        this.classBody = classBody;
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
         staticFieldInitializations = new ArrayList<JFieldDeclaration>();
@@ -183,7 +184,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
         // Pre-analyze the members and add them to the partial
         // class
-        for (JMember member : classBlock) {
+        for (JMember member : classBody.getMembers()) {
             member.preAnalyze(this.context, partial);
             if (member instanceof JConstructorDeclaration
                     && ((JConstructorDeclaration) member).params.size() == 0) {
@@ -216,12 +217,12 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
     public JAST analyze(Context context) {
         // Analyze all members
-        for (JMember member : classBlock) {
+        for (JMember member : classBody.getMembers()) {
             ((JAST) member).analyze(this.context);
         }
 
         // Copy declared fields for purposes of initialization.
-        for (JMember member : classBlock) {
+        for (JMember member : classBody.getMembers()) {
             if (member instanceof JFieldDeclaration) {
                 JFieldDeclaration fieldDecl = (JFieldDeclaration) member;
                 if (fieldDecl.mods().contains("static")) {
@@ -266,7 +267,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         }
 
         // The members
-        for (JMember member : classBlock) {
+        for (JMember member : classBody.getMembers()) {
             ((JAST) member).codegen(output);
         }
 
@@ -296,9 +297,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             p.indentLeft();
             p.println("</Modifiers>");
         }
-        if (classBlock != null) {
+        if (classBody.getMembers() != null) {
             p.println("<ClassBlock>");
-            for (JMember member : classBlock) {
+            for (JMember member : classBody.getMembers()) {
                 ((JAST) member).writeToStdOut(p);
             }
             p.println("</ClassBlock>");
