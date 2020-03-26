@@ -37,8 +37,8 @@ out/production/j--/spim/SPIM.s
 
 out/production/j--/jminusminus/j--.jj
 
+.idea/misc.xml
 lib/j--.jar
-
 lib/spim.jar
 
 classes
@@ -57,7 +57,7 @@ src/jminusminus/Token.java
 
 src/jminusminus/TokenMgrError.java
 
-lib/spim.jar
+
 
 classes/production/j--/spim.jar
 *.kotlin_module
