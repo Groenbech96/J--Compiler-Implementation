@@ -742,7 +742,7 @@ private JMember interfaceMemberDecl( ArrayList<String>  mods ) : {
 }
 {
     try {
-        LOOKAHEAD( ( <VOID> | <IDENTIFIER> ) <IDENTIFIER> <LPAREN> )
+        LOOKAHEAD( ( <VOID> | type() ) <IDENTIFIER> <LPAREN> )
         (
             <VOID> { type = Type.VOID; } |
             type = type()
