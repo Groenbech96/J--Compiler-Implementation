@@ -147,33 +147,16 @@ TOKEN:
 {
   < ABSTRACT: "abstract" >
 | < BOOLEAN: "boolean" >
-| <BREAK: "break" >
-| <BYTE: "byte" >
-| <CASE: "case" >
-| <CATCH: "catch" >
 | < CHAR: "char" >
 | < CLASS: "class" >
-| <CONST: "const" >
-| <CONTINUE: "continue" >
-| <DEFAULTT: "default" >
-| <DO: "do" >
-| < DOUBLE: "double" >
 | < ELSE: "else" >
 | < EXTENDS: "extends" >
 | < FALSE: "false" >
-| <FINAL: "final" >
-| <FINALLY: "finally" >
-| <FLOAT: "float" >
-| <FOR: "for" >
-| <GOTO: "goto" >
 | < IF: "if" >
-| < IMPLEMENTS: "implements" >
 | < IMPORT: "import" >
-| < INTERFACE: "interface" >
 | < INSTANCEOF: "instanceof" >
+| < DOUBLE: "double" >
 | < INT: "int" >
-| <LONG: "long" >
-| <NATIVE: "native" >
 | < NEW: "new" >
 | < NULL: "null" >
 | < PACKAGE: "package">
@@ -181,50 +164,29 @@ TOKEN:
 | < PROTECTED: "protected" >
 | < PUBLIC: "public" >
 | < RETURN: "return" >
-| <SHORT: "short" >
 | < STATIC: "static" >
-| <STRICTFP: "strictfp" >
 | < SUPER: "super" >
-| <SWITCH: "switch" >
-| <SYNCHRONIZED: "synchronized" >
 | < THIS: "this" >
-| < THROW: "throw" >
-| < THROWS: "throws" >
-| < TRANSIENT: "transient" >
 | < TRUE: "true" >
-| < TRY: "try" >
 | < VOID: "void" >
-| < VOLATILE: "volatile" >
 | < WHILE: "while" >
 }
 
 // Operators (these could be combined with the reserved words)
 TOKEN:
 {
- < BITWISE_AND : "&">
-| < BITWISE_OR: "|">
-| < BITWISE_XOR : "^">
-| < BITWISE_NOT: "~">
-| < PLUS: "+" >
+  < PLUS: "+" >
 | < ASSIGN: "=" >
 | < DEC: "--" >
 | < EQUAL: "==" >
 | < GT: ">" >
-| < LT: "<" >
 | < INC: "++" >
 | < LAND: "&&" >
-| < LOR: "||" >
 | < LE: "<=" >
-| < GE: ">=" >
 | < LNOT: "!" >
 | < MINUS: "-" >
 | < PLUS_ASSIGN: "+=" >
-| < DIVIDE: "/">
-| < REMAINDER: "%">
 | < STAR: "*" >
-| < LSHIFT: "<<" >
-| < RSHIFT: ">>" >
-| < RSHIFT_ZERO: ">>>" >
 }
 
 // Separators (these could be combined with the reserved words)
@@ -488,8 +450,8 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
     int line = 0;
     String name = "";
     Type superClass = Type.OBJECT;
-    JClassBody classBody = null;
     ArrayList<Type> interfaces = null;
+    ArrayList<JMember> classBody = null;
 }
 {
     try {
@@ -498,7 +460,7 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
         [ 
             <EXTENDS> superClass = qualifiedIdentifier() 
         ]
-        classBody = classBody(line)
+        classBody = classBody()           
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
@@ -510,121 +472,35 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
 }
 
 /**
-* Parse a interface delcaration
-*
-* <pre>
-*    interfaceDeclaration ::= INTERFACE IDENTIFIER
-*                            [EXTENDS qualifiedIdentifier {COMMA qualifiedIdentifier}]
-*                            interfaceBody
-* </pre>
-*
-*/
-
-private JInterfaceDeclaration interfaceDeclaration( ArrayList<String> mods ): {
-    int line = 0;
-    String name = "";
-    Type aType = null;
-    ArrayList<JMember> interfaceBody = null;
-    ArrayList<Type> superInterfaces = null;
-}
-{
-    try {
-        <INTERFACE> { line = token.beginLine; }
-        <IDENTIFIER> { name = token.image; }
-        [
-            <EXTENDS> aType = type()
-                      { superInterfaces.add( aType ); }
-                      (
-                          <COMMA> aType = type()
-                          { superInterfaces.add( aType ); }
-                      )*
-        ]
-        interfaceBody = interfaceBody()
-    } catch (ParseException e) {
-        recoverFromError( new int[] { SEMI, EOF }, e );
-    }
-    {
-        return new JInterfaceDeclaration(line, mods, name, superInterfaces, interfaceBody);
-    }
-
-}
-
-
-/**
  * Parse a class body.
  * 
  * <pre>
  *   classBody ::= LCURLY
- *                   {
-                        static block |
-                        block |
-                        modifiers memberDecl
-                     }
+ *                   {modifiers memberDecl}
  *                 RCURLY
  * </pre>
  * 
  * @return list of members in the class body.
  */
 
-private JClassBody classBody(int line): {
+private ArrayList<JMember> classBody(): {
     ArrayList<String> mods = null;
     JMember aMember = null;
-    JBlock body = null;
-    ArrayList<JBlock> staticBLocks = new ArrayList<JBlock>();
-    ArrayList<JBlock> instanceBlocks = new ArrayList<JBlock>();
     ArrayList<JMember> members = new ArrayList<JMember>();
 }
 {
     try {
         <LCURLY>
-        (
-            <STATIC> body = block() { staticBLocks.add(body); } |    // static block
-            body = block() { instanceBlocks.add(body); } |           // instance block
-            mods = modifiers()                                       // modifiers memberDecl
-            aMember = memberDecl( mods ) { members.add( aMember ); }
+        ( 
+            mods = modifiers()
+            aMember = memberDecl( mods ) { members.add( aMember ); } 
         )*
         <RCURLY>
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
-    { return new JClassBody(line, staticBLocks, instanceBlocks, members); }
-}
-
-/**
-* Parse interface body
-* interfaceBody ::= LCURLY
-                        { modifiers interfaceMemberDecl }
-                    RCURLY
-
-*
-*
-*
-*/
-
-private ArrayList<JMember> interfaceBody(): {
-    ArrayList<String> mods = null;
-    JMember aMember = null;
-    ArrayList<JMember> members = new ArrayList<JMember>();
-}{
-    try {
-        <LCURLY>
-        (
-            mods = modifiers()
-            aMember = interfaceMemberDecl( mods ) { members.add( aMember ); }
-        )*
-        <RCURLY>
-
-    }
-    catch (ParseException e) {
-        recoverFromError( new int[] { SEMI, EOF }, e );
-    }
-    {
-        return members;
-    }
-
-
-
+    { return members; }
 }
 
 /**
@@ -651,7 +527,6 @@ private JMember memberDecl( ArrayList<String>  mods ): {
     ArrayList<JFormalParameter> params = null;
     JBlock body = null;
     ArrayList<JVariableDeclarator> variableDeclarators = null;
-    ArrayList<Type> exceptions = null;
     JMember memberDecl = null;
 }
 {
@@ -663,19 +538,11 @@ private JMember memberDecl( ArrayList<String>  mods ): {
             name = token.image;
         }
         params = formalParameters()
-        [
-            <THROWS>
-            { exceptions = new ArrayList<Type>(); exceptions.add( qualifiedIdentifier() ); }
-            (
-                <COMMA>
-                { exceptions.add( qualifiedIdentifier() ); }
-            )*
-        ]
         body = block()
         {
             memberDecl =
             new JConstructorDeclaration( line, mods,
-                                         name, params, exceptions, body );
+                                         name, params, body );
         } |
         LOOKAHEAD( ( <VOID> | type() ) <IDENTIFIER> <LPAREN> )
         (
@@ -685,14 +552,6 @@ private JMember memberDecl( ArrayList<String>  mods ): {
         { line = token.beginLine; }
         <IDENTIFIER> { name = token.image; }
         params = formalParameters()
-        [
-            <THROWS>
-            { exceptions = new ArrayList<Type>(); exceptions.add( qualifiedIdentifier() ); }
-            (
-                <COMMA>
-                { exceptions.add( qualifiedIdentifier() ); }
-            )*
-        ]
         (
             body = block() |
             <SEMI>
@@ -700,7 +559,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
         {
             memberDecl =
                new JMethodDeclaration( line, mods, name,
-                                       type, params, exceptions, body );
+                                       type, params, body );
         } |
         ( 
             type = type() { line = token.beginLine; }
@@ -717,53 +576,6 @@ private JMember memberDecl( ArrayList<String>  mods ): {
     }
     { return memberDecl; }
 }
-
-/**
-* parse interface member declaration
-*
-* <pre>
-*   interfaceMemberDecl ::= classDeclaration
-*                         | interfaceDeclaration
-*                         | (void | type) <identifier>
-*                              formalParameters { [] }
-*                                   [throws qualifiedIdentifier {, qualifiedIdentifier}] (block | ;)
-*                         | type variableDeclarators;
-*
-*
-*/
-
-private JMember interfaceMemberDecl( ArrayList<String>  mods ) : {
-    int line = 0;
-    Type type = null;
-    String name = "";
-    ArrayList<JFormalParameter> params = null;
-    ArrayList<Type> exceptions = null;
-    JMember interfaceMemberDecl = null;
-}
-{
-    try {
-        LOOKAHEAD( ( <VOID> | <IDENTIFIER> ) <IDENTIFIER> <LPAREN> )
-        (
-            <VOID> { type = Type.VOID; } |
-            type = type()
-        )
-        { line = token.beginLine; }
-        <IDENTIFIER> { name = token.image; }
-        params = formalParameters()
-        {
-            interfaceMemberDecl =
-               new JMethodDeclaration( line, mods, name,
-                                       type, params, exceptions, null );
-        }
-    } catch (ParseException e) {
-        recoverFromError( new int[] { SEMI, EOF }, e );
-    }
-    {return interfaceMemberDecl;}
-
-}
-
-
-
 
 /**
  * Parse a block.
@@ -844,11 +656,6 @@ private JStatement statement(): {
     JStatement alternate = null;
     JStatement body = null;
     JExpression expr = null;
-    JBlock tryBlock = null;
-    ArrayList<JBlock> catchBlocks = null;
-    ArrayList<ArrayList<JFormalParameter>> catchParameters = null;
-    JBlock finallyBlock = null;
-
 }
 {       
     try {
@@ -879,26 +686,10 @@ private JStatement statement(): {
         { statement = new JReturnStatement( line, expr ); } |
         <SEMI> 
         { statement = new JEmptyStatement( line ); } |
-        <TRY>
-        tryBlock = block()
-        { catchParameters = new ArrayList<ArrayList<JFormalParameter>>(); catchBlocks = new ArrayList<JBlock>(); }
-        (
-            <CATCH>
-            { catchParameters.add ( formalParameters() );   catchBlocks.add( block() ); }
-        )*
-        [
-            <FINALLY>
-            finallyBlock = block()
-        ]
-        { statement = new JExceptionStatement(line, tryBlock, catchBlocks, catchParameters, finallyBlock); } |
-        <THROW>
-        expr = expression()
-        <SEMI>
-        { statement = new JThrowStatement(line, expr); } |
         // Must be a statementExpression
-        statement = statementExpression()
+        statement = statementExpression() 
         <SEMI>
-    }
+    } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
@@ -1225,8 +1016,7 @@ private Type basicType(): {
     try {
         <BOOLEAN> { type = Type.BOOLEAN; } |
         <CHAR> { type = Type.CHAR; } |
-        <INT> { type = Type.INT; } |
-        <DOUBLE> { type = Type.DOUBLE; }
+        <INT> { type = Type.INT; }
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
@@ -1251,15 +1041,15 @@ private Type referenceType(): {
 {
     try {
         type = basicType()
-        <LBRACK> <RBRACK> { type = new ArrayTypeName(type); }
+        <LBRACK> <RBRACK> { type = new ArrayTypeName( type ); }
         ( 
             <LBRACK> <RBRACK> 
-            { type = new ArrayTypeName(type); }
+            { type = new ArrayTypeName( type ); } 
         )* |
         type = qualifiedIdentifier()
         ( 
             <LBRACK> <RBRACK> 
-            { type = new ArrayTypeName(type); }
+            { type = new ArrayTypeName( type ); } 
         )*
     } 
     catch ( ParseException e ) { 
@@ -1268,7 +1058,8 @@ private Type referenceType(): {
     { return type; }       
 }
 
-/*private JStatement ternaryExpression(): {
+/*
+private JStatement ternaryExpression(): {
     int line = 0;
     JExpression condition = null, ifTrue = null, ifFalse = null;
 }
@@ -1283,7 +1074,8 @@ private Type referenceType(): {
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
     { return new TernaryExpression(line, condition, ifTrue, ifFalse); }
-}*/
+}
+*/
 
 /**
  * Parse a statement expression. 
@@ -1343,8 +1135,7 @@ private JExpression expression(): {
 }
 {
     try {
-        expr = assignmentExpression()
-        //(expr = assignmentExpression() | expr = ternaryExpression())
+        (expr = assignmentExpression())
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
@@ -1891,9 +1682,7 @@ private JExpression literal(): {
 {       
     try {
         <INT_LITERAL> 
-        { expr = new JLiteralInt( token.beginLine, token.image ); } |
-        <DOUBLE_LITERAL>
-        { expr = new JLiteralDouble( token.beginLine, token.image ); } |
+        { expr = new JLiteralInt( token.beginLine, token.image ); } | 
         <CHAR_LITERAL> 
         { expr = new JLiteralChar( token.beginLine, token.image ); } |
         <STRING_LITERAL> 
