@@ -649,9 +649,9 @@ private JMember memberDecl( ArrayList<String>  mods ): {
     Type type = null;
     String name = "";
     ArrayList<JFormalParameter> params = null;
-    ArrayList<Type> exceptions = null;
     JBlock body = null;
     ArrayList<JVariableDeclarator> variableDeclarators = null;
+    ArrayList<Type> exceptions = null;
     JMember memberDecl = null;
 }
 {
@@ -663,6 +663,14 @@ private JMember memberDecl( ArrayList<String>  mods ): {
             name = token.image;
         }
         params = formalParameters()
+        [
+            <THROWS>
+            { exceptions = new ArrayList<Type>(); exceptions.add( qualifiedIdentifier() ); }
+            (
+                <COMMA>
+                { exceptions.add( qualifiedIdentifier() ); }
+            )*
+        ]
         body = block()
         {
             memberDecl =
@@ -677,6 +685,14 @@ private JMember memberDecl( ArrayList<String>  mods ): {
         { line = token.beginLine; }
         <IDENTIFIER> { name = token.image; }
         params = formalParameters()
+        [
+            <THROWS>
+            { exceptions = new ArrayList<Type>(); exceptions.add( qualifiedIdentifier() ); }
+            (
+                <COMMA>
+                { exceptions.add( qualifiedIdentifier() ); }
+            )*
+        ]
         (
             body = block() |
             <SEMI>
@@ -828,6 +844,11 @@ private JStatement statement(): {
     JStatement alternate = null;
     JStatement body = null;
     JExpression expr = null;
+    JBlock tryBlock = null;
+    ArrayList<JBlock> catchBlocks = null;
+    ArrayList<ArrayList<JFormalParameter>> catchParameters = null;
+    JBlock finallyBlock = null;
+
 }
 {       
     try {
@@ -858,10 +879,26 @@ private JStatement statement(): {
         { statement = new JReturnStatement( line, expr ); } |
         <SEMI> 
         { statement = new JEmptyStatement( line ); } |
-        // Must be a statementExpression
-        statement = statementExpression() 
+        <TRY>
+        tryBlock = block()
+        { catchParameters = new ArrayList<ArrayList<JFormalParameter>>(); catchBlocks = new ArrayList<JBlock>(); }
+        (
+            <CATCH>
+            { catchParameters.add ( formalParameters() );   catchBlocks.add( block() ); }
+        )*
+        [
+            <FINALLY>
+            finallyBlock = block()
+        ]
+        { statement = new JExceptionStatement(line, tryBlock, catchBlocks, catchParameters, finallyBlock); } |
+        <THROW>
+        expr = expression()
         <SEMI>
-    } 
+        { statement = new JThrowStatement(line, expr); } |
+        // Must be a statementExpression
+        statement = statementExpression()
+        <SEMI>
+    }
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
