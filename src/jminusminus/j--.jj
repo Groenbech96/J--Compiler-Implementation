@@ -1468,8 +1468,8 @@ private JStatement statementExpression(): {
                 expr.isStatementExpression = true;
             }
             else {
-                reportParserError( " \"%s\" Invalid statement expression; " +
-                    "it does not have a side-effect", expr.getClass().getName() );
+                reportParserError( "Invalid statement expression; " +
+                    "it does not have a side-effect" );
             }
         }
     }
