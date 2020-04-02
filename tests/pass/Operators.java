@@ -5,6 +5,7 @@ public class Operators {
         int a = 5;
         int b = 5;
 
+        // Tests parsing for all operators
         a = !(a == b) ? a : b;
         a = ~a;
         a = (a != b) ? a : b;

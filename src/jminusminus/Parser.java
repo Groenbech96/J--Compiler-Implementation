@@ -1173,7 +1173,8 @@ public class Parser {
                 || expr instanceof JPostDecrementOp
                 || expr instanceof JMessageExpression
                 || expr instanceof JSuperConstruction
-                || expr instanceof JThisConstruction || expr instanceof JNewOp
+                || expr instanceof JThisConstruction
+                || expr instanceof JNewOp
                 || expr instanceof JNewArrayOp) {
             // So as not to save on stack
             expr.isStatementExpression = true;
@@ -1403,7 +1404,7 @@ public class Parser {
      *
      * <pre>
      *   equalityExpression ::= relationalExpression  // level 6
-     *                            {EQUAL relationalExpression}
+     *                            {(EQUAL | NEQUAL) relationalExpression}
      * </pre>
      *
      * @return an AST for an equalityExpression.
@@ -1432,7 +1433,7 @@ public class Parser {
      *
      * <pre>
      *   relationalExpression ::= shiftExpression  // level 5
-     *                              [(GT | LE) shiftExpression
+     *                              [(GT | GE | LT | LE) shiftExpression
      *                              | INSTANCEOF referenceType]
      * </pre>
      *
@@ -1492,7 +1493,7 @@ public class Parser {
      *
      * <pre>
      *   additiveExpression ::= multiplicativeExpression // level 3
-     *                            {MINUS multiplicativeExpression}
+     *                            {(PLUS | MINUS) multiplicativeExpression}
      * </pre>
      *
      * @return an AST for an additiveExpression.
@@ -1519,7 +1520,7 @@ public class Parser {
      *
      * <pre>
      *   multiplicativeExpression ::= unaryExpression  // level 2
-     *                                  {STAR unaryExpression}
+     *                                  {(STAR | DIVIDE | REMAINDER) unaryExpression}
      * </pre>
      *
      * @return an AST for a multiplicativeExpression.
@@ -1537,12 +1538,6 @@ public class Parser {
                 lhs = new JDivideOp(line, lhs, unaryExpression());
             } else if (have(REMAINDER)) {
                 lhs = new JRemainderOp(line, lhs, unaryExpression());
-            } else if (have(AND)) {
-                lhs = new JBitwiseAndOp(line, lhs, unaryExpression());
-            } else if (have(OR)) {
-                lhs = new JBitwiseInclusiveOrOp(line, lhs, unaryExpression());
-            } else if (have(XOR)) {
-                lhs = new JBitwiseExclusiveOrOp(line, lhs, unaryExpression());
             } else {
                 more = false;
             }
@@ -1556,8 +1551,10 @@ public class Parser {
      * Parse an unary expression.
      *
      * <pre>
-     *   unaryExpression ::= INC unaryExpression // level 1
+     *   unaryExpression ::= PLUS unaryExpression // level 1
      *                     | MINUS unaryExpression
+     *                     | INC unaryExpression
+     *                     | DEC unaryExpression
      *                     | simpleUnaryExpression
      * </pre>
      *
@@ -1568,14 +1565,12 @@ public class Parser {
         int line = scanner.token().line();
         if (have(PLUS)) {
             return new JPositiveOp(line, unaryExpression());
+        } else if (have(MINUS)) {
+            return new JNegateOp(line, unaryExpression());
         } else if (have(INC)) {
             return new JPreIncrementOp(line, unaryExpression());
         } else if (have(DEC)) {
             return new JPreDecrementOp(line, unaryExpression());
-        } else if (have(MINUS)) {
-            return new JNegateOp(line, unaryExpression());
-        } else if (have(BITWISE_COMPLEMENT)) {
-            return new JBitwiseNotOp(line, unaryExpression());
         } else {
             return simpleUnaryExpression();
         }
@@ -1586,6 +1581,7 @@ public class Parser {
      *
      * <pre>
      *   simpleUnaryExpression ::= LNOT unaryExpression
+     *                           | BITWISE_COMPLEMENT unaryExpression
      *                           | LPAREN basicType RPAREN
      *                               unaryExpression
      *                           | LPAREN
@@ -1601,6 +1597,8 @@ public class Parser {
         int line = scanner.token().line();
         if (have(LNOT)) {
             return new JLogicalNotOp(line, unaryExpression());
+        } else if (have(BITWISE_COMPLEMENT)) {
+            return new JBitwiseNotOp(line, unaryExpression());
         } else if (seeCast()) {
             mustBe(LPAREN);
             boolean isBasicType = seeBasicType();
