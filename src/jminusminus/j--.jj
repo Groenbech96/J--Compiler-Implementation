@@ -380,7 +380,7 @@ private TypeName qualifiedIdentifier(): {
  * Parse a type declaration.
  * 
  * <pre>
- *   typeDeclaration ::= modifiers classDeclaration
+ *   typeDeclaration ::= modifiers (classDeclaration | interfaceDeclaration) | ;
  * </pre>
  * 
  * @return an AST for a typeDeclaration.
@@ -388,17 +388,23 @@ private TypeName qualifiedIdentifier(): {
 
 private JAST typeDeclaration(): {
     ArrayList<String> mods = null;
-    JAST classDeclaration = null;
+    JAST typeDeclaration = null;
 }
 {
     try {
         mods = modifiers()
-        classDeclaration = classDeclaration( mods )
+        (
+            LOOKAHEAD( <CLASS> )
+            typeDeclaration = classDeclaration( mods ) |
+            LOOKAHEAD( <INTERFACE> )
+            typeDeclaration = interfaceDeclaration( mods )
+        ) |
+        <SEMI>
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
-    { return classDeclaration; }
+    { return typeDeclaration; }
 }
 
 /**
@@ -487,7 +493,8 @@ private ArrayList<String> modifiers(): {
  * 
  * <pre>
  *   classDeclaration ::= CLASS IDENTIFIER 
- *                        [EXTENDS qualifiedIdentifier] 
+ *                        [EXTENDS qualifiedIdentifier]
+                          [IMPLEMENTS qualifiedIdentifier {, qualifiedIdentifier}]
  *                        classBody
  * </pre>
  * 
@@ -511,6 +518,14 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
         <IDENTIFIER> { name = token.image; }
         [ 
             <EXTENDS> superClass = qualifiedIdentifier() 
+        ]
+        [
+            <IMPLEMENTS>
+             { interfaces = new ArrayList<Type>(); interfaces.add( qualifiedIdentifier() ); }
+             (
+                 <COMMA>
+                 { interfaces.add( qualifiedIdentifier() ); }
+             )*
         ]
         classBody = classBody(line)
     } 
@@ -584,7 +599,7 @@ private JClassBody classBody(int line): {
     ArrayList<String> mods = null;
     JMember aMember = null;
     JBlock body = null;
-    ArrayList<JBlock> staticBLocks = new ArrayList<JBlock>();
+    ArrayList<JBlock> staticBlocks = new ArrayList<JBlock>();
     ArrayList<JBlock> instanceBlocks = new ArrayList<JBlock>();
     ArrayList<JMember> members = new ArrayList<JMember>();
 }
@@ -593,7 +608,8 @@ private JClassBody classBody(int line): {
         <LCURLY>
         (
             LOOKAHEAD( <STATIC> <LCURLY> )
-            body = block() { staticBLocks.add(body); } |             // static block
+            <STATIC>
+            body = block() { staticBlocks.add(body); } |             // static block
             LOOKAHEAD( <LCURLY> )
             body = block() { instanceBlocks.add(body); } |           // instance block
             mods = modifiers()                                       // modifiers memberDecl
@@ -602,10 +618,9 @@ private JClassBody classBody(int line): {
         <RCURLY>
     } 
     catch ( ParseException e ) {
-        reportParserError("D");
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
-    { return new JClassBody(line, staticBLocks, instanceBlocks, members); }
+    { return new JClassBody(line, staticBlocks, instanceBlocks, members); }
 }
 
 /**

@@ -1340,7 +1340,7 @@ public class Parser {
         boolean more = true;
         JExpression lhs = exclusiveOrExpression();
         while (more) {
-            if (have(AND)) {
+            if (have(OR)) {
                 lhs = new JBitwiseInclusiveOrOp(line, lhs, exclusiveOrExpression());
             } else {
                 more = false;
@@ -1365,7 +1365,7 @@ public class Parser {
         boolean more = true;
         JExpression lhs = andExpression();
         while (more) {
-            if (have(AND)) {
+            if (have(XOR)) {
                 lhs = new JBitwiseExclusiveOrOp(line, lhs, andExpression());
             } else {
                 more = false;
