@@ -589,14 +589,17 @@ private JClassBody classBody(int line): {
     try {
         <LCURLY>
         (
-            <STATIC> body = block() { staticBLocks.add(body); } |    // static block
+            LOOKAHEAD( <STATIC> <LCURLY> )
+            body = block() { staticBLocks.add(body); } |             // static block
+            LOOKAHEAD( <LCURLY> )
             body = block() { instanceBlocks.add(body); } |           // instance block
             mods = modifiers()                                       // modifiers memberDecl
             aMember = memberDecl( mods ) { members.add( aMember ); }
         )*
         <RCURLY>
     } 
-    catch ( ParseException e ) { 
+    catch ( ParseException e ) {
+        reportParserError("D");
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
     { return new JClassBody(line, staticBLocks, instanceBlocks, members); }
