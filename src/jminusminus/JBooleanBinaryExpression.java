@@ -220,3 +220,22 @@ class JLogicalAndOp extends JBooleanBinaryExpression {
     }
 
 }
+
+/**
+ * The AST node for a logical OR (||) expression. Implements short-circuiting
+ * branching.
+ */
+
+class JLogicalOrOp extends JBooleanBinaryExpression {
+    public JLogicalOrOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "||", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        return null;
+    }
+
+    public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
+    }
+
+}
