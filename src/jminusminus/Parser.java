@@ -1233,6 +1233,26 @@ public class Parser {
             return new JAssignOp(line, lhs, assignmentExpression());
         } else if (have(PLUS_ASSIGN)) {
             return new JPlusAssignOp(line, lhs, assignmentExpression());
+        } else if (have(MINUS_ASSIGN)) {
+            return new JMinusAssignOp(line, lhs, assignmentExpression());
+        } else if (have(STAR_ASSIGN)) {
+            return new JStarAssignOp(line, lhs, assignmentExpression());
+        } else if (have(DIVIDE_ASSIGN)) {
+            return new JDivideAssignOp(line, lhs, assignmentExpression());
+        } else if (have(REMAINDER_ASSIGN)) {
+            return new JRemainderAssignOp(line, lhs, assignmentExpression());
+        } else if (have(RSHIFT_ASSIGN)) {
+            return new JRShiftAssignOp(line, lhs, assignmentExpression());
+        } else if (have(RSHIFT_ZERO_ASSIGN)) {
+            return new JRShiftZeroAssignOp(line, lhs, assignmentExpression());
+        } else if (have(LSHIFT_ASSIGN)) {
+            return new JLShiftAssignOp(line, lhs, assignmentExpression());
+        } else if (have(AND_ASSIGN)) {
+            return new JAndAssignOp(line, lhs, assignmentExpression());
+        } else if (have(OR_ASSIGN)) {
+            return new JOrAssignOp(line, lhs, assignmentExpression());
+        } else if (have(XOR_ASSIGN)) {
+            return new JXorAssignOp(line, lhs, assignmentExpression());
         } else {
             return lhs;
         }
@@ -1281,7 +1301,11 @@ public class Parser {
         while (more) {
             if (have(EQUAL)) {
                 lhs = new JEqualOp(line, lhs, relationalExpression());
-            } else {
+            }
+            else if(have(NEQUAL)){
+                lhs = new JNEqualOp(line, lhs, relationalExpression());
+            }
+            else {
                 more = false;
             }
         }
