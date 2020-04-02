@@ -157,6 +157,7 @@ TOKEN:
 | <CONTINUE: "continue" >
 | <DEFAULTT: "default" >
 | <DO: "do" >
+| < DOUBLE: "double" >
 | < ELSE: "else" >
 | < EXTENDS: "extends" >
 | < FALSE: "false" >
@@ -170,7 +171,6 @@ TOKEN:
 | < IMPORT: "import" >
 | < INTERFACE: "interface" >
 | < INSTANCEOF: "instanceof" >
-| < DOUBLE: "double" >
 | < INT: "int" >
 | <LONG: "long" >
 | <NATIVE: "native" >
@@ -649,9 +649,9 @@ private JMember memberDecl( ArrayList<String>  mods ): {
     Type type = null;
     String name = "";
     ArrayList<JFormalParameter> params = null;
-    ArrayList<Type> exceptions = null;
     JBlock body = null;
     ArrayList<JVariableDeclarator> variableDeclarators = null;
+    ArrayList<Type> exceptions = null;
     JMember memberDecl = null;
 }
 {
@@ -663,6 +663,14 @@ private JMember memberDecl( ArrayList<String>  mods ): {
             name = token.image;
         }
         params = formalParameters()
+        [
+            <THROWS>
+            { exceptions = new ArrayList<Type>(); exceptions.add( qualifiedIdentifier() ); }
+            (
+                <COMMA>
+                { exceptions.add( qualifiedIdentifier() ); }
+            )*
+        ]
         body = block()
         {
             memberDecl =
@@ -677,6 +685,14 @@ private JMember memberDecl( ArrayList<String>  mods ): {
         { line = token.beginLine; }
         <IDENTIFIER> { name = token.image; }
         params = formalParameters()
+        [
+            <THROWS>
+            { exceptions = new ArrayList<Type>(); exceptions.add( qualifiedIdentifier() ); }
+            (
+                <COMMA>
+                { exceptions.add( qualifiedIdentifier() ); }
+            )*
+        ]
         (
             body = block() |
             <SEMI>
@@ -726,7 +742,7 @@ private JMember interfaceMemberDecl( ArrayList<String>  mods ) : {
 }
 {
     try {
-        LOOKAHEAD( ( <VOID> | <IDENTIFIER> ) <IDENTIFIER> <LPAREN> )
+        LOOKAHEAD( ( <VOID> | type() ) <IDENTIFIER> <LPAREN> )
         (
             <VOID> { type = Type.VOID; } |
             type = type()
@@ -828,6 +844,10 @@ private JStatement statement(): {
     JStatement alternate = null;
     JStatement body = null;
     JExpression expr = null;
+    JBlock tryBlock = null;
+    ArrayList<JBlock> catchBlocks = null;
+    ArrayList<ArrayList<JFormalParameter>> catchParameters = null;
+    JBlock finallyBlock = null;
 
 }
 {       
@@ -863,10 +883,26 @@ private JStatement statement(): {
         <SEMI>
 
         { statement = new JEmptyStatement( line ); } |
-        // Must be a statementExpression
-        statement = statementExpression() 
+        <TRY>
+        tryBlock = block()
+        { catchParameters = new ArrayList<ArrayList<JFormalParameter>>(); catchBlocks = new ArrayList<JBlock>(); }
+        (
+            <CATCH>
+            { catchParameters.add ( formalParameters() );   catchBlocks.add( block() ); }
+        )*
+        [
+            <FINALLY>
+            finallyBlock = block()
+        ]
+        { statement = new JExceptionStatement(line, tryBlock, catchBlocks, catchParameters, finallyBlock); } |
+        <THROW>
+        expr = expression()
         <SEMI>
-    } 
+        { statement = new JThrowStatement(line, expr); } |
+        // Must be a statementExpression
+        statement = statementExpression()
+        <SEMI>
+    }
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
@@ -1292,7 +1328,8 @@ private Type basicType(): {
     try {
         <BOOLEAN> { type = Type.BOOLEAN; } |
         <CHAR> { type = Type.CHAR; } |
-        <INT> { type = Type.INT; }
+        <INT> { type = Type.INT; } |
+        <DOUBLE> { type = Type.DOUBLE; }
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
@@ -1336,14 +1373,15 @@ private Type referenceType(): {
 
 /*private JStatement ternaryExpression(): {
     int line = 0;
-    JExpression condition, ifTrue, ifFalse;
-}{
+    JExpression condition = null, ifTrue = null, ifFalse = null;
+}
+{
     try {
-        condition = assignmentExpression() { line = condition.line() }
+        condition = assignmentExpression() { line = condition.line(); }
         <COLON>
-        ifTrue = assignmentExpression() { line = condition.line() }
+        ifTrue = assignmentExpression() { line = condition.line(); }
         <QUESTION_MARK>
-        ifFalse = assignmentExpression() { line = condition.line() }
+        ifFalse = assignmentExpression() { line = condition.line(); }
     } catch (Exception e) {
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
@@ -1956,7 +1994,9 @@ private JExpression literal(): {
 {       
     try {
         <INT_LITERAL> 
-        { expr = new JLiteralInt( token.beginLine, token.image ); } | 
+        { expr = new JLiteralInt( token.beginLine, token.image ); } |
+        <DOUBLE_LITERAL>
+        { expr = new JLiteralDouble( token.beginLine, token.image ); } |
         <CHAR_LITERAL> 
         { expr = new JLiteralChar( token.beginLine, token.image ); } |
         <STRING_LITERAL> 
