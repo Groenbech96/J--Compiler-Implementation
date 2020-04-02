@@ -77,11 +77,13 @@ class JForStatement extends JStatement {
         p.printf("<JForStatement line=\"%d\">\n", line());
         p.indentRight();
 
-        p.printf("<InitialVariableDeclarations>");
-        p.indentRight();
-        initVariableDecls.writeToStdOut(p);
-        p.indentLeft();
-        p.printf("</InitialVariableDeclarations>\n");
+        if(initVariableDecls != null) {
+            p.printf("<InitialVariableDeclarations>");
+            p.indentRight();
+            initVariableDecls.writeToStdOut(p);
+            p.indentLeft();
+            p.printf("</InitialVariableDeclarations>\n");
+        }
 
         p.printf("<InitialStatements>\n");
         p.indentRight();

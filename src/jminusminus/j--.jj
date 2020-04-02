@@ -910,7 +910,7 @@ private JStatement statement(): {
 }
 
 private JStatement forOrForEachStatement(int line):{
-JVariableDeclaration variableDeclaration = null;
+    JVariableDeclaration variableDeclaration = null;
     ArrayList<JStatement> initStatements = null;
     ArrayList<JStatement> updateStatements = null;
     Type type = null;
@@ -923,7 +923,7 @@ JVariableDeclaration variableDeclaration = null;
 {
 
 try{
-    LOOKAHEAD(<IDENTIFIER>  <IDENTIFIER> <COLON> )
+    LOOKAHEAD(type() <IDENTIFIER> <COLON> )
 
         //if it is for-each
         type = type()
@@ -932,22 +932,53 @@ try{
         forEachCollection = type()
         <RPAREN>
         body = statement()
-        { statement = new JForEachStatement(line, new JFormalParameter(forEachVariable), forEachCollection, body); return statement;} |
-
+        {
+            statement = new JForEachStatement(line, new JFormalParameter(forEachVariable), forEachCollection, body);
+            return statement;
+        } |
+    LOOKAHEAD(localVariableDeclarationStatement() | forInits() )
         // if it is for-i
-        LOOKAHEAD( <IDENTIFIER> )
-        variableDeclaration = forDeclarationVariable(line)
-        initStatements = forInits()
+        try{
+        //Add support for no initializing variable
+        LOOKAHEAD(localVariableDeclarationStatement())
+        {
+            variableDeclaration = forDeclarationVariable(line);
+            initStatements = new ArrayList<JStatement>();
+        } |
+        {
+            initStatements = forInits();
+            variableDeclaration = null;
+        }
+        } catch( ParseException e){
+            variableDeclaration = null;
+            initStatements = new ArrayList<JStatement>();
+
+        }
+
+        [<SEMI>]
+
+        [ expr = expression()]
+
         <SEMI>
-        expr = expression()
-        <SEMI>
-        updateStatements = forUpdates()
+
+        try{
+        //add support for no updates
+            updateStatements = forUpdates()
+        } catch( ParseException e){
+            updateStatements = new ArrayList<JStatement>();
+        }
         <RPAREN>
         body = statement()
-        { statement = new JForStatement(line,variableDeclaration, initStatements, expr, updateStatements, body); return statement; }
+        {
+            statement = new JForStatement(line,variableDeclaration, initStatements, expr, updateStatements, body);
+            return statement;
+        }
 
     } catch( ParseException e ) {
         recoverFromError( new int[] { SEMI, EOF }, e );
+    }
+    {
+        throw new ParseException("Should not happend");
     }
 }
 
@@ -973,10 +1004,10 @@ private ArrayList<JStatement> forInits(): {
 {
     try{
         [
-            currentInitStatement = statement()
+            currentInitStatement = statementExpression()
             { initStatements.add(currentInitStatement); }
             (
-                <COMMA> currentInitStatement = statement()
+                <COMMA> currentInitStatement = statementExpression()
                 { initStatements.add(currentInitStatement); }
             )*
         ]
@@ -994,10 +1025,10 @@ private ArrayList<JStatement> forUpdates(): {
 {
     try{
         [
-            currentUpdateStatement = statement()
+            currentUpdateStatement = statementExpression()
             { updateStatements.add(currentUpdateStatement); }
             (
-                <COMMA> currentUpdateStatement = statement()
+                <COMMA> currentUpdateStatement = statementExpression()
                 { updateStatements.add(currentUpdateStatement); }
             )*
         ]
