@@ -34,6 +34,12 @@ class JFormalParameter extends JAST {
         this.type = type;
     }
 
+    public JFormalParameter(JVariableDeclarator variableDeclaration) {
+        super(variableDeclaration.line);
+        this.name = variableDeclaration.name();
+        this.type = variableDeclaration.type();
+    }
+
     /**
      * Return the parameter's name.
      *
