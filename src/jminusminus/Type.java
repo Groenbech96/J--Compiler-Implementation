@@ -2,6 +2,8 @@
 
 package jminusminus;
 
+import com.sun.org.apache.xpath.internal.operations.Mod;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -619,7 +621,7 @@ class Type {
      */
 
     public boolean checkAccess(int line, Member member) {
-        if (!checkAccess(line, classRep, member.declaringType().classRep)) {
+        if (!checkAccess(line, classRep, member.declaringType().classRep, new ArrayList<>())) {
             return false;
         }
 
@@ -675,17 +677,18 @@ class Type {
      *
      * @param line       line in which the access occurs.
      * @param targetType the type being accessed.
+     * @param interfaces
      * @return true if access is valid; false otherwise.
      */
 
-    public boolean checkAccess(int line, Type targetType) {
+    public boolean checkAccess(int line, Type targetType, ArrayList<Type> interfaces) {
         if (targetType.isPrimitive()) {
             return true;
         }
         if (targetType.isArray()) {
-            return this.checkAccess(line, targetType.componentType());
+            return this.checkAccess(line, targetType.componentType(), interfaces );
         }
-        return checkAccess(line, classRep, targetType.classRep);
+        return checkAccess(line, classRep, targetType.classRep, interfaces);
     }
 
     /**
@@ -694,23 +697,48 @@ class Type {
      * @param line            the line in which the access occurs.
      * @param referencingType the type attempting the access.
      * @param type            the type that we want to access.
+     * @param interfaces
      * @return true if access is valid; false otherwise.
      */
 
     public static boolean checkAccess(int line, Class referencingType,
-                                      Class type) {
-        java.lang.Package p1 = referencingType.getPackage();
-        java.lang.Package p2 = type.getPackage();
+                                      Class type, ArrayList<Type> interfaces) {
+        java.lang.Package newClassPackage = referencingType.getPackage();
+        java.lang.Package superClassPackage = type.getPackage();
+
+        if(!checkInterfaceAccess(line, referencingType,interfaces)){
+            return false;
+        }
+
         if (Modifier.isPublic(type.getModifiers())
-                || (p1 == null ? "" : p1.getName()).equals((p2 == null ? ""
-                : p2.getName()))) {
+                || (newClassPackage == null ? "" : newClassPackage.getName()).equals((superClassPackage == null ? ""
+                : superClassPackage.getName()))) {
             return true;
-        } else {
+        }
+        else {
             JAST.compilationUnit.reportSemanticError(line, "The type, "
                     + type.getCanonicalName() + ", is not accessible from "
                     + referencingType.getCanonicalName());
             return false;
         }
+    }
+
+    public static boolean checkInterfaceAccess(int line, Class referencingType, ArrayList<Type> interfaces){
+        java.lang.Package newClassPackage = referencingType.getPackage();
+
+        for (Type _interface : interfaces) {
+            Class interfaceClassRep = _interface.classRep;
+            java.lang.Package interfacePackage = interfaceClassRep.getPackage();
+            if (!Modifier.isPublic(interfaceClassRep.getModifiers()) &&
+                    !(newClassPackage == null ? "" : newClassPackage.getName()).equals((interfacePackage == null ? ""
+                            : interfacePackage.getName()))) {
+                JAST.compilationUnit.reportSemanticError(line, "The type, "
+                        + interfaceClassRep.getCanonicalName() + ", is not accessible from "
+                        + referencingType.getCanonicalName());
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -858,7 +886,7 @@ class TypeName extends Type {
             Type referencingType = ((JTypeDecl) (context.classContext
                     .definition())).thisType();
             Type.checkAccess(line, referencingType.classRep(), resolvedType
-                    .classRep());
+                    .classRep(), new ArrayList<>());
         }
         return resolvedType;
     }

@@ -4,8 +4,6 @@ package jminusminus;
 
 import java.util.ArrayList;
 
-import static jminusminus.CLConstants.*;
-
 /**
  * A class declaration has a list of modifiers, a name, a super class and a
  * class block; it distinguishes between instance fields and static (class)
@@ -156,10 +154,19 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         superType = superType.resolve(this.context);
         classBody.setClassSuperType(superType);
 
+        //Resolve possible interfaces
+        ArrayList<Type> resolvedInterfaces = new ArrayList<>();
+        for (Type _interface : interfaces) {
+            resolvedInterfaces.add(_interface.resolve(this.context));
+        }
+        interfaces.clear();
+        interfaces.addAll(resolvedInterfaces);
+
+
         // Creating a partial class in memory can result in a
         // java.lang.VerifyError if the semantics below are
         // violated, so we can't defer these checks to analyze()
-        thisType.checkAccess(line, superType);
+        thisType.checkAccess(line, superType, interfaces);
         if (superType.isFinal()) {
             JAST.compilationUnit.reportSemanticError(line,
                     "Cannot extend a final type: %s", superType.toString());
@@ -169,7 +176,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         CLEmitter partial = new CLEmitter(false);
 
         // Add the class header to the partial class
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         partial.addClass(mods, qualifiedName, superType.jvmName(), null, false);
 

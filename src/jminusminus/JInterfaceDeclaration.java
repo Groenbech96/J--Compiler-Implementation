@@ -1,12 +1,14 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     private final ArrayList<JMember> methods;
     private final ArrayList<Type> interfaces;
     private final String name;
     private final ArrayList<String> mods;
+    private ClassContext context;
 
     /**
      * Construct an AST node the given its line number in the source file.
@@ -22,6 +24,38 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     }
 
     //TODO: Fill out codegen and analysis
+
+    @Override
+    public void preAnalyze(Context context) {
+        this.context = new ClassContext(this, context);
+        ArrayList<Type> resolvedInterfaces = new ArrayList<>();
+        for (Type _interface : interfaces) {
+            resolvedInterfaces.add(_interface.resolve(this.context));
+        }
+        interfaces.clear();
+        interfaces.addAll(resolvedInterfaces);
+
+        Type.checkInterfaceAccess(line,thisType().classRep(),interfaces);
+
+        CLEmitter clEmitter = new CLEmitter(false);
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
+                : JAST.compilationUnit.packageName() + "/" + name;
+
+        ArrayList<String> interfaceNames = interfaces.stream().map(Type::jvmName).collect(Collectors.toCollection(ArrayList::new));
+        clEmitter.addClass(mods,qualifiedName,null, interfaceNames,false);
+
+        for(JMember method: methods){
+            method.preAnalyze(context, clEmitter);
+        }
+
+        // Get the Class rep for the (partial) class and make it
+        // the
+        // representation for this type
+        Type id = this.context.lookupType(name);
+        if (id != null && !JAST.compilationUnit.errorHasOccurred()) {
+            id.setClassRep(clEmitter.toClass());
+        }
+    }
 
     @Override
     public JAST analyze(Context context) {
@@ -40,11 +74,6 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     @Override
     public void declareThisType(Context context) {
-
-    }
-
-    @Override
-    public void preAnalyze(Context context) {
 
     }
 
