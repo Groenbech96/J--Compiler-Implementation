@@ -51,10 +51,9 @@ class JForEachStatement extends JStatement {
 
         // TODO: should we support list etc? or do these things also report isArray as true?
         if (!array.isArray())
-            JAST.compilationUnit.reportSemanticError(line(), "attempt to for each a non-array object");
+            JAST.compilationUnit.reportSemanticError(line(), "Attempt to for each over a non-array object");
 
-        if (!array.componentType().equals(parameter.type()))
-            JAST.compilationUnit.reportSemanticError(line(), "Parameter is not same type as iterated over values");
+        array.componentType().mustMatchExpected(line(), parameter.type());
 
         return this;
     }
