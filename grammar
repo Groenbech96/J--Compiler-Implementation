@@ -42,7 +42,7 @@ blockStatement ::= localVariableDeclarationStatement
 statement ::= block
             | IF parExpression statement [ELSE statement]
             | WHILE parExpression statement
-            | FOR forExpression statement
+            | FOR forExpression | forEachExpression statement
             | RETURN [expression] SEMI
             | SEMI
             | TRY block {CATCH formalParameters block} [FINALLY block]
@@ -85,6 +85,7 @@ conditionalExpression ::= expression COLON expression QUESTION_MARK expression
 forInit ::= statementExpression {COMMA statementExpression} | [final] type variableDeclarators
 forUpdate ::= statementExpression {COMMA statementExpression}
 forExpression ::= LPAREN [forInit] SEMI expression SEMI [forUpdate] RPAREN
+forEachExpression ::= LPAREN type IDENTIFIER COLON IDENTIFIER RPAREN
 
 statementExpression ::= expression // but must have side-effect, eg i++
 
