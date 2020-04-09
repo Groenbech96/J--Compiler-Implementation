@@ -23,7 +23,7 @@ public class JLiteralDouble extends JExpression {
     }
 
     /**
-     * Analyzing an int literal is trivial.
+     * Analyzing a double literal is trivial.
      *
      * @param context context in which names are resolved (ignored here).
      * @return the analyzed (and possibly rewritten) AST subtree.
