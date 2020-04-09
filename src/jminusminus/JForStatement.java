@@ -3,6 +3,10 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static java.util.stream.Collectors.*;
 
 /**
  * The AST node for a for-statement.
@@ -28,12 +32,12 @@ class JForStatement extends JStatement {
      * Construct an AST node for a while-statement given its line number, the
      * test expression, and the body.
      *
-     * @param line                  line in which the while-statement occurs in the source file.
-     * @param initVariableDecls     the initial variable declarations
-     * @param initStatements        the initial statements
-     * @param condition             the condition
-     * @param updateStatements      the update statements
-     * @param body                  the body.
+     * @param line              line in which the while-statement occurs in the source file.
+     * @param initVariableDecls the initial variable declarations
+     * @param initStatements    the initial statements
+     * @param condition         the condition
+     * @param updateStatements  the update statements
+     * @param body              the body.
      */
 
     public JForStatement(int line, JVariableDeclaration initVariableDecls, ArrayList<JStatement> initStatements,
@@ -53,9 +57,15 @@ class JForStatement extends JStatement {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
     public JForStatement analyze(Context context) {
+        initVariableDecls = (JVariableDeclaration) initVariableDecls.analyze(context);
+        initStatements = (ArrayList<JStatement>) initStatements.stream()
+                .map(statement -> (JStatement) statement.analyze(context)).collect(toList());
         condition = condition.analyze(context);
+        updateStatements = (ArrayList<JStatement>) updateStatements.stream()
+                .map(statement -> (JStatement) statement.analyze(context)).collect(toList());
+        body = (JStatement) body.analyze(context);
+
         condition.type().mustMatchExpected(line(), Type.BOOLEAN);
-        body = (JStatement)body.analyze(context);
         return this;
     }
 
@@ -77,7 +87,7 @@ class JForStatement extends JStatement {
         p.printf("<JForStatement line=\"%d\">\n", line());
         p.indentRight();
 
-        if(initVariableDecls != null) {
+        if (initVariableDecls != null) {
             p.printf("<InitialVariableDeclarations>");
             p.indentRight();
             initVariableDecls.writeToStdOut(p);
@@ -87,7 +97,7 @@ class JForStatement extends JStatement {
 
         p.printf("<InitialStatements>\n");
         p.indentRight();
-        for(JStatement statement : initStatements) {
+        for (JStatement statement : initStatements) {
             statement.writeToStdOut(p);
         }
         p.indentLeft();
@@ -95,10 +105,9 @@ class JForStatement extends JStatement {
 
         p.printf("<ConditionExpression>\n");
         p.indentRight();
-        if(condition == null) {
+        if (condition == null) {
             p.printf("null\n");
-        }
-        else {
+        } else {
             condition.writeToStdOut(p);
         }
         p.indentLeft();
@@ -106,7 +115,7 @@ class JForStatement extends JStatement {
 
         p.printf("<UpdateStatements>\n");
         p.indentRight();
-        for(JStatement statement : updateStatements) {
+        for (JStatement statement : updateStatements) {
             statement.writeToStdOut(p);
         }
         p.indentLeft();
