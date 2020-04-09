@@ -60,9 +60,12 @@ class JForStatement extends JStatement {
         initVariableDecls = (JVariableDeclaration) initVariableDecls.analyze(context);
         initStatements = (ArrayList<JStatement>) initStatements.stream()
                 .map(statement -> (JStatement) statement.analyze(context)).collect(toList());
+
         condition = condition.analyze(context);
+
         updateStatements = (ArrayList<JStatement>) updateStatements.stream()
                 .map(statement -> (JStatement) statement.analyze(context)).collect(toList());
+
         body = (JStatement) body.analyze(context);
 
         condition.type().mustMatchExpected(line(), Type.BOOLEAN);

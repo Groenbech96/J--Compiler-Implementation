@@ -48,7 +48,7 @@ class JForEachStatement extends JStatement {
     public JForEachStatement analyze(Context context) {
         body = (JStatement) body.analyze(context);
         parameter = (JFormalParameter) parameter.analyze(context);
-        
+
         if (!array.isArray())
             JAST.compilationUnit.reportSemanticError(line(), "Attempt to for each over a non-array object");
 
