@@ -48,8 +48,7 @@ class JForEachStatement extends JStatement {
     public JForEachStatement analyze(Context context) {
         body = (JStatement) body.analyze(context);
         parameter = (JFormalParameter) parameter.analyze(context);
-
-        // TODO: should we support list etc? or do these things also report isArray as true?
+        
         if (!array.isArray())
             JAST.compilationUnit.reportSemanticError(line(), "Attempt to for each over a non-array object");
 
