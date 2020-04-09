@@ -46,7 +46,16 @@ class JForEachStatement extends JStatement {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
     public JForEachStatement analyze(Context context) {
-        body = (JStatement)body.analyze(context);
+        body = (JStatement) body.analyze(context);
+        parameter = (JFormalParameter) parameter.analyze(context);
+
+        // TODO: should we support list etc? or do these things also report isArray as true?
+        if (!array.isArray())
+            JAST.compilationUnit.reportSemanticError(line(), "attempt to for each a non-array object");
+
+        if (!array.componentType().equals(parameter.type()))
+            JAST.compilationUnit.reportSemanticError(line(), "Parameter is not same type as iterated over values");
+
         return this;
     }
 
