@@ -110,6 +110,56 @@ class JEqualOp extends JBooleanBinaryExpression {
 }
 
 /**
+ * The AST node for an equality (!=) expression. Implements short-circuiting
+ * branching.
+ */
+
+class JNEqualOp extends JBooleanBinaryExpression {
+
+    /**
+     * Construct an AST node for an equality expression.
+     *
+     * @param line line number in which the equality expression occurs in the
+     *             source file.
+     * @param lhs  lhs operand.
+     * @param rhs  rhs operand.
+     */
+
+    public JNEqualOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "!=", lhs, rhs);
+    }
+
+    /**
+     * Analyzing an equality expression means analyzing its operands and
+     * checking that the types match.
+     *
+     * @param context context in which names are resolved.
+     * @return the analyzed (and possibly rewritten) AST subtree.
+     */
+
+    public JExpression analyze(Context context) {
+        lhs = (JExpression) lhs.analyze(context);
+        rhs = (JExpression) rhs.analyze(context);
+        lhs.type().mustMatchExpected(line(), rhs.type());
+        type = Type.BOOLEAN;
+        return this;
+    }
+
+    /**
+     * Branching code generation for == operation.
+     *
+     * @param output      the code emitter (basically an abstraction for producing the
+     *                    .class file).
+     * @param targetLabel target for generated branch instruction.
+     * @param onTrue      should we branch on true?
+     */
+
+    public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
+    }
+
+}
+
+/**
  * The AST node for a logical AND (&&) expression. Implements short-circuiting
  * branching.
  */
@@ -167,6 +217,25 @@ class JLogicalAndOp extends JBooleanBinaryExpression {
             lhs.codegen(output, targetLabel, false);
             rhs.codegen(output, targetLabel, false);
         }
+    }
+
+}
+
+/**
+ * The AST node for a logical OR (||) expression. Implements short-circuiting
+ * branching.
+ */
+
+class JLogicalOrOp extends JBooleanBinaryExpression {
+    public JLogicalOrOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "||", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        return null;
+    }
+
+    public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
     }
 
 }

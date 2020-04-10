@@ -275,6 +275,32 @@ class JPostDecrementOp extends JUnaryExpression {
 
 }
 
+/**
+ * The AST node for an expr++.
+ */
+
+class JPostIncrementOp extends JUnaryExpression {
+
+    /**
+     * Construct an AST node for an expr-- expression given its line number, and
+     * the operand.
+     *
+     * @param line line in which the expression occurs in the source file.
+     * @param arg  the operand.
+     */
+
+    public JPostIncrementOp(int line, JExpression arg) {
+        super(line, "post++", arg);
+    }
+
+    public JExpression analyze(Context context) {
+        return this;
+    }
+
+    public void codegen(CLEmitter output) {
+    }
+}
+
 
 /**
  * The AST node for a ++expr expression.
@@ -350,6 +376,24 @@ class JPreIncrementOp extends JUnaryExpression {
             }
             ((JLhs) arg).codegenStore(output);
         }
+    }
+
+}
+
+/**
+ * The AST node for a --expr expression.
+ */
+
+class JPreDecrementOp extends JUnaryExpression {
+    public JPreDecrementOp(int line, JExpression arg) {
+        super(line, "--pre", arg);
+    }
+
+    public JExpression analyze(Context context) {
+        return null;
+    }
+
+    public void codegen(CLEmitter output) {
     }
 
 }

@@ -43,7 +43,7 @@ public class JMinusMinusTest extends TestCase {
                 Main.main(args);
                 System.out.printf("\n\n");
 
-                // true even if a single test fails
+                // true even if a 1ngle test fails
                 errorHasOccurred |= Main.errorHasOccurred();
             }
         }
