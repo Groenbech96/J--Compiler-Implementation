@@ -85,6 +85,34 @@ class JGreaterThanOp extends JComparison {
 }
 
 /**
+ * The AST node for a greater-than (>=) expression. Implements short-circuiting
+ * branching.
+ */
+
+class JGreaterEqualOp extends JComparison {
+    public JGreaterEqualOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, ">=", lhs, rhs);
+    }
+
+    public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
+    }
+}
+
+/**
+ * The AST node for a greater-than (<) expression. Implements short-circuiting
+ * branching.
+ */
+
+class JLessThanOp extends JComparison {
+    public JLessThanOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "<", lhs, rhs);
+    }
+
+    public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
+    }
+}
+
+/**
  * The AST node for a less-than-or-equal-to (<=) expression. Implements
  * short-circuiting branching.
  */
