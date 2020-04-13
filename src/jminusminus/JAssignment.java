@@ -33,6 +33,14 @@ abstract class JAssignment extends JBinaryExpression {
         return -1;
     }
 
+    int numericSub() {
+        if (type == Type.INT) return ISUB;
+        if (type == Type.DOUBLE) return DSUB;
+        JAST.compilationUnit.reportSemanticError(line(), "Illegal type for subtracting " + type.toString());
+        return -1;
+    }
+
+
 }
 
 /**
@@ -194,10 +202,47 @@ class JMinusAssignOp extends JAssignment {
     }
 
     public JExpression analyze(Context context) {
-        return null;
+
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+
+        rhs = (JExpression) rhs.analyze(context);
+        if (lhs.type().equals(Type.INT)) {
+            rhs.type().mustMatchExpected(line(), Type.INT);
+            type = Type.INT;
+        } else if (lhs.type().equals(Type.DOUBLE)) {
+            rhs.type().mustMatchExpected(line(), Type.DOUBLE);
+            type = Type.DOUBLE;
+        } else {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid lhs type for +=: " + lhs.type());
+        }
+        return this;
+
     }
 
     public void codegen(CLEmitter output) {
+
+        // Load L-value onto stack
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        // Load R value for assignment
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+
+        rhs.codegen(output);
+        output.addNoArgInstruction(numericSub());
+
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack (x = y--)
+            // (y-- should be treated as R-value, hence atop stack)
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
+
     }
 }
 
