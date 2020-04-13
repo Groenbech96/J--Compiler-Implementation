@@ -127,13 +127,9 @@ public class JClassBody extends JAST  {
         }
 
         // Generate a class initialization method?
-        if (staticFieldInitializations.size() > 0) {
+        if (staticFieldInitializations.size() > 0 || staticBlocks.size() > 0) {
             codegenClassInit(output);
         }
-
-
-
-
     }
 
     @Override
@@ -210,6 +206,10 @@ public class JClassBody extends JAST  {
         // for them
         for (JFieldDeclaration staticField : staticFieldInitializations) {
             staticField.codegenInitializations(output);
+        }
+
+        for (JBlock block : staticBlocks) {
+            block.codegen(output);
         }
 
         // Return
