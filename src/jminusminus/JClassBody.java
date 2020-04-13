@@ -88,6 +88,7 @@ public class JClassBody extends JAST  {
     public JAST analyze(Context context) {
         // Analyze all members
         for (JMember member : members) {
+            //Todo: Should we update the members?
             ((JAST) member).analyze(context);
         }
 
