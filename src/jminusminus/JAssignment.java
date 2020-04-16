@@ -187,3 +187,133 @@ class JPlusAssignOp extends JAssignment {
     }
 
 }
+
+class JMinusAssignOp extends JAssignment {
+    public JMinusAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "-=", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        return null;
+    }
+
+    public void codegen(CLEmitter output) {
+    }
+}
+
+class JStarAssignOp extends JAssignment {
+    public JStarAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "*=", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        return null;
+    }
+
+    public void codegen(CLEmitter output) {
+    }
+}
+
+class JDivideAssignOp extends JAssignment {
+    public JDivideAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "/=", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        return null;
+    }
+
+    public void codegen(CLEmitter output) {
+    }
+}
+
+class JRemainderAssignOp extends JAssignment {
+    public JRemainderAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "%=", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        return null;
+    }
+
+    public void codegen(CLEmitter output) {
+    }
+}
+
+class JRShiftAssignOp extends JAssignment {
+    public JRShiftAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, ">>=", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        return null;
+    }
+
+    public void codegen(CLEmitter output) {
+    }
+}
+
+class JRShiftZeroAssignOp extends JAssignment {
+    public JRShiftZeroAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, ">>>=", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        return null;
+    }
+
+    public void codegen(CLEmitter output) {
+    }
+}
+
+class JLShiftAssignOp extends JAssignment {
+    public JLShiftAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "<<=", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        return null;
+    }
+
+    public void codegen(CLEmitter output) {
+    }
+}
+
+class JAndAssignOp extends JAssignment {
+    public JAndAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "&=", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        return null;
+    }
+
+    public void codegen(CLEmitter output) {
+    }
+}
+
+class JOrAssignOp extends JAssignment {
+    public JOrAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "|=", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        return null;
+    }
+
+    public void codegen(CLEmitter output) {
+    }
+}
+
+class JXorAssignOp extends JAssignment {
+    public JXorAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "^=", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        return null;
+    }
+
+    public void codegen(CLEmitter output) {
+    }
+}
