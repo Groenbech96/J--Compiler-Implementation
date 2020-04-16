@@ -25,7 +25,7 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
         this.thisType = this.thisType();
     }
 
-    //TODO: Fill out codegen and analysis
+    //TODO: Fill out codegen
 
     @Override
     public void preAnalyze(Context context) {
@@ -61,7 +61,7 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     @Override
     public JAST analyze(Context context) {
-
+        // s164429: I don't see any members of the declaration that needs analyze called on it.
         return this;
     }
 
