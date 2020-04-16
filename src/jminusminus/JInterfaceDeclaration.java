@@ -72,7 +72,29 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     @Override
     public void writeToStdOut(PrettyPrinter p) {
-
+        p.printf("<JInterfaceDeclaration line=\"%d\" name=\"%s\""
+                + " super interfaces=\"%s\">\n", line(), name, interfaces.stream().map(Type::simpleName).collect(Collectors.joining(", ")));
+        p.indentRight();
+        if (context != null) {
+            context.writeToStdOut(p);
+        }
+        if (mods != null) {
+            p.println("<Modifiers>");
+            p.indentRight();
+            for (String mod : mods) {
+                p.printf("<Modifier name=\"%s\"/>\n", mod);
+            }
+            p.indentLeft();
+            p.println("</Modifiers>");
+        }
+        if(methods != null) {
+            p.println("<Method declarations>");
+            for (JMember member: methods) {
+                ((JMethodInterface) member).writeToStdOut(p);
+            }
+        }
+        p.indentLeft();
+        p.println("</JClassDeclaration>");
     }
 
     @Override
