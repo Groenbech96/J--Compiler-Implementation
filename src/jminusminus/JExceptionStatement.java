@@ -26,7 +26,22 @@ public class JExceptionStatement extends JStatement {
 
     @Override
     public JAST analyze(Context context) {
-        return null;
+        tryBLock.analyze(context);
+
+        for (JBlock block : catchBlocks) {
+            block.analyze(context);
+        }
+
+        for (ArrayList<JFormalParameter> parameters : parametersList) {
+            for (JFormalParameter parameter : parameters) {
+                parameter.analyze(context);
+                parameter.type().mustMatchExpected(line(), Type.THROWABLE);
+            }
+        }
+
+        finalBlock.analyze(context);
+
+        return this;
     }
 
     @Override
