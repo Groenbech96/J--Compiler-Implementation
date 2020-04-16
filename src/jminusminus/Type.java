@@ -764,15 +764,15 @@ class Type {
      */
 
     public static String signatureFor(String name, Type[] argTypes) {
-        String signature = name + "(";
+        StringBuilder signature = new StringBuilder(name + "(");
         if (argTypes.length > 0) {
-            signature += argTypes[0].toString();
+            signature.append(argTypes[0].toString());
             for (int i = 1; i < argTypes.length; i++) {
-                signature += "," + argTypes[i].toString();
+                signature.append(",").append(argTypes[i].toString());
             }
         }
-        signature += ")";
-        return signature;
+        signature.append(")");
+        return signature.toString();
     }
 
 }

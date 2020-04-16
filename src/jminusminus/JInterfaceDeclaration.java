@@ -9,6 +9,7 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     private final String name;
     private final ArrayList<String> mods;
     private ClassContext context;
+    private Type thisType;
 
     /**
      * Construct an AST node the given its line number in the source file.
@@ -21,6 +22,7 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
         this.name = name;
         this.interfaces = interfaces;
         this.methods = methods;
+        this.thisType = this.thisType();
     }
 
     //TODO: Fill out codegen and analysis
@@ -59,7 +61,8 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     @Override
     public JAST analyze(Context context) {
-        return null;
+
+        return this;
     }
 
     @Override
@@ -89,6 +92,11 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     @Override
     public Type thisType() {
-        return null;
+        return thisType;
     }
+
+    public ArrayList<JMember> getMethods() {
+        return methods;
+    }
+
 }
