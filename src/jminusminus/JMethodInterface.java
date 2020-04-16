@@ -6,7 +6,7 @@ public class JMethodInterface implements JMember {
     //TODO: Add getters for fields as needed by the ast
     private final int line;
     private final String name;
-    private final Type returnType;
+    private Type returnType;
     private final ArrayList<JFormalParameter> params;
 
     public JMethodInterface(int line, String name, Type returnType,
@@ -19,6 +19,12 @@ public class JMethodInterface implements JMember {
 
     @Override
     public void preAnalyze(Context context, CLEmitter partial) {
-        //TODO: Add during analysis step
+        // Resolve types of the formal parameters
+        for (JFormalParameter param : params) {
+            param.setType(param.type().resolve(context));
+        }
+
+        // Resolve return type
+        returnType = returnType.resolve(context);
     }
 }
