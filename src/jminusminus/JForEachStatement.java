@@ -49,7 +49,7 @@ class JForEachStatement extends JStatement {
         body = (JStatement) body.analyze(context);
         parameter = (JFormalParameter) parameter.analyze(context);
 
-        if (!array.isArray())
+        if (!array.isArray() && !array.isJavaAssignableFrom(Type.ENUMERABLE))
             JAST.compilationUnit.reportSemanticError(line(), "Attempt to for each over a non-array object");
 
         array.componentType().mustMatchExpected(line(), parameter.type());
