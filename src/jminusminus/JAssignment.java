@@ -469,8 +469,7 @@ class JRShiftZeroAssignOp extends JAssignment {
         ((JLhs) lhs).codegenLoadLhsRvalue(output);
 
         rhs.codegen(output);
-        //TODO: Figure out
-        //output.addNoArgInstruction(numericAsm(INSTRUCTION));
+        output.addNoArgInstruction(numericAsm(IUSHR));
 
         if (!isStatementExpression) {
             // Generate code to leave the r-value atop stack (x = y--)
