@@ -29,7 +29,7 @@ abstract class JAssignment extends JBinaryExpression {
     int numericAsm(int intInstruction, int doubleInstruction) {
         if (type == Type.INT) return intInstruction;
         if (type == Type.DOUBLE) return doubleInstruction;
-        JAST.compilationUnit.reportSemanticError(line(), "Illegal type for adding " + type.toString());
+        JAST.compilationUnit.reportSemanticError(line(), "Illegal type " + type.toString());
         return -1;
     }
 
@@ -115,6 +115,7 @@ class JAssignOp extends JAssignment {
      */
 
     public JExpression analyze(Context context) {
+
         if (!(lhs instanceof JLhs)) {
             JAST.compilationUnit.reportSemanticError(line(),
                     "Illegal lhs for assignment");

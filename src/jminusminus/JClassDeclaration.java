@@ -198,7 +198,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     public JAST analyze(Context context) {
 
         // Analyze body
-        this.classBody.analyze(context);
+        this.classBody.analyze(this.context);
 
         // Finally, ensure that a non-abstract class has
         // no abstract methods.
