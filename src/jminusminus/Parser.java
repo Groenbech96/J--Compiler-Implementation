@@ -721,19 +721,19 @@ public class Parser {
 
     private JMember interfaceMemberDecl(ArrayList<String> mods) {
         // Modifier rules for interfaces
-        if(!mods.contains("static")) {
-            if(!mods.contains("public")) {
-                mods.add("public");
-            }
-            if(!mods.contains("abstract")) {
-                mods.add("abstract");
-            }
+        // Public by default
+        if(!mods.contains("public")) {
+            mods.add("public");
         }
 
         int line = scanner.token().line();
         JMember interfaceMemberDecl = null;
         Type type = null;
         if (have(VOID)) {
+            // Methods are also abstract by default
+            if(!mods.contains("abstract")) {
+                mods.add("abstract");
+            }
             // void method
             type = Type.VOID;
             mustBe(IDENTIFIER);
@@ -748,6 +748,10 @@ public class Parser {
         } else {
             type = type();
             if (seeIdentLParen()) {
+                // Methods are also abstract by default
+                if(!mods.contains("abstract")) {
+                    mods.add("abstract");
+                }
                 // Non void method
                 mustBe(IDENTIFIER);
                 String name = scanner.previousToken().image();
@@ -760,6 +764,13 @@ public class Parser {
                 interfaceMemberDecl = new JMethodDeclaration(line, mods, name, type, params, exceptions, null);
             } else {
                 // Field
+                // Variables are also both static and final by default
+                if(!mods.contains("static")) {
+                    mods.add("static");
+                }
+                if(!mods.contains("final")) {
+                    mods.add("final");
+                }
                 interfaceMemberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
                 mustBe(SEMI);
             }

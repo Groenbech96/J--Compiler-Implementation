@@ -772,12 +772,26 @@ private JMember interfaceMemberDecl( ArrayList<String>  mods ) : {
     ArrayList<JVariableDeclarator> variableDeclarators = null;
 }
 {
+    // Modifier rules for interfaces
+    // Both methods and variables are public by default
+    {
+      if(!mods.contains("public")) {
+        mods.add("public");
+      }
+    }
+
     try {
         LOOKAHEAD( ( <VOID> | type() ) <IDENTIFIER> <LPAREN> )
         (
             <VOID> { type = Type.VOID; } |
             type = type()
         )
+        {
+          // Methods are also abstract by default
+          if(!mods.contains("abstract")) {
+            mods.add("abstract");
+          }
+        }
         { line = token.beginLine; }
         <IDENTIFIER> { name = token.image; }
         params = formalParameters()
@@ -791,21 +805,20 @@ private JMember interfaceMemberDecl( ArrayList<String>  mods ) : {
         ]
         <SEMI>
         {
-            {
-              if(!mods.contains("static")) {
-                if(!mods.contains("public")) {
-                  mods.add("public");
-                }
-                if(!mods.contains("abstract")) {
-                  mods.add("abstract");
-                }
-              }
-            }
             interfaceMemberDecl =
                new JMethodDeclaration( line, mods, name,
                                        type, params, exceptions, null );
         } |
         ( 
+          {       
+            // Variables are also both static and final by default
+            if(!mods.contains("static")) {
+              mods.add("static");
+            }
+            if(!mods.contains("final")) {
+              mods.add("final");
+            }
+          }
             type = type() { line = token.beginLine; }
             variableDeclarators = variableDeclarators( type )
             <SEMI>
