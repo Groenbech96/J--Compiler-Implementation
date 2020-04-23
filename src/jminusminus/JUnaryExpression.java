@@ -390,7 +390,16 @@ class JPreDecrementOp extends JUnaryExpression {
     }
 
     public JExpression analyze(Context context) {
-        return null;
+        if (!(arg instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line,
+                    "Operand to --expr must have an LValue.");
+            type = Type.ANY;
+        } else {
+            arg = (JExpression) arg.analyze(context);
+            arg.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+            type = arg.type();
+        }
+        return this;
     }
 
     public void codegen(CLEmitter output) {

@@ -642,10 +642,10 @@ public class Parser {
      * <pre>
      *   memberDecl ::= IDENTIFIER            // constructor
      *                    formalParameters
-     *                    block
+     *                    [throws qualifiedIdentifier {, qualifiedIdentifier}] block
      *                | (VOID | type) IDENTIFIER  // method
      *                    formalParameters
-     *                    (block | SEMI)
+     *                    [throws qualifiedIdentifier {, qualifiedIdentifier}]  (block | SEMI)
      *                | type variableDeclarators SEMI
      * </pre>
      *
@@ -825,6 +825,7 @@ public class Parser {
      *               | WHILE parExpression statement
      *               | FOR forExpression statement
      *               | RETURN [expression] SEMI
+     *               | THROW expression SEMI
      *               | SEMI
      *               | statementExpression SEMI
      * </pre>
