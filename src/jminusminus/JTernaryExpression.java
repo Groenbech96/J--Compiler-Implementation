@@ -1,5 +1,7 @@
 package jminusminus;
 
+import static jminusminus.CLConstants.*;
+
 /**
  * The AST node for a ternary expression 'bool ? a : b'
  */
@@ -33,9 +35,7 @@ public class JTernaryExpression extends JExpression {
      */
     public JExpression analyze(Context context) {
 
-
         condition = condition.analyze(context);
-        JAST.compilationUnit.reportSemanticError(line(), "%s hello", condition.toString());
         ifTrue = ifTrue.analyze(context);
         ifFalse = ifFalse.analyze(context);
 
@@ -51,8 +51,21 @@ public class JTernaryExpression extends JExpression {
     }
 
     public void codegen(CLEmitter output) {
-        // TODO: this
-        System.err.println("Error in code generation for ternary");
+
+        // a = a == b ? a : c
+
+        String endLabel = output.createLabel();
+        String falseLabel = output.createLabel();
+
+        condition.codegen(output, falseLabel, false); // IF cond is false, goto false
+
+        ifTrue.codegen(output);
+        output.addBranchInstruction(GOTO, endLabel); // Goto end
+
+        output.addLabel(falseLabel);
+        ifFalse.codegen(output);
+        output.addLabel(endLabel);
+
     }
 
     @Override

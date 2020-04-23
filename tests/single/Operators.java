@@ -5,7 +5,7 @@ public class Operators {
         int a = 5;
         int b = 5;
 
-        // Tests parsing for all operators
+        /*// Tests parsing for all operators
         a = !(a == b) ? a : b;
         a = ~a;
         a = (a != b) ? a : b;
@@ -43,6 +43,6 @@ public class Operators {
         a = (true && false) ? a : b;
 
         int[] A = {1, 2, 3};
-        //System.out.flush();
+        //System.out.flush();*/
     }
 }
