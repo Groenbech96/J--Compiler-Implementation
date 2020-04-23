@@ -620,7 +620,7 @@ public class Parser {
     /**
      * Parse an interface body
      * <pre>
-     *      classBody ::= LCURLY
+     *      interfaceBody ::= LCURLY
      *                     {(VOID | type) IDENTIFIER formalParameters SEMI}
      *                    RCURLY
      * </pre>

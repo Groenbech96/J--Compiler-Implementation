@@ -754,9 +754,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
 * parse interface member declaration
 *
 * <pre>
-*   interfaceMemberDecl ::= classDeclaration
-*                         | interfaceDeclaration
-*                         | (void | type) <identifier>
+*   interfaceMemberDecl ::= (void | type) <identifier>
 *                              formalParameters { [] }
 *                                   [throws qualifiedIdentifier {, qualifiedIdentifier}] (block | ;)
 *                         | type variableDeclarators;
@@ -771,6 +769,7 @@ private JMember interfaceMemberDecl( ArrayList<String>  mods ) : {
     ArrayList<JFormalParameter> params = null;
     ArrayList<Type> exceptions = null;
     JMember interfaceMemberDecl = null;
+    ArrayList<JVariableDeclarator> variableDeclarators = null;
 }
 {
     try {
@@ -782,12 +781,41 @@ private JMember interfaceMemberDecl( ArrayList<String>  mods ) : {
         { line = token.beginLine; }
         <IDENTIFIER> { name = token.image; }
         params = formalParameters()
+        [
+            <THROWS>
+            { exceptions = new ArrayList<Type>(); exceptions.add( qualifiedIdentifier() ); }
+            (
+                <COMMA>
+                { exceptions.add( qualifiedIdentifier() ); }
+            )*
+        ]
+        <SEMI>
         {
+            {
+              if(!mods.contains("static")) {
+                if(!mods.contains("public")) {
+                  mods.add("public");
+                }
+                if(!mods.contains("abstract")) {
+                  mods.add("abstract");
+                }
+              }
+            }
             interfaceMemberDecl =
                new JMethodDeclaration( line, mods, name,
                                        type, params, exceptions, null );
-        }
+        } |
+        ( 
+            type = type() { line = token.beginLine; }
+            variableDeclarators = variableDeclarators( type )
+            <SEMI>
+            { 
+                interfaceMemberDecl = new JFieldDeclaration( line, mods, 
+                    variableDeclarators ); 
+            }
+        )
     } catch (ParseException e) {
+        reportParserError("%d", mods.size()); 
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
     {return interfaceMemberDecl;}
