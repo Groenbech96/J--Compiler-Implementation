@@ -614,33 +614,26 @@ public class Parser {
         }
         mustBe(RCURLY);
         return new JClassBody(classDeclarationLine, staticBlocks, instanceBlocks, members);
-        // return members;
     }
 
     /**
      * Parse an interface body
      * <pre>
      *      interfaceBody ::= LCURLY
-     *                     {(VOID | type) IDENTIFIER formalParameters SEMI}
-     *                    RCURLY
+                                { modifiers interfaceMemberDecl }
+     *                        RCURLY
      * </pre>
      *
      * @return methods founds
      */
     private ArrayList<JMember> interfaceBody() {
-        ArrayList<JMember> methods = new ArrayList<>();
+        ArrayList<JMember> members = new ArrayList<>();
         mustBe(LCURLY);
         while (!see(RCURLY) && !see(EOF)) {
-            int line = scanner.token().line();
-            Type type = have(VOID) ? Type.VOID : type();
-            mustBe(IDENTIFIER);
-            String name = scanner.previousToken().image();
-            ArrayList<JFormalParameter> params = formalParameters();
-            methods.add(new JMethodInterface(line, name, type, params));
-            mustBe(SEMI);
+            members.add(interfaceMemberDecl(modifiers()));
         }
         mustBe(RCURLY);
-        return methods;
+        return members;
     }
 
     /**
@@ -713,6 +706,66 @@ public class Parser {
         return memberDecl;
     }
 
+    /**
+     * Parse an interface member declaration.
+     *
+     * <pre>
+     *   interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method
+     *                    formalParameters SEMI
+     *                | type variableDeclarators SEMI
+     * </pre>
+     *
+     * @param mods the class member modifiers.
+     * @return an AST for a memberDecl.
+     */
+
+    private JMember interfaceMemberDecl(ArrayList<String> mods) {
+        // Modifier rules for interfaces
+        if(!mods.contains("static")) {
+            if(!mods.contains("public")) {
+                mods.add("public");
+            }
+            if(!mods.contains("abstract")) {
+                mods.add("abstract");
+            }
+        }
+
+        int line = scanner.token().line();
+        JMember interfaceMemberDecl = null;
+        Type type = null;
+        if (have(VOID)) {
+            // void method
+            type = Type.VOID;
+            mustBe(IDENTIFIER);
+            String name = scanner.previousToken().image();
+            ArrayList<JFormalParameter> params = formalParameters();
+            ArrayList<Type> exceptions = null;
+            if (see(THROWS)) {
+                exceptions = parseThrows();
+            }
+            mustBe(SEMI);
+            interfaceMemberDecl = new JMethodDeclaration(line, mods, name, type, params, exceptions, null);
+        } else {
+            type = type();
+            if (seeIdentLParen()) {
+                // Non void method
+                mustBe(IDENTIFIER);
+                String name = scanner.previousToken().image();
+                ArrayList<JFormalParameter> params = formalParameters();
+                ArrayList<Type> exceptions = null;
+                if (see(THROWS)) {
+                    exceptions = parseThrows();
+                }
+                mustBe(SEMI);
+                interfaceMemberDecl = new JMethodDeclaration(line, mods, name, type, params, exceptions, null);
+            } else {
+                // Field
+                interfaceMemberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
+                mustBe(SEMI);
+            }
+        }
+        return interfaceMemberDecl;
+    }
     private ArrayList<Type> parseThrows() {
         ArrayList<Type> exceptionTypes = new ArrayList();
         mustBe(THROWS);
