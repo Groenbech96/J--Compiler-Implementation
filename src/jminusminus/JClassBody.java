@@ -131,6 +131,11 @@ public class JClassBody extends JAST  {
         if (staticFieldInitializations.size() > 0 || staticBlocks.size() > 0) {
             codegenClassInit(output);
         }
+
+        for(JFieldDeclaration instanceField : instanceFieldInitializations){
+            instanceField.codegen(output);
+        }
+
     }
 
     @Override
@@ -174,12 +179,6 @@ public class JClassBody extends JAST  {
         output.addNoArgInstruction(ALOAD_0);
         output.addMemberAccessInstruction(INVOKESPECIAL, classSuperType.jvmName(),
                 "<init>", "()V");
-
-        // If there are instance field initializations, generate
-        // code for them
-        for (JFieldDeclaration instanceField : instanceFieldInitializations) {
-            instanceField.codegenInitializations(output);
-        }
 
         // Return
         output.addNoArgInstruction(RETURN);
