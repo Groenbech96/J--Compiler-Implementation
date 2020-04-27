@@ -26,12 +26,66 @@ abstract class JAssignment extends JBinaryExpression {
         super(line, operator, lhs, rhs);
     }
 
+    int numericAsm(int intInstruction) {
+        return numericAsm(intInstruction, NOP);
+    }
+
+    int numericAsm(int intInstruction, int doubleInstruction) {
+        if (type == Type.INT) return intInstruction;
+        if (type == Type.DOUBLE) return doubleInstruction;
+        JAST.compilationUnit.reportSemanticError(line(), "Illegal type " + type.toString());
+        return -1;
+    }
+
     int numericAdd() {
         if (type == Type.INT) return IADD;
         if (type == Type.DOUBLE) return DADD;
         JAST.compilationUnit.reportSemanticError(line(), "Illegal type for adding " + type.toString());
         return -1;
     }
+
+    int numericSub() {
+        if (type == Type.INT) return ISUB;
+        if (type == Type.DOUBLE) return DSUB;
+        JAST.compilationUnit.reportSemanticError(line(), "Illegal type for subtracting " + type.toString());
+        return -1;
+    }
+
+    int numericMul() {
+        if (type == Type.INT) return IMUL;
+        if (type == Type.DOUBLE) return DMUL;
+        JAST.compilationUnit.reportSemanticError(line(), "Illegal type for multiplying " + type.toString());
+        return -1;
+    }
+
+    int numericDiv() {
+        if (type == Type.INT) return IDIV;
+        if (type == Type.DOUBLE) return DDIV;
+        JAST.compilationUnit.reportSemanticError(line(), "Illegal type for dividing " + type.toString());
+        return -1;
+    }
+
+    int numericRem() {
+        if (type == Type.INT) return IDIV;
+        if (type == Type.DOUBLE) return DDIV;
+        JAST.compilationUnit.reportSemanticError(line(), "Illegal type for dividing " + type.toString());
+        return -1;
+    }
+
+    Type checkNumericTypes(JExpression lhs, JExpression rhs, Type ... types) {
+
+        for (Type t : types) {
+            if (lhs.type().equals(t)) {
+                rhs.type().mustMatchExpected(line(), t);
+                return t;
+            }
+        }
+        JAST.compilationUnit.reportSemanticError(line(),
+                "Invalid lhs type for +=: " + lhs.type());
+        return null;
+
+    }
+
 
 }
 
@@ -65,6 +119,7 @@ class JAssignOp extends JAssignment {
      */
 
     public JExpression analyze(Context context) {
+
         if (!(lhs instanceof JLhs)) {
             JAST.compilationUnit.reportSemanticError(line(),
                     "Illegal lhs for assignment");
@@ -144,19 +199,22 @@ class JPlusAssignOp extends JAssignment {
             lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
         }
         rhs = (JExpression) rhs.analyze(context);
-        if (lhs.type().equals(Type.INT)) {
-            rhs.type().mustMatchExpected(line(), Type.INT);
-            type = Type.INT;
-        } else if (lhs.type().equals(Type.DOUBLE)) {
-            rhs.type().mustMatchExpected(line(), Type.DOUBLE);
-            type = Type.DOUBLE;
-        } else if (lhs.type().equals(Type.STRING)) {
-            rhs = (new JStringConcatenationOp(line, lhs, rhs)).analyze(context);
-            type = Type.STRING;
-        } else {
-            JAST.compilationUnit.reportSemanticError(line(),
-                    "Invalid lhs type for +=: " + lhs.type());
-        }
+
+        checkNumericTypes(lhs, rhs, Type.INT, Type.DOUBLE, Type.STRING);
+
+//        if (lhs.type().equals(Type.INT)) {
+//            rhs.type().mustMatchExpected(line(), Type.INT);
+//            type = Type.INT;
+//        } else if (lhs.type().equals(Type.DOUBLE)) {
+//            rhs.type().mustMatchExpected(line(), Type.DOUBLE);
+//            type = Type.DOUBLE;
+//        } else if (lhs.type().equals(Type.STRING)) {
+//            rhs = (new JStringConcatenationOp(line, lhs, rhs)).analyze(context);
+//            type = Type.STRING;
+//        } else {
+//            JAST.compilationUnit.reportSemanticError(line(),
+//                    "Invalid lhs type for +=: " + lhs.type());
+//        }
         return this;
     }
 
@@ -177,7 +235,7 @@ class JPlusAssignOp extends JAssignment {
         } else {
             ((JLhs) lhs).codegenLoadLhsRvalue(output);
             rhs.codegen(output);
-            output.addNoArgInstruction(numericAdd());
+            output.addNoArgInstruction(numericAsm(IADD, DADD));
         }
         if (!isStatementExpression) {
             // Generate code to leave the r-value atop stack
@@ -194,10 +252,39 @@ class JMinusAssignOp extends JAssignment {
     }
 
     public JExpression analyze(Context context) {
-        return null;
+
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+
+        rhs = (JExpression) rhs.analyze(context);
+        type = checkNumericTypes(lhs, rhs, Type.INT, Type.DOUBLE);
+
+        return this;
+
     }
 
     public void codegen(CLEmitter output) {
+
+        // Load L-value onto stack
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        // Load R value for assignment
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+
+        rhs.codegen(output);
+        output.addNoArgInstruction(numericAsm(ISUB, DSUB));
+
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack (x = y--)
+            // (y-- should be treated as R-value, hence atop stack)
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
+
     }
 }
 
@@ -207,10 +294,39 @@ class JStarAssignOp extends JAssignment {
     }
 
     public JExpression analyze(Context context) {
-        return null;
+        // Make sure that lhs is an actual lhs
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+
+        rhs = (JExpression) rhs.analyze(context);
+        type = checkNumericTypes(lhs, rhs, Type.INT, Type.DOUBLE);
+
+        return this;
+
     }
 
     public void codegen(CLEmitter output) {
+
+        // Load L-value onto stack
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        // Load R value for assignment
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+
+        rhs.codegen(output);
+        output.addNoArgInstruction(numericAsm(IMUL, DMUL));
+
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack (x = y--)
+            // (y-- should be treated as R-value, hence atop stack)
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
+
     }
 }
 
@@ -220,10 +336,36 @@ class JDivideAssignOp extends JAssignment {
     }
 
     public JExpression analyze(Context context) {
-        return null;
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+
+        rhs = (JExpression) rhs.analyze(context);
+        type = checkNumericTypes(lhs, rhs, Type.INT, Type.DOUBLE);
+
+        return this;
     }
 
     public void codegen(CLEmitter output) {
+
+        // Load L-value onto stack
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        // Load R value for assignment
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+
+        rhs.codegen(output);
+        output.addNoArgInstruction(numericAsm(IDIV, DDIV));
+
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack (x = y--)
+            // (y-- should be treated as R-value, hence atop stack)
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
     }
 }
 
@@ -233,10 +375,35 @@ class JRemainderAssignOp extends JAssignment {
     }
 
     public JExpression analyze(Context context) {
-        return null;
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+        rhs = (JExpression) rhs.analyze(context);
+        type = checkNumericTypes(lhs, rhs, Type.INT, Type.DOUBLE);
+
+        return this;
     }
 
     public void codegen(CLEmitter output) {
+
+        // Load L-value onto stack
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        // Load R value for assignment
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+
+        rhs.codegen(output);
+        output.addNoArgInstruction(numericAsm(IREM, DREM));
+
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack (x = y--)
+            // (y-- should be treated as R-value, hence atop stack)
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
     }
 }
 
@@ -246,10 +413,34 @@ class JRShiftAssignOp extends JAssignment {
     }
 
     public JExpression analyze(Context context) {
-        return null;
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+        rhs = (JExpression) rhs.analyze(context);
+        type = checkNumericTypes(lhs, rhs, Type.INT);
+
+        return this;
     }
 
     public void codegen(CLEmitter output) {
+        // Load L-value onto stack
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        // Load R value for assignment
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+
+        rhs.codegen(output);
+        output.addNoArgInstruction(numericAsm(ISHR));
+
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack (x = y--)
+            // (y-- should be treated as R-value, hence atop stack)
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
     }
 }
 
@@ -259,10 +450,34 @@ class JRShiftZeroAssignOp extends JAssignment {
     }
 
     public JExpression analyze(Context context) {
-        return null;
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+        rhs = (JExpression) rhs.analyze(context);
+        type = checkNumericTypes(lhs, rhs, Type.INT);
+
+        return this;
     }
 
     public void codegen(CLEmitter output) {
+        // Load L-value onto stack
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        // Load R value for assignment
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+
+        rhs.codegen(output);
+        output.addNoArgInstruction(numericAsm(IUSHR));
+
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack (x = y--)
+            // (y-- should be treated as R-value, hence atop stack)
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
     }
 }
 
@@ -272,10 +487,34 @@ class JLShiftAssignOp extends JAssignment {
     }
 
     public JExpression analyze(Context context) {
-        return null;
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+        rhs = (JExpression) rhs.analyze(context);
+        type = checkNumericTypes(lhs, rhs, Type.INT);
+
+        return this;
     }
 
     public void codegen(CLEmitter output) {
+        // Load L-value onto stack
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        // Load R value for assignment
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+
+        rhs.codegen(output);
+        output.addNoArgInstruction(numericAsm(ISHL));
+
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack (x = y--)
+            // (y-- should be treated as R-value, hence atop stack)
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
     }
 }
 
@@ -285,10 +524,34 @@ class JAndAssignOp extends JAssignment {
     }
 
     public JExpression analyze(Context context) {
-        return null;
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+        rhs = (JExpression) rhs.analyze(context);
+        type = checkNumericTypes(lhs, rhs, Type.INT);
+
+        return this;
     }
 
     public void codegen(CLEmitter output) {
+        // Load L-value onto stack
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        // Load R value for assignment
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+
+        rhs.codegen(output);
+        output.addNoArgInstruction(numericAsm(IAND));
+
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack (x = y--)
+            // (y-- should be treated as R-value, hence atop stack)
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
     }
 }
 
@@ -298,10 +561,34 @@ class JOrAssignOp extends JAssignment {
     }
 
     public JExpression analyze(Context context) {
-        return null;
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+        rhs = (JExpression) rhs.analyze(context);
+        type = checkNumericTypes(lhs, rhs, Type.INT);
+
+        return this;
     }
 
     public void codegen(CLEmitter output) {
+        // Load L-value onto stack
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        // Load R value for assignment
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+
+        rhs.codegen(output);
+        output.addNoArgInstruction(numericAsm(IOR));
+
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack (x = y--)
+            // (y-- should be treated as R-value, hence atop stack)
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
     }
 }
 
@@ -311,9 +598,34 @@ class JXorAssignOp extends JAssignment {
     }
 
     public JExpression analyze(Context context) {
-        return null;
+
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+        rhs = (JExpression) rhs.analyze(context);
+        type = checkNumericTypes(lhs, rhs, Type.INT);
+
+        return this;
     }
 
     public void codegen(CLEmitter output) {
+        // Load L-value onto stack
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        // Load R value for assignment
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+
+        rhs.codegen(output);
+        output.addNoArgInstruction(numericAsm(IXOR));
+
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack (x = y--)
+            // (y-- should be treated as R-value, hence atop stack)
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
     }
 }
