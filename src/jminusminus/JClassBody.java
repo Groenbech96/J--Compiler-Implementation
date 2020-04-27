@@ -65,10 +65,8 @@ public class JClassBody extends JAST  {
     }
 
     public void preAnalyzeMembers(Context context, CLEmitter partial) {
-
         // Pre-analyze the members and add them to the partial
         // class
-
         for (JMember member : members) {
             member.preAnalyze(context, partial);
             if (member instanceof JConstructorDeclaration
@@ -86,8 +84,18 @@ public class JClassBody extends JAST  {
 
     @Override
     public JAST analyze(Context context) {
+
+        for(JBlock block : instanceBlocks) {
+            block.analyze(context);
+        }
+
+        for(JBlock block : staticBlocks) {
+            block.analyze(context);
+        }
+
         // Analyze all members
         for (JMember member : members) {
+            //Todo: Should we update the members?
             ((JAST) member).analyze(context);
         }
 
@@ -120,42 +128,34 @@ public class JClassBody extends JAST  {
         }
 
         // Generate a class initialization method?
-        if (staticFieldInitializations.size() > 0) {
+        if (staticFieldInitializations.size() > 0 || staticBlocks.size() > 0) {
             codegenClassInit(output);
         }
-
-
-
-
     }
 
     @Override
     public void writeToStdOut(PrettyPrinter p) {
-
+        p.println("<ClassBlock>");
+         
         if(staticBlocks.size() > 0) {
-            p.println("<ClassBlock>");
             for (JBlock member : staticBlocks) {
                 ((JAST) member).writeToStdOut(p);
             }
-            p.println("</ClassBlock>");
         }
 
         if(instanceBlocks.size() > 0) {
-            p.println("<ClassBlock>");
-            for (JBlock member : staticBlocks) {
+            for (JBlock member : instanceBlocks) {
                 ((JAST) member).writeToStdOut(p);
             }
-            p.println("</ClassBlock>");
         }
 
         if (members.size() > 0) {
-            p.println("<ClassBlock>");
             for (JMember member : members) {
                 ((JAST) member).writeToStdOut(p);
             }
-            p.println("</ClassBlock>");
         }
 
+        p.println("</ClassBlock>");
     }
 
     /**
@@ -203,6 +203,10 @@ public class JClassBody extends JAST  {
         // for them
         for (JFieldDeclaration staticField : staticFieldInitializations) {
             staticField.codegenInitializations(output);
+        }
+
+        for (JBlock block : staticBlocks) {
+            block.codegen(output);
         }
 
         // Return

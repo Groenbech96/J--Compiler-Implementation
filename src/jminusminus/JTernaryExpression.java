@@ -32,7 +32,10 @@ public class JTernaryExpression extends JExpression {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
     public JExpression analyze(Context context) {
+
+
         condition = condition.analyze(context);
+        JAST.compilationUnit.reportSemanticError(line(), "%s hello", condition.toString());
         ifTrue = ifTrue.analyze(context);
         ifFalse = ifFalse.analyze(context);
 

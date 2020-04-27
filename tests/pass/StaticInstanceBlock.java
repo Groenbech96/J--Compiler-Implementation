@@ -1,7 +1,7 @@
 package pass;
 
 public class StaticInstanceBlock {
-    private static int test;
+    public static int test;
     private int nonStaticTest;
     static {
         test = 5;
