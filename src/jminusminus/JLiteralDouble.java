@@ -1,16 +1,18 @@
 package jminusminus;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import static jminusminus.CLConstants.DCONST_0;
 import static jminusminus.CLConstants.DCONST_1;
 
 public class JLiteralDouble extends JExpression {
     /**
-     * String representation of the int.
+     * String representation of the double.
      */
     private String text;
 
     /**
-     * Construct an AST node for an int literal given its line number and string
+     * Construct an AST node for a double literal given its line number and string
      * representation.
      *
      * @param line line in which the literal occurs in the source file.
@@ -23,7 +25,7 @@ public class JLiteralDouble extends JExpression {
     }
 
     /**
-     * Analyzing an int literal is trivial.
+     * Analyzing a double literal is trivial.
      *
      * @param context context in which names are resolved (ignored here).
      * @return the analyzed (and possibly rewritten) AST subtree.
@@ -35,7 +37,7 @@ public class JLiteralDouble extends JExpression {
     }
 
     /**
-     * Generating code for an int literal means generating code to push it onto
+     * Generating code for a double literal means generating code to push it onto
      * the stack.
      *
      * @param output the code emitter (basically an abstraction for producing the
@@ -46,10 +48,11 @@ public class JLiteralDouble extends JExpression {
         double i = Double.parseDouble(text);
         if (i == 0) {
             output.addNoArgInstruction(DCONST_0);
-        } else if (i == 1){
+        } else if (i == 1) {
             output.addNoArgInstruction(DCONST_1);
         } else {
             // TODO: code-gen
+            throw new NotImplementedException();
         }
     }
 
