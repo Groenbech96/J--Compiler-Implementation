@@ -6,6 +6,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
@@ -85,6 +86,11 @@ class Type {
     public static Type OBJECT = typeFor(java.lang.Object.class);
 
     /**
+     * The type java.util.Enumerable.
+     */
+    public static Type ENUMERABLE = typeFor(java.util.Enumeration.class);
+
+    /**
      * The void type.
      */
     public final static Type VOID = typeFor(void.class);
@@ -135,8 +141,7 @@ class Type {
      * This constructor is to keep the compiler happy.
      */
 
-    protected Type() {
-        super();
+    protected Type() { super();
     }
 
     /**

@@ -1,6 +1,8 @@
 package pass;
 
 import java.lang.System;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ForStatements {
     public static void main(String[] args) {
@@ -18,14 +20,19 @@ public class ForStatements {
 
         // For loop with initial statements instead of variable declarations
         int i = 0;
-        for(i += 1, i += 1, i += 1; i == 0; i += 1) {
+        for (i += 1, i += 1, i += 1; i == 0; i += 1) {
+        }
+
+        List<Integer> list = new ArrayList<Integer>();
+
+        for (Integer value : list) {
         }
 
         TestClass[] arr = new TestClass[5];
-        for(TestClass tc : arr) {
+        for (TestClass tc : arr) {
         }
 
-        for(;;) {
+        for (; ; ) {
         }
     }
 }

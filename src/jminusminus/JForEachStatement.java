@@ -46,7 +46,14 @@ class JForEachStatement extends JStatement {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
     public JForEachStatement analyze(Context context) {
-        body = (JStatement)body.analyze(context);
+        body = (JStatement) body.analyze(context);
+        parameter = (JFormalParameter) parameter.analyze(context);
+
+        if (!array.isArray())
+            parameter.type().mustMatchExpected(line(), Type.ENUMERABLE);
+        
+        array.componentType().mustMatchExpected(line(), parameter.type());
+
         return this;
     }
 
