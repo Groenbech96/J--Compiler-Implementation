@@ -121,6 +121,11 @@ class Type {
     public final static Type ANY = new Type(null);
 
     /**
+     * The throwable type
+     */
+    public final static Type THROWABLE = new Type(java.lang.Throwable.class);
+
+    /**
      * Construct a Type representation for a type from its Java (Class)
      * representation. Use typeFor() -- that maps types having like classReps to
      * like Types.
