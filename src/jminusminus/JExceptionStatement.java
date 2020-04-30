@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class JExceptionStatement extends JStatement {
 
-    private JBlock tryBLock;
+    private JBlock tryBlock;
     private ArrayList<JBlock> catchBlocks;
     private ArrayList<ArrayList<JFormalParameter>> parametersList;
 
@@ -17,7 +17,7 @@ public class JExceptionStatement extends JStatement {
      */
     protected JExceptionStatement(int line, JBlock tryblock, ArrayList<JBlock> catchBlocks, ArrayList<ArrayList<JFormalParameter>> parameters, JBlock finalBlock) {
         super(line);
-        this.tryBLock = tryblock;
+        this.tryBlock = tryblock;
         this.catchBlocks = catchBlocks;
         this.parametersList = parameters;
         this.finalBlock = finalBlock;
@@ -26,7 +26,22 @@ public class JExceptionStatement extends JStatement {
 
     @Override
     public JAST analyze(Context context) {
-        return null;
+        tryBlock = tryBlock.analyze(context);
+
+        for (JBlock block : catchBlocks) {
+            block = block.analyze(context);
+        }
+
+        for (ArrayList<JFormalParameter> parameters : parametersList) {
+            for (JFormalParameter parameter : parameters) {
+                parameter = (JFormalParameter) parameter.analyze(context);
+                parameter.type().mustMatchExpected(line(), Type.THROWABLE);
+            }
+        }
+
+        finalBlock = finalBlock.analyze(context);
+
+        return this;
     }
 
     @Override
@@ -40,7 +55,7 @@ public class JExceptionStatement extends JStatement {
         p.indentRight();
         p.printf("<TryBlock>\n");
         p.indentRight();
-        tryBLock.writeToStdOut(p);
+        tryBlock.writeToStdOut(p);
         p.indentLeft();
         p.printf("</TryBlock>\n");
         if(!parametersList.isEmpty()) {
