@@ -8,6 +8,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
@@ -87,6 +88,11 @@ class Type {
     public static Type OBJECT = typeFor(java.lang.Object.class);
 
     /**
+     * The type java.util.Enumerable.
+     */
+    public static Type ENUMERABLE = typeFor(java.util.Enumeration.class);
+
+    /**
      * The void type.
      */
     public final static Type VOID = typeFor(void.class);
@@ -117,6 +123,11 @@ class Type {
     public final static Type ANY = new Type(null);
 
     /**
+     * The throwable type
+     */
+    public final static Type THROWABLE = new Type(java.lang.Throwable.class);
+
+    /**
      * Construct a Type representation for a type from its Java (Class)
      * representation. Use typeFor() -- that maps types having like classReps to
      * like Types.
@@ -132,8 +143,7 @@ class Type {
      * This constructor is to keep the compiler happy.
      */
 
-    protected Type() {
-        super();
+    protected Type() { super();
     }
 
     /**
@@ -216,6 +226,26 @@ class Type {
     }
 
     /**
+     * Return the Type's interfaces (or null if there is none). Meaningful only
+     * to class Types.
+     *
+     * @return the super type.
+     */
+
+    public ArrayList<Type> interfaces() {
+        if(classRep == null) {
+            return new ArrayList<Type>();
+        }
+        ArrayList<Type> types = new ArrayList<>();
+        Class<?>[] interfaces = classRep.getInterfaces();
+        
+        for(Class<?> iface : interfaces) {
+            types.add(typeFor(iface));
+        }
+        return types;
+    }
+
+    /**
      * Is this a primitive type?
      *
      * @return true or false.
@@ -276,10 +306,47 @@ class Type {
         return this.classRep.isAssignableFrom(that.classRep);
     }
 
+    // Returns true if access to method b is less
+    // or equally as restrictive as access to method a
+    public boolean isLessOrEquallyRestrictive(Method a, Method b) {
+        if (a.isPublic()) {
+            return b.isPublic();
+        }
+        if (a.isProtected()) {
+            return (b.isPublic() || b.isProtected());
+        }
+        if (a.isPrivate()) {
+            return (b.isPublic() || b.isProtected() || b.isPrivate());
+        }
+        return false;
+    }
+
+    // Returns true if the method given is allowed to override a method in
+    // the list of methods given. It is allowed to do so if:
+    // (1): The method to be overriden is not final or static
+    // (2): They have the same parameters
+    // (3): They have the same name
+    // (4): They have the same return type
+    // (5): The method to be overriden is less or equally restrictive
+    public boolean containsMethod(ArrayList<Method> methods, Method method) {
+            for (Method candidate : methods) {
+                if (!candidate.isStatic() &&
+                     !candidate.isFinal() &&
+                     candidate.equals(method) &&
+                     candidate.returnType() == method.returnType() &&
+                     candidate.name() == method.name() &&
+                     isLessOrEquallyRestrictive(candidate, method)) {
+                        return true;
+                }
+            }
+            return false;
+    }
+
     /**
      * Return a list of this class' abstract methods? It does has abstract
      * methods if (1) Any method declared in the class is abstract, or (2) Its
-     * superclass has an abstract method which is not overridden here.
+     * superclass has an abstract method which is not overridden here or (3)
+     * it implements an interface with methods not overriden here
      *
      * @return a list of abstract methods.
      */
@@ -287,13 +354,21 @@ class Type {
     public ArrayList<Method> abstractMethods() {
         ArrayList<Method> inheritedAbstractMethods = superClass() == null ? new ArrayList<Method>()
                 : superClass().abstractMethods();
+
+        // Add all interface methods to the list of inherited abstract methods
+        ArrayList<Type> interfaces = interfaces();
+        for(Type iface : interfaces) {
+            inheritedAbstractMethods.addAll(iface.abstractMethods());
+        }
+
         ArrayList<Method> abstractMethods = new ArrayList<Method>();
         ArrayList<Method> declaredConcreteMethods = declaredConcreteMethods();
         ArrayList<Method> declaredAbstractMethods = declaredAbstractMethods();
+
         abstractMethods.addAll(declaredAbstractMethods);
         for (Method method : inheritedAbstractMethods) {
-            if (!declaredConcreteMethods.contains(method)
-                    && !declaredAbstractMethods.contains(method)) {
+            if(!containsMethod(declaredConcreteMethods, method) &&
+                !containsMethod(declaredAbstractMethods, method)) {
                 abstractMethods.add(method);
             }
         }

@@ -4,28 +4,69 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class JInterfaceDeclaration extends JAST implements JTypeDecl {
-    private final ArrayList<JMember> methods;
-    private final ArrayList<Type> interfaces;
+    private final ArrayList<JMember> members;
+    private final ArrayList<Type> superInterfaces;
     private final String name;
     private final ArrayList<String> mods;
-    private ClassContext context;
     private Type thisType;
+    private ArrayList<JFieldDeclaration> staticFieldInitializations;
+    private ClassContext context;
+    private ArrayList<String> superInterfaceNames;
 
     /**
      * Construct an AST node the given its line number in the source file.
      *
      * @param line line in which the source for the AST was found.
      */
-    protected JInterfaceDeclaration(int line, ArrayList<String> mods, String name,  ArrayList<Type> interfaces, ArrayList<JMember> methods) {
+    protected JInterfaceDeclaration(int line, ArrayList<String> mods, String name,  ArrayList<Type> superInterfaces, ArrayList<JMember> members) {
         super(line);
         this.mods = mods;
+        this.mods.add("interface");
         this.name = name;
-        this.interfaces = interfaces;
-        this.methods = methods;
-        this.thisType = this.thisType();
+        this.superInterfaces = superInterfaces;
+        this.members = members;
+        this.staticFieldInitializations = new ArrayList<>();
     }
 
-    //TODO: Fill out codegen
+    @Override
+    public void preAnalyze(Context context) {
+
+        // Create the (partial) interface, this is required
+        // in the pre-analysis pass so the interface can be
+        // referenced before it is declared
+        CLEmitter partial = new CLEmitter(false);
+
+        String packageName = JAST.compilationUnit.packageName();
+        String qualifiedName = packageName == "" ? name : packageName + "/" + name;
+
+        // TODO: CHECK
+        superInterfaceNames = new ArrayList<String>();
+        if(superInterfaces != null) {
+            for(Type t : superInterfaces) {
+                Type superType = t.resolve(this.context);
+                superInterfaceNames.add(superType.jvmName());
+            }
+        }
+        // All interfaces have OBJECT as their supertype
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null, false);
+
+        // Ensure that all members are methods or field declarations
+        for(JMember member : members) {
+            if(!(member instanceof JMethodDeclaration || member instanceof JFieldDeclaration)) {
+                JAST.compilationUnit.reportSemanticError(line(), 
+                    "Member %s is not a valid interface member", member.toString());
+            }
+
+            member.preAnalyze(this.context, partial);
+        }
+
+        // Get the Class rep for the (partial) class and make it
+        // the representation for this type
+        Type id = this.context.lookupType(name);
+        if (id != null && !JAST.compilationUnit.errorHasOccurred()) {
+            id.setClassRep(partial.toClass());
+        }
+    }
 
     @Override
     public void preAnalyze(Context context) {
@@ -61,13 +102,42 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     @Override
     public JAST analyze(Context context) {
-        // s164429: I don't see any members of the declaration that needs analyze called on it.
+        // Analyze all members
+        for (JMember member : members) {
+            ((JAST) member).analyze(this.context);
+        }
+
+        // Copy declared fields for purposes of initialization.
+        for (JMember member : members) {
+            if (member instanceof JFieldDeclaration) {
+                JFieldDeclaration fieldDecl = (JFieldDeclaration) member;
+                if (fieldDecl.mods().contains("static")) {
+                    staticFieldInitializations.add(fieldDecl);
+                } else {
+                    JAST.compilationUnit.reportSemanticError(line(), 
+                    "Field declaration is not a static member, interfaces may only have static field declarations", member.toString());
+                }
+            }
+        }
+
         return this;
     }
 
     @Override
     public void codegen(CLEmitter output) {
+        String packageName = JAST.compilationUnit.packageName();
+        String qualifiedName = packageName == "" ? name : packageName + "/" + name;
+        output.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), superInterfaceNames, false); 
 
+        // Generate code for the interface members
+        for (JMember member : members) {
+            ((JAST) member).codegen(output);
+        }
+
+        // Generate code for the static fields
+        for (JFieldDeclaration staticField : staticFieldInitializations) {
+            staticField.codegenInitializations(output);
+        }
     }
 
     @Override
@@ -99,7 +169,12 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     @Override
     public void declareThisType(Context context) {
-
+        String packageName = JAST.compilationUnit.packageName();
+        String qualifiedName = packageName == "" ? name : packageName + "/" + name;
+        CLEmitter partial = new CLEmitter(false);
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), superInterfaceNames, false);
+        thisType = Type.typeFor(partial.toClass());
+        context.addType(line, thisType);
     }
 
     @Override
@@ -109,7 +184,7 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     @Override
     public Type superType() {
-        return null;
+        return Type.OBJECT;
     }
 
     @Override
