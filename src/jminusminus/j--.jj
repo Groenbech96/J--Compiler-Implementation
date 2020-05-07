@@ -754,9 +754,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
 * parse interface member declaration
 *
 * <pre>
-*   interfaceMemberDecl ::= classDeclaration
-*                         | interfaceDeclaration
-*                         | (void | type) <identifier>
+*   interfaceMemberDecl ::= (void | type) <identifier>
 *                              formalParameters { [] }
 *                                   [throws qualifiedIdentifier {, qualifiedIdentifier}] (block | ;)
 *                         | type variableDeclarators;
@@ -771,23 +769,66 @@ private JMember interfaceMemberDecl( ArrayList<String>  mods ) : {
     ArrayList<JFormalParameter> params = null;
     ArrayList<Type> exceptions = null;
     JMember interfaceMemberDecl = null;
+    ArrayList<JVariableDeclarator> variableDeclarators = null;
 }
 {
+    // Modifier rules for interfaces
+    // Both methods and variables are public by default
+    {
+      if(!mods.contains("public")) {
+        mods.add("public");
+      }
+    }
+
     try {
         LOOKAHEAD( ( <VOID> | type() ) <IDENTIFIER> <LPAREN> )
         (
             <VOID> { type = Type.VOID; } |
             type = type()
         )
+        {
+          // Methods are also abstract by default
+          if(!mods.contains("abstract")) {
+            mods.add("abstract");
+          }
+        }
         { line = token.beginLine; }
         <IDENTIFIER> { name = token.image; }
         params = formalParameters()
+        [
+            <THROWS>
+            { exceptions = new ArrayList<Type>(); exceptions.add( qualifiedIdentifier() ); }
+            (
+                <COMMA>
+                { exceptions.add( qualifiedIdentifier() ); }
+            )*
+        ]
+        <SEMI>
         {
             interfaceMemberDecl =
                new JMethodDeclaration( line, mods, name,
                                        type, params, exceptions, null );
-        }
+        } |
+        ( 
+          {       
+            // Variables are also both static and final by default
+            if(!mods.contains("static")) {
+              mods.add("static");
+            }
+            if(!mods.contains("final")) {
+              mods.add("final");
+            }
+          }
+            type = type() { line = token.beginLine; }
+            variableDeclarators = variableDeclarators( type )
+            <SEMI>
+            { 
+                interfaceMemberDecl = new JFieldDeclaration( line, mods, 
+                    variableDeclarators ); 
+            }
+        )
     } catch (ParseException e) {
+        reportParserError("%d", mods.size()); 
         recoverFromError( new int[] { SEMI, EOF }, e );
     }
     {return interfaceMemberDecl;}

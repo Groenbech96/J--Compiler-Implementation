@@ -267,8 +267,15 @@ class JPostDecrementOp extends JUnaryExpression {
                 // Loading its original rvalue
                 ((JLhs) arg).codegenDuplicateRvalue(output);
             }
-            output.addNoArgInstruction(ICONST_1);
-            output.addNoArgInstruction(ISUB);
+
+            if(type == Type.INT) {
+                output.addNoArgInstruction(ICONST_1);
+                output.addNoArgInstruction(ISUB);
+            } else if (type == Type.DOUBLE) {
+                output.addNoArgInstruction(DCONST_1);
+                output.addNoArgInstruction(DSUB);
+            }
+
             ((JLhs) arg).codegenStore(output);
         }
     }
@@ -294,10 +301,46 @@ class JPostIncrementOp extends JUnaryExpression {
     }
 
     public JExpression analyze(Context context) {
+        if (!(arg instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line,
+                    "Operand to expr++ must have an LValue.");
+            type = Type.ANY;
+        } else {
+            arg = (JExpression) arg.analyze(context);
+            arg.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+            type = arg.type();
+        }
         return this;
     }
 
     public void codegen(CLEmitter output) {
+        if (arg instanceof JVariable) {
+            // A local variable; otherwise analyze() would
+            // have replaced it with an explicit field selection.
+            int offset = ((LocalVariableDefn) ((JVariable) arg).iDefn())
+                    .offset();
+            if (!isStatementExpression) {
+                // Loading its original rvalue
+                arg.codegen(output);
+            }
+            output.addIINCInstruction(offset, 1);
+        } else {
+            ((JLhs) arg).codegenLoadLhsLvalue(output);
+            ((JLhs) arg).codegenLoadLhsRvalue(output);
+            if (!isStatementExpression) {
+                // Loading its original rvalue
+                ((JLhs) arg).codegenDuplicateRvalue(output);
+            }
+
+            if(type == Type.INT) {
+                output.addNoArgInstruction(ICONST_1);
+                output.addNoArgInstruction(IADD);
+            } else if (type == Type.DOUBLE) {
+                output.addNoArgInstruction(DCONST_1);
+                output.addNoArgInstruction(DADD);
+            }
+            ((JLhs) arg).codegenStore(output);
+        }
     }
 }
 
@@ -368,8 +411,15 @@ class JPreIncrementOp extends JUnaryExpression {
         } else {
             ((JLhs) arg).codegenLoadLhsLvalue(output);
             ((JLhs) arg).codegenLoadLhsRvalue(output);
-            output.addNoArgInstruction(ICONST_1);
-            output.addNoArgInstruction(IADD);
+
+            if(type == Type.INT) {
+                output.addNoArgInstruction(ICONST_1);
+                output.addNoArgInstruction(IADD);
+            } else if (type == Type.DOUBLE) {
+                output.addNoArgInstruction(DCONST_1);
+                output.addNoArgInstruction(DADD);
+            }
+
             if (!isStatementExpression) {
                 // Loading its original rvalue
                 ((JLhs) arg).codegenDuplicateRvalue(output);
@@ -403,6 +453,34 @@ class JPreDecrementOp extends JUnaryExpression {
     }
 
     public void codegen(CLEmitter output) {
+        if (arg instanceof JVariable) {
+            // A local variable; otherwise analyze() would
+            // have replaced it with an explicit field selection.
+            int offset = ((LocalVariableDefn) ((JVariable) arg).iDefn())
+                    .offset();
+            output.addIINCInstruction(offset, -1);
+            if (!isStatementExpression) {
+                // Loading its original rvalue
+                arg.codegen(output);
+            }
+        } else {
+            ((JLhs) arg).codegenLoadLhsLvalue(output);
+            ((JLhs) arg).codegenLoadLhsRvalue(output);
+
+            if(type == Type.INT) {
+                output.addNoArgInstruction(ICONST_1);
+                output.addNoArgInstruction(ISUB);
+            } else if (type == Type.DOUBLE) {
+                output.addNoArgInstruction(DCONST_1);
+                output.addNoArgInstruction(DSUB);
+            }
+
+            if (!isStatementExpression) {
+                // Loading its original rvalue
+                ((JLhs) arg).codegenDuplicateRvalue(output);
+            }
+            ((JLhs) arg).codegenStore(output);
+        }
     }
 
 }

@@ -200,7 +200,7 @@ class JPlusAssignOp extends JAssignment {
         }
         rhs = (JExpression) rhs.analyze(context);
 
-        checkNumericTypes(lhs, rhs, Type.INT, Type.DOUBLE, Type.STRING);
+        type = checkNumericTypes(lhs, rhs, Type.INT, Type.DOUBLE, Type.STRING);
 
 //        if (lhs.type().equals(Type.INT)) {
 //            rhs.type().mustMatchExpected(line(), Type.INT);

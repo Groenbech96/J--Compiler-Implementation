@@ -42,7 +42,9 @@ public class Operators {
         a &= b;
         a = (true && false) ? a : b;
 
-        int[] A = {1, 2, 3};
-        //System.out.flush();
+
+
+        // int[] A = {1, 2, 3};
+        //System.out.flush();*/
     }
 }

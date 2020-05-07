@@ -53,6 +53,10 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      */
     private ClassContext context;
 
+    /**
+     * Interface names
+     */
+    private ArrayList<String> interfaceNames;
 
 
 
@@ -169,18 +173,24 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         // Create the (partial) class
         CLEmitter partial = new CLEmitter(false);
 
+        interfaceNames = new ArrayList<>();
+        if(interfaces != null) {
+            for(Type type : interfaces) {
+                type = type.resolve(this.context);
+                interfaceNames.add(type.jvmName());
+            }
+        }
         // Add the class header to the partial class
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
-        partial.addClass(mods, qualifiedName, superType.jvmName(), null, false);
+        partial.addClass(mods, qualifiedName, superType.jvmName(), interfaceNames, false);
 
         // Pre analyze all members of this class
         // Finds out if we have an explicit constructor
         this.classBody.preAnalyzeMembers(this.context, partial);
 
         // Get the Class rep for the (partial) class and make it
-        // the
-        // representation for this type
+        // the representation for this type
         Type id = this.context.lookupType(name);
         if (id != null && !JAST.compilationUnit.errorHasOccurred()) {
             id.setClassRep(partial.toClass());
@@ -197,7 +207,6 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      */
 
     public JAST analyze(Context context) {
-
         // Analyze body
         this.classBody.analyze(this.context);
 
@@ -209,10 +218,11 @@ class JClassDeclaration extends JAST implements JTypeDecl {
                 methods += "\n" + method;
             }
             JAST.compilationUnit.reportSemanticError(line,
-                    "Class must be declared abstract since it defines "
-                            + "the following abstract methods: %s", methods);
+                    "Class %s must be declared abstract since it defines "
+                            + "the following abstract methods: %s", name, methods);
 
         }
+
         return this;
     }
 
