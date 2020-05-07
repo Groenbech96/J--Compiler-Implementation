@@ -125,7 +125,10 @@ class JNegateOp extends JUnaryExpression {
 
     public void codegen(CLEmitter output) {
         arg.codegen(output);
-        output.addNoArgInstruction(INEG);
+        if (type == Type.INT)
+            output.addNoArgInstruction(INEG);
+        else if (type == Type.DOUBLE)
+            output.addNoArgInstruction(DNEG);
     }
 
 }
