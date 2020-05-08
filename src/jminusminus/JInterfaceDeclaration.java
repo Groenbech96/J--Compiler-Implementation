@@ -1,6 +1,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     private final ArrayList<JMember> members;
@@ -10,7 +11,6 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     private Type thisType;
     private ArrayList<JFieldDeclaration> staticFieldInitializations;
     private ClassContext context;
-    private ArrayList<String> superInterfaceNames;
 
     /**
      * Construct an AST node the given its line number in the source file.
@@ -30,41 +30,37 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     @Override
     public void preAnalyze(Context context) {
         this.context = new ClassContext(this, context);
-
-        // Create the (partial) interface, this is required
-        // in the pre-analysis pass so the interface can be
-        // referenced before it is declared
-        CLEmitter partial = new CLEmitter(false);
-
-        String packageName = JAST.compilationUnit.packageName();
-        String qualifiedName = packageName == "" ? name : packageName + "/" + name;
-
-        // TODO: CHECK
-        superInterfaceNames = new ArrayList<String>();
-        if(superInterfaces != null) {
-            for(Type t : superInterfaces) {
-                Type superType = t.resolve(this.context);
-                superInterfaceNames.add(superType.jvmName());
-            }
+        ArrayList<Type> resolvedInterfaces = new ArrayList<>();
+        for (Type _interface : superInterfaces) {
+            resolvedInterfaces.add(_interface.resolve(this.context));
         }
-        // All interfaces have OBJECT as their supertype
-        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null, false);
+        superInterfaces.clear();
+        superInterfaces.addAll(resolvedInterfaces);
 
-        // Ensure that all members are methods or field declarations
+        Type.checkInterfaceAccess(line,thisType().classRep(),superInterfaces);
+
+        CLEmitter clEmitter = new CLEmitter(false);
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
+                : JAST.compilationUnit.packageName() + "/" + name;
+
+        ArrayList<String> interfaceNames = superInterfaces.stream().map(Type::jvmName).collect(Collectors.toCollection(ArrayList::new));
+        clEmitter.addClass(mods,qualifiedName,null, interfaceNames,false);
+
         for(JMember member : members) {
             if(!(member instanceof JMethodDeclaration || member instanceof JFieldDeclaration)) {
-                JAST.compilationUnit.reportSemanticError(line(), 
-                    "Member %s is not a valid interface member", member.toString());
+                JAST.compilationUnit.reportSemanticError(line(),
+                        "Member %s is not a valid interface member", member.toString());
             }
 
-            member.preAnalyze(this.context, partial);
+            member.preAnalyze(this.context, clEmitter);
         }
 
         // Get the Class rep for the (partial) class and make it
-        // the representation for this type
+        // the
+        // representation for this type
         Type id = this.context.lookupType(name);
         if (id != null && !JAST.compilationUnit.errorHasOccurred()) {
-            id.setClassRep(partial.toClass());
+            id.setClassRep(clEmitter.toClass());
         }
     }
 
@@ -94,7 +90,8 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     @Override
     public void codegen(CLEmitter output) {
         String packageName = JAST.compilationUnit.packageName();
-        String qualifiedName = packageName == "" ? name : packageName + "/" + name;
+        String qualifiedName = packageName.equals("") ? name : packageName + "/" + name;
+        ArrayList<String> superInterfaceNames = superInterfaces.stream().map(Type::jvmName).collect(Collectors.toCollection(ArrayList::new));
         output.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), superInterfaceNames, false); 
 
         // Generate code for the interface members
@@ -110,7 +107,8 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     @Override
     public void writeToStdOut(PrettyPrinter p) {
-        p.printf("<JInterfaceDeclaration line=\"%d\" name=\"%s\"", line(), name);
+        p.printf("<JInterfaceDeclaration line=\"%d\" name=\"%s\""
+                + " super interfaces=\"%s\">\n", line(), name, superInterfaces.stream().map(Type::simpleName).collect(Collectors.joining(", ")));
         p.indentRight();
         if (context != null) {
             context.writeToStdOut(p);
@@ -124,23 +122,26 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
             p.indentLeft();
             p.println("</Modifiers>");
         }
-        p.println("<InterfaceBlock>");
-        if (members.size() > 0) {
-            for (JMember member : members) {
-                ((JAST) member).writeToStdOut(p);
+        if(members != null) {
+            p.println("<Method declarations>");
+            for (JMember member: members) {
+                if(member instanceof JMethodInterface){
+                ((JMethodInterface) member).writeToStdOut(p);
+                } else if (member instanceof  JFieldDeclaration){
+                    ((JFieldDeclaration) member).writeToStdOut(p);
+                }
             }
         }
-        p.println("</InterfaceBlock>");
-
         p.indentLeft();
-        p.println("</JInterfaceDeclaration>");
+        p.println("</JClassDeclaration>");
     }
 
     @Override
     public void declareThisType(Context context) {
         String packageName = JAST.compilationUnit.packageName();
-        String qualifiedName = packageName == "" ? name : packageName + "/" + name;
+        String qualifiedName = packageName.equals("") ? name : packageName + "/" + name;
         CLEmitter partial = new CLEmitter(false);
+        ArrayList<String> superInterfaceNames = superInterfaces.stream().map(Type::jvmName).collect(Collectors.toCollection(ArrayList::new));
         partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), superInterfaceNames, false);
         thisType = Type.typeFor(partial.toClass());
         context.addType(line, thisType);
@@ -160,4 +161,9 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     public Type thisType() {
         return thisType;
     }
+
+    public ArrayList<JMember> getMembers() {
+        return members;
+    }
+
 }

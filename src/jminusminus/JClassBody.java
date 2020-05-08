@@ -8,9 +8,9 @@ import static jminusminus.CLConstants.RETURN;
 public class JClassBody extends JAST  {
 
 
-    private ArrayList<JBlock> staticBlocks = new ArrayList<JBlock>();
-    private ArrayList<JBlock> instanceBlocks = new ArrayList<JBlock>();
-    private ArrayList<JMember> members = new ArrayList<JMember>();
+    private ArrayList<JBlock> staticBlocks;
+    private ArrayList<JBlock> instanceBlocks;
+    private ArrayList<JMember> members;
 
     /**
      * Whether this class has an explicit constructor.
@@ -26,8 +26,6 @@ public class JClassBody extends JAST  {
      * Static (class) fields of this class.
      */
     private ArrayList<JFieldDeclaration> staticFieldInitializations;
-
-
 
     /**
      * Class declaration super class type.
@@ -60,8 +58,8 @@ public class JClassBody extends JAST  {
         this.instanceBlocks = instanceBlocks;
         this.members = members;
 
-        instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
-        staticFieldInitializations = new ArrayList<JFieldDeclaration>();
+        instanceFieldInitializations = new ArrayList<>();
+        staticFieldInitializations = new ArrayList<>();
     }
 
     public void preAnalyzeMembers(Context context, CLEmitter partial) {

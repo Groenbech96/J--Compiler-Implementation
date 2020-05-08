@@ -18,6 +18,6 @@ interface JMember {
      *                partial class).
      */
 
-    public void preAnalyze(Context context, CLEmitter partial);
+    void preAnalyze(Context context, CLEmitter partial);
 
 }
