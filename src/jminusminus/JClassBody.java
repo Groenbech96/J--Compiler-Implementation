@@ -130,10 +130,6 @@ public class JClassBody extends JAST  {
             codegenClassInit(output);
         }
 
-        for(JFieldDeclaration instanceField : instanceFieldInitializations){
-            instanceField.codegen(output);
-        }
-
     }
 
     @Override
@@ -178,6 +174,10 @@ public class JClassBody extends JAST  {
         output.addMemberAccessInstruction(INVOKESPECIAL, classSuperType.jvmName(),
                 "<init>", "()V");
 
+        for(JFieldDeclaration instanceField : instanceFieldInitializations){
+            instanceField.codegen(output);
+        }
+
         // Return
         output.addNoArgInstruction(RETURN);
     }
@@ -220,13 +220,15 @@ public class JClassBody extends JAST  {
 
     private void codegenPartialImplicitConstructor(CLEmitter partial) {
         // Invoke super constructor
-        ArrayList<String> mods = new ArrayList<String>();
+        ArrayList<String> mods = new ArrayList<>();
         mods.add("public");
         partial.addMethod(mods, "<init>", "()V", null, false);
         partial.addNoArgInstruction(ALOAD_0);
         partial.addMemberAccessInstruction(INVOKESPECIAL, classSuperType.jvmName(),
                 "<init>", "()V");
-
+        for(JFieldDeclaration instanceField : instanceFieldInitializations){
+            instanceField.codegen(partial);
+        }
         // Return
         partial.addNoArgInstruction(RETURN);
     }
