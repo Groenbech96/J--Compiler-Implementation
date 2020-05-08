@@ -3,8 +3,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
-
-import static jminusminus.CLConstants.*;
+import java.util.stream.Collectors;
 
 /**
  * A class declaration has a list of modifiers, a name, a super class and a
@@ -135,7 +134,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      */
 
     public void declareThisType(Context context) {
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         CLEmitter partial = new CLEmitter(false);
         partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null,
@@ -160,10 +159,20 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         superType = superType.resolve(this.context);
         classBody.setClassSuperType(superType);
 
+        //Resolve possible interfaces
+        ArrayList<Type> resolvedInterfaces = new ArrayList<>();
+        for (Type _interface : interfaces) {
+            Type resolvedInterface = _interface.resolve(this.context);
+            resolvedInterfaces.add(resolvedInterface);
+
+        }
+        interfaces.clear();
+        interfaces.addAll(resolvedInterfaces);
+
         // Creating a partial class in memory can result in a
         // java.lang.VerifyError if the semantics below are
         // violated, so we can't defer these checks to analyze()
-        thisType.checkAccess(line, superType);
+        thisType.checkAccess(line, superType, resolvedInterfaces);
         if (superType.isFinal()) {
             JAST.compilationUnit.reportSemanticError(line,
                     "Cannot extend a final type: %s", superType.toString());
@@ -180,7 +189,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             }
         }
         // Add the class header to the partial class
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         partial.addClass(mods, qualifiedName, superType.jvmName(), interfaceNames, false);
 
@@ -212,14 +221,36 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         // Finally, ensure that a non-abstract class has
         // no abstract methods.
         if (!thisType.isAbstract() && thisType.abstractMethods().size() > 0) {
-            String methods = "";
+            StringBuilder methods = new StringBuilder();
             for (Method method : thisType.abstractMethods()) {
-                methods += "\n" + method;
+                methods.append("\n").append(method);
             }
             JAST.compilationUnit.reportSemanticError(line,
                     "Class %s must be declared abstract since it defines "
                             + "the following abstract methods: %s", name, methods);
 
+        }
+
+        // Make sure that all interface methods are implemented
+        StringBuilder missingInterfaceMethods = new StringBuilder();
+        for (Type _interface: this.interfaces) {
+            Class<? extends Type> classRep = _interface.getClass();
+            java.lang.reflect.Method[] methods = classRep.getDeclaredMethods();
+            for (java.lang.reflect.Method member: methods) {
+                Method method = thisType.methodFor(member.getName(),
+                            new Type[]{Type.typeFor(member.getReturnType())});
+                if(method == null){
+                    missingInterfaceMethods.append("\n").append(_interface.simpleName()).append(".")
+                        .append(member.getName());
+                }
+            }
+        }
+
+
+        if(!missingInterfaceMethods.toString().equals("")){
+            JAST.compilationUnit.reportSemanticError(line,
+                    "Not all interfaces are implemented. Missing functions are: %s",
+                    missingInterfaceMethods.toString());
         }
 
         return this;
@@ -234,9 +265,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
     public void codegen(CLEmitter output) {
         // The class header
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
-        output.addClass(mods, qualifiedName, superType.jvmName(), interfaceNames, false);
+        output.addClass(mods, qualifiedName, superType.jvmName(), new ArrayList<>(interfaces.stream().map(Type::jvmName).collect(Collectors.toList())), false);
 
         this.classBody.codegen(output);
 
