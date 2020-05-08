@@ -67,8 +67,7 @@ public class JClassBody extends JAST  {
         // class
         for (JMember member : members) {
             member.preAnalyze(context, partial);
-            if (member instanceof JConstructorDeclaration
-                    && ((JConstructorDeclaration) member).params.size() == 0) {
+            if (member instanceof JConstructorDeclaration) {
                 hasExplicitConstructor = true;
             }
         }
