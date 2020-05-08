@@ -3,6 +3,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * A class declaration has a list of modifiers, a name, a super class and a
@@ -266,7 +267,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         // The class header
         String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
-        output.addClass(mods, qualifiedName, superType.jvmName(), interfaceNames, false);
+        output.addClass(mods, qualifiedName, superType.jvmName(), new ArrayList<>(interfaces.stream().map(Type::jvmName).collect(Collectors.toList())), false);
 
         this.classBody.codegen(output);
 
