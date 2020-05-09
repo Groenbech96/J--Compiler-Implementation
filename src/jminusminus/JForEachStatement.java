@@ -104,29 +104,30 @@ class JForEachStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
-        String test = output.createLabel();
-        String out = output.createLabel();
+        String startLabel = output.createLabel();
+        String endLabel = output.createLabel();
 
-        //init_iterator.codegen(output);
-        counter.codegen(output);
+        // Declare variables
+        counterDecl.codegen(output);
+        parameterDecl.codegen(output);
 
-        // Branch out of the loop on the test condition
-        // being false
-        output.addLabel(test);
-        condition.codegen(output, out, false);
+        // Branch out of the loop on the test condition being false
+        output.addLabel(startLabel);
+        condition.codegen(output, endLabel, false);
         setForCurrentIndex.codegen(output);
 
         // Codegen body
         body.codegen(output);
 
+        // Increment our counter
         int offset = ((LocalVariableDefn) counter.iDefn()).offset();
         output.addIINCInstruction(offset, 1);
 
-        // Unconditional jump back up to test
-        output.addBranchInstruction(GOTO, test);
+        // Unconditional jump back up to branch
+        output.addBranchInstruction(GOTO, startLabel);
 
         // The label below and outside the loop
-        output.addLabel(out);
+        output.addLabel(endLabel);
     }
 
     /**
