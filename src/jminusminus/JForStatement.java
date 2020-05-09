@@ -70,7 +70,7 @@ class JForStatement extends JStatement {
         initStatements = (ArrayList<JStatement>) initStatements.stream()
                 .map(statement -> (JStatement) statement.analyze(this.context)).collect(toList());
 
-        if(condition != null) {
+        if (condition != null) {
             condition = condition.analyze(this.context);
             condition.type().mustMatchExpected(line(), Type.BOOLEAN);
         }
@@ -107,13 +107,14 @@ class JForStatement extends JStatement {
         output.addLabel(startLabel);
 
         // End for loop if condition is false
-        condition.codegen(output, endLabel, false);
+        if (condition != null)
+            condition.codegen(output, endLabel, false);
 
         // For-loop body
         body.codegen(output);
 
         // Update increment expressions
-        for (JStatement statement : updateStatements){
+        for (JStatement statement : updateStatements) {
             statement.codegen(output);
         }
 
