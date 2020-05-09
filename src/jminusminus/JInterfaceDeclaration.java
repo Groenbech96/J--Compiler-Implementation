@@ -44,7 +44,7 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
                 : JAST.compilationUnit.packageName() + "/" + name;
 
         ArrayList<String> interfaceNames = superInterfaces.stream().map(Type::jvmName).collect(Collectors.toCollection(ArrayList::new));
-        clEmitter.addClass(mods,qualifiedName,null, interfaceNames,false);
+        clEmitter.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), interfaceNames, false);
 
         for(JMember member : members) {
             if(!(member instanceof JMethodDeclaration || member instanceof JFieldDeclaration)) {

@@ -2,8 +2,6 @@
 
 package jminusminus;
 
-import com.sun.org.apache.xpath.internal.operations.Mod;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -426,6 +424,26 @@ class Type {
         JAST.compilationUnit.reportSemanticError(line,
                 "Type %s doesn't match any of the expected types %s", this,
                 Arrays.toString(expectedTypes));
+    }
+
+    /**
+     * An assertion that this type inherits from the the specified type. If there is no
+     * match, an error message is written.
+     *
+     * @param line         the line near which the mismatch occurs.
+     * @param superClass   superclass with which to match
+     */
+    public void mustInheritFrom(int line, Type superClass) {
+        Type t = this;
+        while(t.superClass() != null) {
+            if(t.superClass().equals(superClass)) {
+                return;
+            }
+            t = t.superClass();
+        }
+
+        JAST.compilationUnit.reportSemanticError(line,
+                "Type %s doesn't inherit from type %s", this, superClass);
     }
 
     /**

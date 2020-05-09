@@ -22,6 +22,12 @@ class JForEachStatement extends JStatement {
      */
     private JStatement body;
 
+
+    /**
+     * The new context (built in analyze()) represented by this for statement
+     */
+    private LocalContext context;
+
     /**
      * Construct an AST node for a while-statement given its line number, the
      * test expression, and the body.
@@ -46,13 +52,16 @@ class JForEachStatement extends JStatement {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
     public JForEachStatement analyze(Context context) {
-        body = (JStatement) body.analyze(context);
-        parameter = (JFormalParameter) parameter.analyze(context);
-
-        if (!array.isArray())
-            parameter.type().mustMatchExpected(line(), Type.ENUMERABLE);
+        this.context = new LocalContext(context);
         
-        array.componentType().mustMatchExpected(line(), parameter.type());
+        body = (JStatement) body.analyze(this.context);
+        parameter = (JFormalParameter) parameter.analyze(this.context);
+
+        LocalVariableDefn localVariable = (LocalVariableDefn)context.lookup(array.toString());
+        if(!localVariable.type().isArray())
+            localVariable.type().mustMatchExpected(line(), Type.ENUMERABLE);
+        
+        localVariable.type().componentType().mustMatchExpected(line(), parameter.type().resolve(this.context));
 
         return this;
     }

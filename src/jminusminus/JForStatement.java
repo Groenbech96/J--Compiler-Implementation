@@ -29,6 +29,11 @@ class JForStatement extends JStatement {
     private JStatement body;
 
     /**
+     * The new context (built in analyze()) represented by this for statement
+     */
+    private LocalContext context;
+
+    /**
      * Construct an AST node for a while-statement given its line number, the
      * test expression, and the body.
      *
@@ -57,18 +62,22 @@ class JForStatement extends JStatement {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
     public JForStatement analyze(Context context) {
-        initVariableDecls = (JVariableDeclaration) initVariableDecls.analyze(context);
-        initStatements = (ArrayList<JStatement>) initStatements.stream()
-                .map(statement -> (JStatement) statement.analyze(context)).collect(toList());
+        this.context = new LocalContext(context);
 
-        condition = condition.analyze(context);
+        initVariableDecls = (JVariableDeclaration) initVariableDecls.analyze(this.context);
+        initStatements = (ArrayList<JStatement>) initStatements.stream()
+                .map(statement -> (JStatement) statement.analyze(this.context)).collect(toList());
+
+        if(condition != null) {
+            condition = condition.analyze(this.context);
+            condition.type().mustMatchExpected(line(), Type.BOOLEAN);
+        }
 
         updateStatements = (ArrayList<JStatement>) updateStatements.stream()
-                .map(statement -> (JStatement) statement.analyze(context)).collect(toList());
+                .map(statement -> (JStatement) statement.analyze(this.context)).collect(toList());
 
-        body = (JStatement) body.analyze(context);
+        body = (JStatement) body.analyze(this.context);
 
-        condition.type().mustMatchExpected(line(), Type.BOOLEAN);
         return this;
     }
 
