@@ -15,11 +15,10 @@ class JForEachStatement extends JStatement {
     /**
      * The for expression
      */
-
-    private JVariable counterName;
     private JStatementExpression setForCurrentIndex;
     private JLessThanOp condition;
-    private JVariableDeclaration counter;
+    private JVariable counter;
+    private JVariableDeclaration counterDecl;
     private JVariableDeclarator parameter;
     private JVariableDeclaration parameterDecl;
     private JVariable array;
@@ -50,23 +49,21 @@ class JForEachStatement extends JStatement {
         this.array = array;
         this.body = body;
 
-        //Artificial nodes
-        String stringVar = "0" + parameter.name();
-        this.counterName = new JVariable(line, stringVar);
-
         this.parameter = parameter;
-        this.parameterDecl = new JVariableDeclaration(line, new ArrayList<>(),
-                new ArrayList<JVariableDeclarator>() {{ add(parameter); }});
+        this.parameterDecl = new JVariableDeclaration(line, new ArrayList<>(), new ArrayList<JVariableDeclarator>() {{
+            add(parameter);
+        }});
 
-        this.counter = new JVariableDeclaration(line, new ArrayList<>(),
-                new ArrayList<JVariableDeclarator>() {{
-                    new JVariableDeclarator(line, stringVar, Type.INT, new JLiteralInt(line, "0"));
-                }});
+        //Artificial nodes
+        this.counter = new JVariable(line, "0" + parameter.name());
+        this.counterDecl = new JVariableDeclaration(line, new ArrayList<>(), new ArrayList<JVariableDeclarator>() {{
+            add(new JVariableDeclarator(line, counter.name(), Type.INT, new JLiteralInt(line, "0")));
+        }});
 
         JFieldSelection length = new JFieldSelection(line, array, "length");
-        this.condition = new JLessThanOp(line, counterName, length);
+        this.condition = new JLessThanOp(line, counter, length);
 
-        JExpression indexExpression = new JArrayExpression(line, array, counterName);
+        JExpression indexExpression = new JArrayExpression(line, array, counter);
         JExpression assign = new JAssignOp(line, new JVariable(line, parameter.name()), indexExpression);
         assign.isStatementExpression = true;
         this.setForCurrentIndex = new JStatementExpression(line, assign);
@@ -80,19 +77,21 @@ class JForEachStatement extends JStatement {
      */
     public JForEachStatement analyze(Context context) {
         this.context = new LocalContext(context);
-        this.counter = (JVariableDeclaration) this.counter.analyze(this.context);
         this.parameterDecl = (JVariableDeclaration) this.parameterDecl.analyze(this.context);
-        //this.condition = (JLessThanOp) this.condition.analyze(this.context);
-        //this.setForCurrentIndex = (JStatementExpression) this.setForCurrentIndex.analyze(this.context);
+        this.array = (JVariable) this.array.analyze(this.context);
 
-        body = (JStatement) body.analyze(this.context);
-        array = (JVariable) array.analyze(this.context);
+        if (!array.type().isArray())
+            array.type().mustMatchExpected(line(), Type.ENUMERABLE);
+        this.parameter.type().resolve(this.context)
+                .mustMatchExpected(line(), array.type().componentType());
 
-        LocalVariableDefn localVariable = (LocalVariableDefn) array.iDefn();
-        if (!localVariable.type().isArray())
-            localVariable.type().mustMatchExpected(line(), Type.ENUMERABLE);
+        this.body = (JStatement) this.body.analyze(this.context);
 
-        localVariable.type().componentType().mustMatchExpected(line(), parameter.type().resolve(this.context));
+        this.counterDecl = (JVariableDeclaration) this.counterDecl.analyze(this.context);
+
+        this.condition = (JLessThanOp) this.condition.analyze(this.context);
+        this.setForCurrentIndex = (JStatementExpression) this.setForCurrentIndex.analyze(this.context);
+
 
         return this;
     }
@@ -120,7 +119,7 @@ class JForEachStatement extends JStatement {
         // Codegen body
         body.codegen(output);
 
-        int offset = ((LocalVariableDefn) counterName.iDefn()).offset();
+        int offset = ((LocalVariableDefn) counter.iDefn()).offset();
         output.addIINCInstruction(offset, 1);
 
         // Unconditional jump back up to test
