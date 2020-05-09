@@ -8,6 +8,8 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
 
+import static jminusminus.CLConstants.*;
+
 /**
  * The AST node for a for-statement.
  */
@@ -80,6 +82,37 @@ class JForStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
+        // Create labels to label start and end of for-loop
+        String startLabel = output.createLabel();
+        String endLabel = output.createLabel();
+
+        // Initialize variables declarations
+        initVariableDecls.codegen(output);
+
+        // Initialize variables
+        for (JStatement statement : initStatements) {
+            statement.codegen(output);
+        }
+
+        // Label start of for-loop
+        output.addLabel(startLabel);
+
+        // End for loop if condition is false
+        condition.codegen(output, endLabel, false);
+
+        // For-loop body
+        body.codegen(output);
+
+        // Update increment expressions
+        for (JStatement statement : updateStatements){
+            statement.codegen(output);
+        }
+
+        // Go to start of for-loop
+        output.addBranchInstruction(GOTO, startLabel);
+
+        // Label end of for-loop
+        output.addLabel(endLabel);
     }
 
     /**
