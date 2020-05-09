@@ -3,6 +3,8 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static jminusminus.CLConstants.*;
 
@@ -13,6 +15,7 @@ import static jminusminus.CLConstants.*;
 class JMethodDeclaration
         extends JAST implements JMember {
 
+    private final ArrayList<String> exceptionJvmNames;
     /**
      * Method modifiers.
      */
@@ -96,6 +99,7 @@ class JMethodDeclaration
         this.isAbstract = mods.contains("abstract");
         this.isStatic = mods.contains("static");
         this.isPrivate = mods.contains("private");
+        this.exceptionJvmNames = (ArrayList<String>) this.exceptions.stream().map(Type::jvmName).collect(Collectors.toList());
     }
 
     /**
@@ -193,7 +197,7 @@ class JMethodDeclaration
         // Generate a method with an empty body; need a return to
         // make
         // the class verifier happy.
-        partial.addMethod(mods, name, descriptor, null, false);
+        partial.addMethod(mods, name, descriptor, exceptionJvmNames, false);
 
         // Add implicit RETURN
         if (returnType == Type.VOID) {
@@ -202,6 +206,9 @@ class JMethodDeclaration
                 || returnType == Type.BOOLEAN || returnType == Type.CHAR) {
             partial.addNoArgInstruction(ICONST_0);
             partial.addNoArgInstruction(IRETURN);
+        } else if (returnType == Type.DOUBLE) {
+            partial.addNoArgInstruction(DCONST_0);
+            partial.addNoArgInstruction(DRETURN);
         } else {
             // A reference type.
             partial.addNoArgInstruction(ACONST_NULL);
@@ -217,7 +224,7 @@ class JMethodDeclaration
      */
 
     public void codegen(CLEmitter output) {
-        output.addMethod(mods, name, descriptor, null, false);
+        output.addMethod(mods, name, descriptor, exceptionJvmNames, false);
         if (body != null) {
             body.codegen(output);
         }

@@ -61,7 +61,7 @@ abstract class JUnaryExpression extends JExpression {
  * The AST node for a unary positive (+) expression.
  */
 
-class JPositiveOp extends JUnaryExpression{
+class JPositiveOp extends JUnaryExpression {
 
     public JPositiveOp(int line, JExpression arg) {
         super(line, "+", arg);
@@ -125,7 +125,10 @@ class JNegateOp extends JUnaryExpression {
 
     public void codegen(CLEmitter output) {
         arg.codegen(output);
-        output.addNoArgInstruction(INEG);
+        if (type == Type.DOUBLE)
+            output.addNoArgInstruction(DNEG);
+        else
+            output.addNoArgInstruction(INEG);
     }
 
 }
@@ -268,7 +271,7 @@ class JPostDecrementOp extends JUnaryExpression {
                 ((JLhs) arg).codegenDuplicateRvalue(output);
             }
 
-            if(type == Type.INT) {
+            if (type == Type.INT) {
                 output.addNoArgInstruction(ICONST_1);
                 output.addNoArgInstruction(ISUB);
             } else if (type == Type.DOUBLE) {
@@ -332,7 +335,7 @@ class JPostIncrementOp extends JUnaryExpression {
                 ((JLhs) arg).codegenDuplicateRvalue(output);
             }
 
-            if(type == Type.INT) {
+            if (type == Type.INT) {
                 output.addNoArgInstruction(ICONST_1);
                 output.addNoArgInstruction(IADD);
             } else if (type == Type.DOUBLE) {
@@ -412,7 +415,7 @@ class JPreIncrementOp extends JUnaryExpression {
             ((JLhs) arg).codegenLoadLhsLvalue(output);
             ((JLhs) arg).codegenLoadLhsRvalue(output);
 
-            if(type == Type.INT) {
+            if (type == Type.INT) {
                 output.addNoArgInstruction(ICONST_1);
                 output.addNoArgInstruction(IADD);
             } else if (type == Type.DOUBLE) {
@@ -467,7 +470,7 @@ class JPreDecrementOp extends JUnaryExpression {
             ((JLhs) arg).codegenLoadLhsLvalue(output);
             ((JLhs) arg).codegenLoadLhsRvalue(output);
 
-            if(type == Type.INT) {
+            if (type == Type.INT) {
                 output.addNoArgInstruction(ICONST_1);
                 output.addNoArgInstruction(ISUB);
             } else if (type == Type.DOUBLE) {
