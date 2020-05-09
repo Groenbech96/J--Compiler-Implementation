@@ -232,26 +232,26 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         }
 
         // Make sure that all interface methods are implemented
-        StringBuilder missingInterfaceMethods = new StringBuilder();
-        for (Type _interface: this.interfaces) {
-            Class<? extends Type> classRep = _interface.getClass();
-            java.lang.reflect.Method[] methods = classRep.getDeclaredMethods();
-            for (java.lang.reflect.Method member: methods) {
-                Method method = thisType.methodFor(member.getName(),
-                            new Type[]{Type.typeFor(member.getReturnType())});
-                if(method == null){
-                    missingInterfaceMethods.append("\n").append(_interface.simpleName()).append(".")
-                        .append(member.getName());
-                }
-            }
-        }
+        // StringBuilder missingInterfaceMethods = new StringBuilder();
+        // for (Type _interface: this.interfaces) {
+        //     Class<? extends Type> classRep = _interface.getClass();
+        //     java.lang.reflect.Method[] methods = classRep.getDeclaredMethods();
+        //     for (java.lang.reflect.Method member: methods) {
+        //         Method method = thisType.methodFor(member.getName(),
+        //                     new Type[]{Type.typeFor(member.getReturnType())});
+        //         if(method == null){
+        //             missingInterfaceMethods.append("\n").append(_interface.simpleName()).append(".")
+        //                 .append(member.getName());
+        //         }
+        //     }
+        // }
 
 
-        if(!missingInterfaceMethods.toString().equals("")){
-            JAST.compilationUnit.reportSemanticError(line,
-                    "Not all interfaces are implemented. Missing functions are: %s",
-                    missingInterfaceMethods.toString());
-        }
+        // if(!missingInterfaceMethods.toString().equals("")){
+        //     JAST.compilationUnit.reportSemanticError(line,
+        //             "Not all interfaces are implemented. Missing functions are: %s",
+        //             missingInterfaceMethods.toString());
+        // }
 
         return this;
     }

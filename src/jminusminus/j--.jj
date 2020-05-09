@@ -269,7 +269,7 @@ TOKEN:
 // Literals
 TOKEN:
 {
-  <DOUBLE_LITERAL: <INT_LITERAL> "." (<DIGIT>)* | "." (<DIGIT>)+ >
+  <DOUBLE_LITERAL: <INT_LITERAL> "." (<DIGIT>)* ("d"|"D")? | "." (<DIGIT>)+ ("d"|"D")? >
 | <INT_LITERAL: ("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) >
 | <CHAR_LITERAL: "'" (<ESC> | ~["'","\\","\n","\r"]) "'" >
 | <STRING_LITERAL: "\"" (<ESC> | ~["\"","\\","\n","\r"])* "\"" >
@@ -554,7 +554,7 @@ private JInterfaceDeclaration interfaceDeclaration( ArrayList<String> mods ): {
     String name = "";
     Type aType = null;
     ArrayList<JMember> interfaceBody = null;
-    ArrayList<Type> superInterfaces = null;
+    ArrayList<Type> superInterfaces = new ArrayList<Type>();
 }
 {
     try {
@@ -902,8 +902,10 @@ private JStatement blockStatement(): {
  *               | IF parExpression statement [ELSE statement]
  *               | WHILE parExpression statement 
  *               | RETURN [expression] SEMI
+ *               | CONTINUE [IDENTIFIER SEMI]
  *               | SEMI 
  *               | statementExpression SEMI
+ *
  * </pre>
  * 
  * @return an AST for a statement.
@@ -953,8 +955,13 @@ private JStatement statement(): {
         ]
         <SEMI>
         { statement = new JReturnStatement( line, expr ); } |
+        <CONTINUE>
+        [
+            <IDENTIFIER>
+        ]
         <SEMI>
-
+        { statement =  new JEmptyStatement( line ); } |
+        <SEMI>
         { statement = new JEmptyStatement( line ); } |
         <TRY>
         tryBlock = block()

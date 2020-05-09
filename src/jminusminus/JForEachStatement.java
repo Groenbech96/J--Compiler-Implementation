@@ -22,6 +22,12 @@ class JForEachStatement extends JStatement {
      */
     private JStatement body;
 
+
+    /**
+     * The new context (built in analyze()) represented by this for statement
+     */
+    private LocalContext context;
+
     /**
      * The new context (built in analyze()) represented by this for statement
      */
