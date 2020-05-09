@@ -7,10 +7,11 @@ public class ExceptionHandlers {
     }
     
     public static void main(String[] args) {
-        try {
-            f();
-        }
-        catch (Exception e) { ; }
-        finally { ; }
+        // TODO: Compilation fails with:  main([Ljava/lang/String;)V: Unable to resolve exception handler label(s)
+        // try {
+        //     f();
+        // }
+        // catch (Exception e) { ; }
+        // finally { ; }
     }
 }

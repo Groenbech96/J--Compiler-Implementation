@@ -270,7 +270,6 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         output.addClass(mods, qualifiedName, superType.jvmName(), new ArrayList<>(interfaces.stream().map(Type::jvmName).collect(Collectors.toList())), false);
 
         this.classBody.codegen(output);
-
     }
 
     /**

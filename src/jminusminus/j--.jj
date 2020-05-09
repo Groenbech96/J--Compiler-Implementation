@@ -510,7 +510,7 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
     String name = "";
     Type superClass = Type.OBJECT;
     JClassBody classBody = null;
-    ArrayList<Type> interfaces = null;
+    ArrayList<Type> interfaces = new ArrayList<Type>();
 }
 {
     try {
@@ -1027,12 +1027,11 @@ try{
         } |
         {
             initStatements = forInits();
-            variableDeclaration = null;
-        }
-        } catch( ParseException e){
-            variableDeclaration = null;
+            variableDeclaration = new JVariableDeclaration(line, new ArrayList<String>(), new ArrayList<JVariableDeclarator>());
+        } 
+        } catch(ParseException e){
+            variableDeclaration = new JVariableDeclaration(line, new ArrayList<String>(), new ArrayList<JVariableDeclarator>());
             initStatements = new ArrayList<JStatement>();
-
         }
 
         [<SEMI>]
@@ -1050,7 +1049,7 @@ try{
         <RPAREN>
         body = statement()
         {
-            statement = new JForStatement(line,variableDeclaration, initStatements, expr, updateStatements, body);
+            statement = new JForStatement(line, variableDeclaration, initStatements, expr, updateStatements, body);
             return statement;
         }
 

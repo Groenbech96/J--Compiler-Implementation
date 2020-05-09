@@ -16,7 +16,6 @@
     <property name="PASS_TESTS_STEP4_DIR" value="${basedir}/tests/pass/step4" />
     <property name="PASS_TESTS_STEP5_DIR" value="${basedir}/tests/pass/step5" />
     <property name="PASS_TESTS_DIR" value="${basedir}/tests/pass" />
-    <property name="SINGLE_TEST_DIR" value="${basedir}/tests/single"/>
     <property name="FAIL_TESTS_DIR" value="${basedir}/tests/fail" />
     <property name="GEN_CLASS_DIR" value="${basedir}/${CLASS_DIR}" />
 
@@ -539,33 +538,6 @@
         </junit>
     </target>
 
-    <target name="testParserSingle" depends="compile,jar">
-        <echo message="Running handwritten parser on the j-- programs..."/>
-        <javac srcdir="${basedir}/tests/"
-               destdir="${CLASS_DIR}"
-               includes="junit/ParserTest.java"
-               includeantruntime="false"
-               debug="on">
-            <!-- Uncomment the following to see compiler warnings. -->
-            <!-- <compilerarg value="-Xlint" />                    -->
-            <classpath>
-                <pathelement location="${LIB_DIR}/junit.jar" />
-            </classpath>
-        </javac>
-        <junit printsummary="yes" haltonfailure="no" showoutput="yes">
-            <sysproperty key="PASS_TESTS_DIR" value="${SINGLE_TEST_DIR}" />
-            <classpath>
-                <pathelement location="${LIB_DIR}/junit.jar" />
-                <pathelement location="${basedir}/${CLASS_DIR}" />
-            </classpath>
-            <test name="junit.ParserTest"
-                  haltonfailure="no">
-                <formatter type="plain" usefile="false"/>
-            </test>
-        </junit>
-    </target>
-
-
     <target name="testStep3" depends="javacc,compileJavaCC,jar">
         <echo message="Running JavaCC scanner and parser on the j-- programs..."/>
         <javac srcdir="${basedir}/tests/"
@@ -712,32 +684,6 @@
         </javac>
         <junit printsummary="yes" haltonfailure="no" showoutput="yes">
             <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_DIR}" />
-            <classpath>
-                <pathelement location="${LIB_DIR}/junit.jar" />
-                <pathelement location="${basedir}/${CLASS_DIR}" />
-            </classpath>
-            <test name="junit.PreAnalysisTest"
-                  haltonfailure="no">
-                <formatter type="plain" usefile="false"/>
-            </test>
-        </junit>
-    </target>
-
-    <target name="testPreAnalysisSingle" depends="compile,jar">
-        <echo message="Running compiler on j-- programs up to pre-analysis..."/>
-        <javac srcdir="${basedir}/tests/"
-               destdir="${CLASS_DIR}"
-               includes="junit/PreAnalysisTest.java"
-               includeantruntime="false"
-               debug="on">
-            <!-- Uncomment the following to see compiler warnings. -->
-            <!-- <compilerarg value="-Xlint" />                    -->
-            <classpath>
-                <pathelement location="${LIB_DIR}/junit.jar" />
-            </classpath>
-        </javac>
-        <junit printsummary="yes" haltonfailure="no" showoutput="yes">
-            <sysproperty key="PASS_TESTS_DIR" value="${SINGLE_TEST_DIR}" />
             <classpath>
                 <pathelement location="${LIB_DIR}/junit.jar" />
                 <pathelement location="${basedir}/${CLASS_DIR}" />

@@ -29,11 +29,6 @@ class JForEachStatement extends JStatement {
     private LocalContext context;
 
     /**
-     * The new context (built in analyze()) represented by this for statement
-     */
-    private LocalContext context;
-
-    /**
      * Construct an AST node for a while-statement given its line number, the
      * test expression, and the body.
      *
