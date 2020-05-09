@@ -206,6 +206,9 @@ class JMethodDeclaration
                 || returnType == Type.BOOLEAN || returnType == Type.CHAR) {
             partial.addNoArgInstruction(ICONST_0);
             partial.addNoArgInstruction(IRETURN);
+        } else if (returnType == Type.DOUBLE) {
+            partial.addNoArgInstruction(DCONST_0);
+            partial.addNoArgInstruction(DRETURN);
         } else {
             // A reference type.
             partial.addNoArgInstruction(ACONST_NULL);
