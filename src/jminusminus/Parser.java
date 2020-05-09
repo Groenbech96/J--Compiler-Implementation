@@ -864,10 +864,10 @@ public class Parser {
             if (seeForEachLoop()) {
                 JFormalParameter parameter = formalParameter();
                 mustBe(COLON);
-                Type array = type();
+                JExpression array = expression();
                 mustBe(RPAREN);
                 JStatement body = statement();
-                return new JForEachStatement(line, parameter, array, body);
+                return new JForEachStatement(line, parameter, arrayExpression, body);
             }
 
             // Parse the initial expression in the for-loop,

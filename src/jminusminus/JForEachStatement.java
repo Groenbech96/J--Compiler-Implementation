@@ -2,8 +2,6 @@
 
 package jminusminus;
 
-import java.util.ArrayList;
-
 /**
  * The AST node for a for-statement.
  */
@@ -15,7 +13,7 @@ class JForEachStatement extends JStatement {
      */
 
     private JFormalParameter parameter;
-    private Type array;
+    private JExpression arrayExpression;
 
     /**
      * The body.
@@ -28,14 +26,14 @@ class JForEachStatement extends JStatement {
      *
      * @param line      line in which the while-statement occurs in the source file.
      * @param parameter the formal parameter on the left side of the for-each expression
-     * @param array     the array parameter on the right side of the for-each expression
+     * @param arrayExpression the array expression parameter on the right side of the for-each expression
      * @param body      the body
      */
 
-    public JForEachStatement(int line, JFormalParameter parameter, Type array, JStatement body) {
+    public JForEachStatement(int line, JFormalParameter parameter, JExpression arrayExpression, JStatement body) {
         super(line);
         this.parameter = parameter;
-        this.array = array;
+        this.arrayExpression = arrayExpression;
         this.body = body;
     }
 
@@ -49,10 +47,12 @@ class JForEachStatement extends JStatement {
         body = (JStatement) body.analyze(context);
         parameter = (JFormalParameter) parameter.analyze(context);
 
-        if (!array.isArray())
-            parameter.type().mustMatchExpected(line(), Type.ENUMERABLE);
+        arrayExpression = arrayExpression.analyze(context);
+
+        if (!arrayExpression.type().isArray())
+            arrayExpression.type().mustMatchExpected(line(), Type.ENUMERABLE);
         
-        array.componentType().mustMatchExpected(line(), parameter.type());
+        arrayExpression.type().componentType().mustMatchExpected(line(), parameter.type());
 
         return this;
     }
@@ -83,7 +83,7 @@ class JForEachStatement extends JStatement {
 
         p.printf("<Array>\n");
         p.indentRight();
-        p.printf("%s\n", array.simpleName());
+        p.printf("%s\n", arrayExpression.type.simpleName());
         p.indentLeft();
         p.printf("</Array>\n");
 
