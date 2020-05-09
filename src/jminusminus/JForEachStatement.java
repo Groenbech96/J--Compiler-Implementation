@@ -19,9 +19,9 @@ class JForEachStatement extends JStatement {
     private JVariable counterName;
     private JStatementExpression setForCurrentIndex;
     private JLessThanOp condition;
-    private JVariableDeclaration declarations;
-    private JVariableDeclarator counter;
+    private JVariableDeclaration counter;
     private JVariableDeclarator parameter;
+    private JVariableDeclaration parameterDecl;
     private JVariable array;
 
     /**
@@ -47,7 +47,6 @@ class JForEachStatement extends JStatement {
 
     public JForEachStatement(int line, JVariableDeclarator parameter, JVariable array, JStatement body) {
         super(line);
-        this.parameter = parameter;
         this.array = array;
         this.body = body;
 
@@ -55,7 +54,14 @@ class JForEachStatement extends JStatement {
         String stringVar = "0" + parameter.name();
         this.counterName = new JVariable(line, stringVar);
 
-        this.counter = new JVariableDeclarator(line, stringVar, Type.INT, new JLiteralInt(line, "0"));
+        this.parameter = parameter;
+        this.parameterDecl = new JVariableDeclaration(line, new ArrayList<>(),
+                new ArrayList<JVariableDeclarator>() {{ add(parameter); }});
+
+        this.counter = new JVariableDeclaration(line, new ArrayList<>(),
+                new ArrayList<JVariableDeclarator>() {{
+                    new JVariableDeclarator(line, stringVar, Type.INT, new JLiteralInt(line, "0"));
+                }});
 
         JFieldSelection length = new JFieldSelection(line, array, "length");
         this.condition = new JLessThanOp(line, counterName, length);
@@ -63,13 +69,6 @@ class JForEachStatement extends JStatement {
         JExpression indexExpression = new JArrayExpression(line, array, counterName);
         JExpression assign = new JAssignOp(line, new JVariable(line, parameter.name()), indexExpression);
         assign.isStatementExpression = true;
-
-        this.setForCurrentIndex = new JStatementExpression(line, assign);
-        this.declarations = new JVariableDeclaration(line, new ArrayList<>(),
-                new ArrayList<JVariableDeclarator>() {{
-                    add(counter);
-                    add(parameter);
-                }});
     }
 
     /**
@@ -80,8 +79,8 @@ class JForEachStatement extends JStatement {
      */
     public JForEachStatement analyze(Context context) {
         this.context = new LocalContext(context);
-        //this.counterName = (JVariable) this.counterName.analyze(this.context);
-        this.declarations = (JVariableDeclaration) this.declarations.analyze(this.context);
+        this.counter = (JVariableDeclaration) this.counter.analyze(this.context);
+        this.parameterDecl = (JVariableDeclaration) this.parameterDecl.analyze(this.context);
         this.condition = (JLessThanOp) this.condition.analyze(this.context);
         this.setForCurrentIndex = (JStatementExpression) this.setForCurrentIndex.analyze(this.context);
 
