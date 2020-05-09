@@ -1013,7 +1013,10 @@ try{
         <RPAREN>
         body = statement()
         {
-            statement = new JForEachStatement(line, new JFormalParameter(forEachVariable), forEachCollection, body);
+            String name = forEachCollection.simpleName();
+            TypeName id = new TypeName(line, name);
+            JVariable array = new JVariable(line, id.simpleName());
+            statement = new JForEachStatement(line, forEachVariable, array, body);
             return statement;
         } |
     LOOKAHEAD(localVariableDeclarationStatement() | forInits() )

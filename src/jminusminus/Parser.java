@@ -3,6 +3,8 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
 
 import static jminusminus.TokenKind.*;
 
@@ -620,7 +622,7 @@ public class Parser {
      * Parse an interface body
      * <pre>
      *      interfaceBody ::= LCURLY
-                                { modifiers interfaceMemberDecl }
+     * { modifiers interfaceMemberDecl }
      *                        RCURLY
      * </pre>
      *
@@ -722,7 +724,7 @@ public class Parser {
     private JMember interfaceMemberDecl(ArrayList<String> mods) {
         // Modifier rules for interfaces
         // Public by default
-        if(!mods.contains("public")) {
+        if (!mods.contains("public")) {
             mods.add("public");
         }
 
@@ -731,7 +733,7 @@ public class Parser {
         Type type = null;
         if (have(VOID)) {
             // Methods are also abstract by default
-            if(!mods.contains("abstract")) {
+            if (!mods.contains("abstract")) {
                 mods.add("abstract");
             }
             // void method
@@ -749,7 +751,7 @@ public class Parser {
             type = type();
             if (seeIdentLParen()) {
                 // Methods are also abstract by default
-                if(!mods.contains("abstract")) {
+                if (!mods.contains("abstract")) {
                     mods.add("abstract");
                 }
                 // Non void method
@@ -765,10 +767,10 @@ public class Parser {
             } else {
                 // Field
                 // Variables are also both static and final by default
-                if(!mods.contains("static")) {
+                if (!mods.contains("static")) {
                     mods.add("static");
                 }
-                if(!mods.contains("final")) {
+                if (!mods.contains("final")) {
                     mods.add("final");
                 }
                 interfaceMemberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
@@ -777,6 +779,7 @@ public class Parser {
         }
         return interfaceMemberDecl;
     }
+
     private ArrayList<Type> parseThrows() {
         ArrayList<Type> exceptionTypes = new ArrayList();
         mustBe(THROWS);
@@ -862,9 +865,11 @@ public class Parser {
 
             // Try to parse the for loop as a for-each
             if (seeForEachLoop()) {
-                JFormalParameter parameter = formalParameter();
+                JVariableDeclarator parameter = variableDeclarator(type());
                 mustBe(COLON);
-                Type array = type();
+                String identifier = type().simpleName();
+                TypeName id = new TypeName(line, identifier);
+                JVariable array = new JVariable(line, id.simpleName());
                 mustBe(RPAREN);
                 JStatement body = statement();
                 return new JForEachStatement(line, parameter, array, body);
@@ -1354,10 +1359,9 @@ public class Parser {
         boolean more = true;
         JExpression lhs = conditionalAndExpression();
         while (more) {
-            if(have(LOR)) {
+            if (have(LOR)) {
                 lhs = new JLogicalOrOp(line, lhs, conditionalAndExpression());
-            }
-            else {
+            } else {
                 more = false;
             }
         }
@@ -1482,11 +1486,9 @@ public class Parser {
         while (more) {
             if (have(EQUAL)) {
                 lhs = new JEqualOp(line, lhs, relationalExpression());
-            }
-            else if(have(NEQUAL)){
+            } else if (have(NEQUAL)) {
                 lhs = new JNEqualOp(line, lhs, relationalExpression());
-            }
-            else {
+            } else {
                 more = false;
             }
         }
@@ -1516,8 +1518,7 @@ public class Parser {
             return new JLessThanOp(line, lhs, shiftExpression());
         } else if (have(LE)) {
             return new JLessEqualOp(line, lhs, shiftExpression());
-        }
-        else if (have(INSTANCEOF)) {
+        } else if (have(INSTANCEOF)) {
             return new JInstanceOfOp(line, lhs, referenceType());
         } else {
             return lhs;
@@ -1694,10 +1695,9 @@ public class Parser {
             primaryExpr = selector(primaryExpr);
         }
         while (see(DEC) || see(INC)) {
-            if(have(DEC)) {
+            if (have(DEC)) {
                 primaryExpr = new JPostDecrementOp(line, primaryExpr);
-            }
-            else if(have(INC)) {
+            } else if (have(INC)) {
                 primaryExpr = new JPostIncrementOp(line, primaryExpr);
             }
         }
