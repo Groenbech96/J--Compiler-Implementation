@@ -16,12 +16,17 @@ public class JThrowStatement extends JStatement {
 
     @Override
     public JAST analyze(Context context) {
-        return null;
+        expression.analyze(context);
+        return this;
     }
 
     @Override
     public void codegen(CLEmitter output) {
+        String endLabel = output.createLabel();
 
+        expression.codegen(output);
+        output.addBranchInstruction(CLConstants.GOTO, endLabel);
+        output.addLabel(endLabel);
     }
 
     @Override
