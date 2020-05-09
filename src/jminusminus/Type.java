@@ -527,7 +527,9 @@ class Type {
                 : cls.isArray() ? "[" + descriptorFor(cls.getComponentType())
                 : cls.isPrimitive() ? (cls == int.class ? "I"
                 : cls == char.class ? "C"
-                : cls == boolean.class ? "Z" : "?")
+                : cls == boolean.class ? "Z"
+                : cls == double.class ? "D"
+                : "?")
                 : "L" + cls.getName().replace('.', '/') + ";";
     }
 
