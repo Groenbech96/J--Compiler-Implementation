@@ -1,5 +1,7 @@
 package pass;
 
+import java.lang.Double;
+
 public class DoubleTest {
 
     public static double func(double d) {
