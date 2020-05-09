@@ -82,8 +82,8 @@ class JForEachStatement extends JStatement {
         this.context = new LocalContext(context);
         this.counter = (JVariableDeclaration) this.counter.analyze(this.context);
         this.parameterDecl = (JVariableDeclaration) this.parameterDecl.analyze(this.context);
-        this.condition = (JLessThanOp) this.condition.analyze(this.context);
-        this.setForCurrentIndex = (JStatementExpression) this.setForCurrentIndex.analyze(this.context);
+        //this.condition = (JLessThanOp) this.condition.analyze(this.context);
+        //this.setForCurrentIndex = (JStatementExpression) this.setForCurrentIndex.analyze(this.context);
 
         body = (JStatement) body.analyze(this.context);
         array = (JVariable) array.analyze(this.context);
