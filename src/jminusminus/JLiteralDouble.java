@@ -1,7 +1,5 @@
 package jminusminus;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import static jminusminus.CLConstants.DCONST_0;
 import static jminusminus.CLConstants.DCONST_1;
 
@@ -45,14 +43,13 @@ public class JLiteralDouble extends JExpression {
      */
 
     public void codegen(CLEmitter output) {
-        double i = Double.parseDouble(text);
-        if (i == 0) {
+        double value = Double.parseDouble(text);
+        if (value == 0.0) {
             output.addNoArgInstruction(DCONST_0);
-        } else if (i == 1) {
+        } else if (value == 1.0) {
             output.addNoArgInstruction(DCONST_1);
         } else {
-            // TODO: code-gen
-            throw new NotImplementedException();
+            output.addLDCInstruction(value);
         }
     }
 
