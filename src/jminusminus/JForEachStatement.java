@@ -50,6 +50,14 @@ class JForEachStatement extends JStatement {
         this.body = body;
 
         this.parameter = parameter;
+
+        if (this.parameter.type() == Type.INT || this.parameter.type() == Type.CHAR)
+            this.parameter.setInitializer(new JLiteralInt(line, "0"));
+        else if (this.parameter.type() == Type.DOUBLE)
+            this.parameter.setInitializer(new JLiteralDouble(line, "0.0"));
+        else
+            this.parameter.setInitializer(new JLiteralNull(line));
+
         this.parameterDecl = new JVariableDeclaration(line, new ArrayList<>(), new ArrayList<JVariableDeclarator>() {{
             add(parameter);
         }});
