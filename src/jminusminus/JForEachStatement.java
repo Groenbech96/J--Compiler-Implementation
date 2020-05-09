@@ -51,7 +51,7 @@ class JForEachStatement extends JStatement {
 
         this.parameter = parameter;
 
-        if (this.parameter.type() == Type.INT || this.parameter.type() == Type.CHAR)
+        if (this.parameter.type() == Type.INT)
             this.parameter.setInitializer(new JLiteralInt(line, "0"));
         else if (this.parameter.type() == Type.DOUBLE)
             this.parameter.setInitializer(new JLiteralDouble(line, "0.0"));
