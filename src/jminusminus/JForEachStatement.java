@@ -69,6 +69,7 @@ class JForEachStatement extends JStatement {
         JExpression indexExpression = new JArrayExpression(line, array, counterName);
         JExpression assign = new JAssignOp(line, new JVariable(line, parameter.name()), indexExpression);
         assign.isStatementExpression = true;
+        this.setForCurrentIndex = new JStatementExpression(line, assign);
     }
 
     /**
