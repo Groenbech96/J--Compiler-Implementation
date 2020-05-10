@@ -427,6 +427,20 @@ class Type {
     }
 
     /**
+     * An assertion that this type inherits or matches from the the specified type. returns bool
+     *
+     * @author s154235, blame me for everything going wrong
+     * @param superClass superclass with which to match
+     * @return boolean
+     */
+    public boolean matchesOrInheritFrom(Type superClass) {
+        Type t = this;
+        for(; t != null; t = t.superClass())
+            if (t.equals(superClass)) return true;
+        return false;
+    }
+
+    /**
      * An assertion that this type inherits or matches from the the specified type. If there is no
      * match, an error message is written.
      *
@@ -435,7 +449,7 @@ class Type {
      * @param superClass superclass with which to match
      */
     public void mustMatchOrInheritFrom(int line, Type superClass) {
-        if (this.equals(superClass)) return;
+        if (equals(superClass)) return;
         mustInheritFrom(line, superClass);
     }
 
@@ -486,6 +500,15 @@ class Type {
         return this == Type.ANY || expected == Type.ANY
                 || (this == Type.NULLTYPE && expected.isReference())
                 || this.equals(expected);
+    }
+
+
+    public static boolean argTypesMatchOrInheritFrom(Class<?>[] givenArgs, Class<?>[] methodArgs) {
+        if (givenArgs.length != methodArgs.length) return false;
+        for (int i = 0; i < givenArgs.length; i++)
+            if (!Type.typeFor(givenArgs[i]).matchesOrInheritFrom(Type.typeFor(methodArgs[i])))
+                return false;
+        return true;
     }
 
     /**
@@ -615,6 +638,29 @@ class Type {
     public String argumentTypeForAppend() {
         return this == Type.STRING || this.isPrimitive() ? toDescriptor()
                 : "Ljava/lang/Object;";
+    }
+
+    public Method methodForOrSuperType(String name, Type[] argTypes) {
+        Method exactMethod = methodFor(name, argTypes);
+        if (exactMethod != null) return exactMethod;
+        Class[] classes = new Class[argTypes.length];
+        for (int i = 0; i < argTypes.length; i++) {
+            classes[i] = argTypes[i].classRep;
+        }
+        Class cls = classRep;
+
+        // Search this class and all superclasses
+        while (cls != null) {
+            java.lang.reflect.Method[] methods = cls.getDeclaredMethods();
+            for (java.lang.reflect.Method method : methods) {
+                if (method.getName().equals(name)
+                        && Type.argTypesMatchOrInheritFrom(classes, method.getParameterTypes())) {
+                    return new Method(method);
+                }
+            }
+            cls = cls.getSuperclass();
+        }
+        return null;
     }
 
     /**
