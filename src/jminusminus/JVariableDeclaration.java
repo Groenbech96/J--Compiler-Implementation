@@ -12,6 +12,12 @@ import java.util.ArrayList;
 
 class JVariableDeclaration extends JStatement {
 
+    public static JVariableDeclaration single(int line, JVariableDeclarator variable){
+        return new JVariableDeclaration(line, new ArrayList<>(), new ArrayList<JVariableDeclarator>(){{
+            add(variable);
+        }});
+    }
+
     /**
      * Modifiers.
      */

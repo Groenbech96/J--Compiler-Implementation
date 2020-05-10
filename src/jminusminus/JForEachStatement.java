@@ -15,20 +15,17 @@ class JForEachStatement extends JStatement {
     /**
      * The for expression
      */
-    private JStatementExpression setForCurrentIndex;
-    private JLessThanOp condition;
-    private JVariable counter;
+    private JVariable freeVariable;
+    private JStatementExpression counterGetNext;
+    private JLessThanOp counterHasNext;
     private JVariableDeclaration counterDecl;
     private JVariableDeclarator parameter;
     private JVariableDeclaration parameterDecl;
     private JVariable array;
-    private boolean isIterator;
-    private JStatementExpression setForCurrentIterator;
-    private JMessageExpression getIterator;
+    private boolean usingIterator;
+    private JStatementExpression iteratorGetNextAndIncrement;
     private JMessageExpression iteratorHasNext;
-    private JMessageExpression iteratorNext;
     private JVariableDeclaration iteratorDecl;
-    private JVariable iteratorVar;
 
     /**
      * The body.
@@ -56,51 +53,34 @@ class JForEachStatement extends JStatement {
         this.parameter = parameter;
         this.array = array;
         this.body = body;
-        this.isIterator = false;
-
-        // Initialize parameter
-        if (this.parameter.type() == Type.CHAR)
-            this.parameter.setInitializer(new JLiteralChar(line, "0"));
-        else if (this.parameter.type() == Type.BOOLEAN)
-            this.parameter.setInitializer(new JLiteralFalse(line));
-        else if (this.parameter.type() == Type.INT)
-            this.parameter.setInitializer(new JLiteralInt(line, "0"));
-        else if (this.parameter.type() == Type.DOUBLE)
-            this.parameter.setInitializer(new JLiteralDouble(line, "0.0"));
-        else
-            this.parameter.setInitializer(new JLiteralNull(line));
-
-        this.getIterator = new JMessageExpression(line, array, "iterator", new ArrayList<>());
-        this.iteratorDecl = new JVariableDeclaration(line, new ArrayList<>(), new ArrayList<JVariableDeclarator>() {{
-            add(new JVariableDeclarator(line, "1" + parameter.name(), Type.ITERABLE, getIterator));
-        }});
-        this.iteratorVar = new JVariable(line, "1" + parameter.name());
-        this.iteratorHasNext = new JMessageExpression(line, this.iteratorVar, "hasNext", new ArrayList<>());
-        this.iteratorNext = new JMessageExpression(line, this.iteratorVar, "next", new ArrayList<>());
-        JExpression iteratorAssign = new JAssignOp(line, new JVariable(line, parameter.name()), this.iteratorNext);
-        iteratorAssign.isStatementExpression = true;
-        this.setForCurrentIterator = new JStatementExpression(line, iteratorAssign);
+        this.usingIterator = false;
 
         // Variable declaration for parameter on left side of for-each loop
-        this.parameterDecl = new JVariableDeclaration(line, new ArrayList<>(), new ArrayList<JVariableDeclarator>() {{
-            add(parameter);
-        }});
+        this.parameter.useDefaultInitializer();
+        this.parameterDecl = JVariableDeclaration.single(line, parameter);
 
-        // Counter we use to track index in array
-        this.counter = new JVariable(line, "0" + parameter.name());
-        this.counterDecl = new JVariableDeclaration(line, new ArrayList<>(), new ArrayList<JVariableDeclarator>() {{
-            add(new JVariableDeclarator(line, counter.name(), Type.INT, new JLiteralInt(line, "0")));
-        }});
+        // Artificial variable either holding Iterator or integer counter
+        this.freeVariable = new JVariable(line, "0" + this.parameter.name());
 
-        // Condition to check when to end loop
+        JMessageExpression getIterator = new JMessageExpression(line, this.array, "iterator", new ArrayList<>());
+        JMessageExpression iteratorNext = new JMessageExpression(line, freeVariable, "next", new ArrayList<>());
+        JAssignOp iteratorAssign = new JAssignOp(line, new JVariable(line, parameter.name()), iteratorNext);
+        iteratorAssign.isStatementExpression = true;
+
+        this.iteratorHasNext = new JMessageExpression(line, freeVariable, "hasNext", new ArrayList<>());
+        this.iteratorGetNextAndIncrement = new JStatementExpression(line, iteratorAssign);
+        this.iteratorDecl = JVariableDeclaration.single(line,
+                new JVariableDeclarator(line, freeVariable.name(), Type.ITERATOR, getIterator));
+
         JFieldSelection length = new JFieldSelection(line, array, "length");
-        this.condition = new JLessThanOp(line, counter, length);
-
-        // Assign parameter to current index in array
-        JExpression indexExpression = new JArrayExpression(line, array, counter);
-        JExpression assign = new JAssignOp(line, new JVariable(line, parameter.name()), indexExpression);
+        JExpression indexExpression = new JArrayExpression(line, array, freeVariable);
+        JAssignOp assign = new JAssignOp(line, new JVariable(line, parameter.name()), indexExpression);
         assign.isStatementExpression = true;
-        this.setForCurrentIndex = new JStatementExpression(line, assign);
+
+        this.counterHasNext = new JLessThanOp(line, freeVariable, length);
+        this.counterGetNext = new JStatementExpression(line, assign);
+        this.counterDecl = JVariableDeclaration.single(line,
+                new JVariableDeclarator(line, freeVariable.name(), Type.INT, new JLiteralInt(line, "0")));
     }
 
     /**
@@ -113,24 +93,29 @@ class JForEachStatement extends JStatement {
         this.context = new LocalContext(context);
 
         this.parameterDecl = (JVariableDeclaration) this.parameterDecl.analyze(this.context);
-        this.array = (JVariable) this.array.analyze(this.context);
-
-        if (!array.type().isArray()) {
-            // array.type().mustInheritFrom(line(), Type.ITERABLE);
-            this.isIterator = true;
+        System.out.println("AAAA " + array.name());
+        try {
+            this.array = (JVariable) this.array.analyze(this.context);
+        } catch (ClassCastException e) {
+            JExpression er = (JFieldSelection) this.array.analyze(this.context);
+            System.out.println("ERROR " + er.type());
         }
-        else {
+        System.out.println("BBBB " + array.name());
+
+        if (array.type().isArray()) {
+            this.parameter.type().resolve(this.context).mustMatchExpected(line(), array.type().componentType());
             this.counterDecl = (JVariableDeclaration) this.counterDecl.analyze(this.context);
-
-            this.condition = (JLessThanOp) this.condition.analyze(this.context);
-            this.setForCurrentIndex = (JStatementExpression) this.setForCurrentIndex.analyze(this.context);
+            this.counterHasNext = (JLessThanOp) this.counterHasNext.analyze(this.context);
+            this.counterGetNext = (JStatementExpression) this.counterGetNext.analyze(this.context);
+        } else {
+            array.type().mustMatchExpected(line(), Type.ITERABLE);
+            this.usingIterator = true;
+            this.iteratorDecl = (JVariableDeclaration) this.iteratorDecl.analyze(this.context);
+            this.iteratorHasNext = (JMessageExpression) this.iteratorHasNext.analyze(this.context);
+            this.iteratorGetNextAndIncrement = (JStatementExpression) this.iteratorGetNextAndIncrement.analyze(this.context);
         }
-
-        this.parameter.type().resolve(this.context).mustMatchExpected(line(), array.type().componentType());
 
         this.body = (JStatement) this.body.analyze(this.context);
-
-
         return this;
     }
 
@@ -144,52 +129,34 @@ class JForEachStatement extends JStatement {
     public void codegen(CLEmitter output) {
         String startLabel = output.createLabel();
         String endLabel = output.createLabel();
+        parameterDecl.codegen(output);
 
-        if (isIterator) {
-            // Declare variables
-            parameterDecl.codegen(output);
+        if (usingIterator) {
+            // Declare variable
             iteratorDecl.codegen(output);
 
             // Label start of loop
             output.addLabel(startLabel);
 
             iteratorHasNext.codegen(output, endLabel, false);
+            iteratorGetNextAndIncrement.codegen(output);
 
-            setForCurrentIterator.codegen(output);
-
-            body.codegen(output);
-
-            output.addBranchInstruction(GOTO, startLabel);
-            
-            output.addLabel(endLabel);
-        }
-        else {
-            // Declare variables
+        } else {
+            // Declare variable
             counterDecl.codegen(output);
-            parameterDecl.codegen(output);
 
             // Label start of loop
             output.addLabel(startLabel);
 
-            // End loop if we reached end of array
-            condition.codegen(output, endLabel, false);
-
-            // Assign parameter
-            setForCurrentIndex.codegen(output);
-
-            // Loop body
-            body.codegen(output);
-
-            // Increment counter which points to index in array
-            int offset = ((LocalVariableDefn) counter.iDefn()).offset();
+            counterHasNext.codegen(output, endLabel, false);
+            counterGetNext.codegen(output);
+            int offset = ((LocalVariableDefn) freeVariable.iDefn()).offset();
             output.addIINCInstruction(offset, 1);
-
-            // Go to start of loop
-            output.addBranchInstruction(GOTO, startLabel);
-
-            // Label end of loop
-            output.addLabel(endLabel);
         }
+
+        body.codegen(output);
+        output.addBranchInstruction(GOTO, startLabel);
+        output.addLabel(endLabel);
     }
 
     /**
@@ -208,7 +175,7 @@ class JForEachStatement extends JStatement {
 
         p.printf("<Array>\n");
         p.indentRight();
-        p.printf("%s\n", array.name());
+        p.printf("%s\n",  array.name());
         p.indentLeft();
         p.printf("</Array>\n");
 
