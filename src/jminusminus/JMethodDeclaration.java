@@ -15,7 +15,6 @@ import static jminusminus.CLConstants.*;
 class JMethodDeclaration
         extends JAST implements JMember {
 
-    private final ArrayList<String> exceptionJvmNames;
     /**
      * Method modifiers.
      */
@@ -68,9 +67,10 @@ class JMethodDeclaration
 
 
     /**
-     * Exceptions thrown from methid
+     * Exceptions thrown from method
      */
     protected ArrayList<Type> exceptions;
+    protected ArrayList<Type> resolvedExceptions;
 
     /**
      * Construct an AST node for a method declaration given the
@@ -99,10 +99,10 @@ class JMethodDeclaration
         this.isAbstract = mods.contains("abstract");
         this.isStatic = mods.contains("static");
         this.isPrivate = mods.contains("private");
-        if(this.exceptions == null){
-            this.exceptions = new ArrayList<>();
+        if (this.exceptions == null) {
+            this.exceptions = new ArrayList<Type>();
         }
-        this.exceptionJvmNames = (ArrayList<String>) this.exceptions.stream().map(Type::jvmName).collect(Collectors.toList());
+        this.resolvedExceptions = new ArrayList<Type>();
     }
 
     /**
@@ -117,6 +117,11 @@ class JMethodDeclaration
         // Resolve types of the formal parameters
         for (JFormalParameter param : params) {
             param.setType(param.type().resolve(context));
+        }
+
+        // Resolve types of the exceptions
+        for (Type type : exceptions) {
+            resolvedExceptions.add(type.resolve(context));
         }
 
         // Resolve return type
@@ -200,7 +205,8 @@ class JMethodDeclaration
         // Generate a method with an empty body; need a return to
         // make
         // the class verifier happy.
-        partial.addMethod(mods, name, descriptor, exceptionJvmNames, false);
+        ArrayList<String> exceptionNames = (ArrayList<String>)this.resolvedExceptions.stream().map(Type::jvmName).collect(Collectors.toList());
+        partial.addMethod(mods, name, descriptor, exceptionNames, false);
 
         // Add implicit RETURN
         if (returnType == Type.VOID) {
@@ -227,7 +233,8 @@ class JMethodDeclaration
      */
 
     public void codegen(CLEmitter output) {
-        output.addMethod(mods, name, descriptor, exceptionJvmNames, false);
+        ArrayList<String> exceptionNames = (ArrayList<String>)this.resolvedExceptions.stream().map(Type::jvmName).collect(Collectors.toList());
+        output.addMethod(mods, name, descriptor, exceptionNames, false);
         if (body != null) {
             body.codegen(output);
         }

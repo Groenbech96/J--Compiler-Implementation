@@ -27,7 +27,6 @@ public class JExceptionStatement extends JStatement {
         }
     }
 
-
     @Override
     public JAST analyze(Context context) {
         tryBlock = tryBlock.analyze(context);
@@ -39,7 +38,7 @@ public class JExceptionStatement extends JStatement {
         for (ArrayList<JFormalParameter> parameters : parametersList) {
             for (JFormalParameter parameter : parameters) {
                 parameter = (JFormalParameter) parameter.analyze(context);
-                parameter.type().mustMatchExpected(line(), Type.THROWABLE);
+                parameter.type().resolve(context).mustInheritFrom(line(), Type.THROWABLE);
             }
         }
         if(parametersList.size() != catchBlocks.size()){
