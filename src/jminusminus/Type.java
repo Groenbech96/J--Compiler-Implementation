@@ -6,7 +6,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
@@ -86,9 +85,9 @@ class Type {
     public static Type OBJECT = typeFor(java.lang.Object.class);
 
     /**
-     * The type java.util.Iterator.
+     * The type java.lang.Iterable.
      */
-    public static Type ITERATOR = typeFor(java.util.Iterator.class);
+    public static Type ITERABLE = typeFor(java.lang.Iterable.class);
 
     /**
      * The void type.
