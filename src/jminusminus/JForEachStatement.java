@@ -97,7 +97,7 @@ class JForEachStatement extends JStatement {
         this.array = (JVariable) this.array.analyze(this.context);
 
         if (!array.type().isArray())
-            array.type().mustMatchExpected(line(), Type.ENUMERABLE);
+            array.type().mustMatchExpected(line(), Type.ITERATOR);
         this.parameter.type().resolve(this.context).mustMatchExpected(line(), array.type().componentType());
 
         this.body = (JStatement) this.body.analyze(this.context);

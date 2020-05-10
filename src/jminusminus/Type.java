@@ -86,9 +86,9 @@ class Type {
     public static Type OBJECT = typeFor(java.lang.Object.class);
 
     /**
-     * The type java.util.Enumerable.
+     * The type java.util.Iterator.
      */
-    public static Type ENUMERABLE = typeFor(java.util.Enumeration.class);
+    public static Type ITERATOR = typeFor(java.util.Iterator.class);
 
     /**
      * The void type.
