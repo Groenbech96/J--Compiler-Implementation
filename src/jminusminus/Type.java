@@ -90,6 +90,11 @@ class Type {
     public static Type ITERABLE = typeFor(java.lang.Iterable.class);
 
     /**
+     * The type java.lang.Iterator.
+     */
+    public static Type ITERATOR = typeFor(java.util.Iterator.class);
+
+    /**
      * The void type.
      */
     public final static Type VOID = typeFor(void.class);

@@ -1,10 +1,18 @@
 package pass;
 
 import java.lang.System;
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.Iterable;
+import java.util.function.Consumer;
+import java.util.Iterator;
+import java.util.Spliterator;
 
 public class ForStatements {
+    public static void test() {
+        List list = new List(new int[] {1, 2, 3});
+        for (Object value : list) {
+        }
+    }
+
     public static void main(String[] args) {
         int sum1 = 0, sum2 = 0;
         for (int i = 1; i <= 10; i += 1) {
@@ -24,10 +32,9 @@ public class ForStatements {
         for (i += 1, i += 1, i += 1; i == 0; i += 1) {
         }
 
-        // List<Integer> list = new ArrayList<Integer>();
-
-        // for (Integer value : list) {
-        // }
+        List list = new List(new int[] {1, 2, 3});
+        for (Object value : list) {
+        }
 
         TestClass[] arr = new TestClass[5];
         for (TestClass tc : arr) {
@@ -39,4 +46,29 @@ public class ForStatements {
 }
 
 class TestClass {
+}
+
+class List implements Iterable {
+
+    public List(int[] elements) {
+        this.elements = elements;
+        this.currentElement = 0;
+    }
+
+    int[] elements;
+    int currentElement;
+
+    public Iterator iterator() {
+        return Arrays.stream(this.elements).iterator();
+    }
+
+    public void forEach(Consumer action) {
+        for(int element : elements){
+            action.accept(element);
+        }
+    }
+
+    public Spliterator spliterator() {
+        return null;
+    }
 }
