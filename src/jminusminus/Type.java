@@ -140,7 +140,8 @@ class Type {
      * This constructor is to keep the compiler happy.
      */
 
-    protected Type() { super();
+    protected Type() {
+        super();
     }
 
     /**
@@ -230,13 +231,13 @@ class Type {
      */
 
     public ArrayList<Type> interfaces() {
-        if(classRep == null) {
+        if (classRep == null) {
             return new ArrayList<Type>();
         }
         ArrayList<Type> types = new ArrayList<>();
         Class<?>[] interfaces = classRep.getInterfaces();
-        
-        for(Class<?> iface : interfaces) {
+
+        for (Class<?> iface : interfaces) {
             types.add(typeFor(iface));
         }
         return types;
@@ -326,17 +327,17 @@ class Type {
     // (4): They have the same return type
     // (5): The method to be overriden is less or equally restrictive
     public boolean containsMethod(ArrayList<Method> methods, Method method) {
-            for (Method candidate : methods) {
-                if (!candidate.isStatic() &&
-                     !candidate.isFinal() &&
-                     candidate.equals(method) &&
-                     candidate.returnType() == method.returnType() &&
-                     candidate.name() == method.name() &&
-                     isLessOrEquallyRestrictive(candidate, method)) {
-                        return true;
-                }
+        for (Method candidate : methods) {
+            if (!candidate.isStatic() &&
+                    !candidate.isFinal() &&
+                    candidate.equals(method) &&
+                    candidate.returnType() == method.returnType() &&
+                    candidate.name() == method.name() &&
+                    isLessOrEquallyRestrictive(candidate, method)) {
+                return true;
             }
-            return false;
+        }
+        return false;
     }
 
     /**
@@ -354,7 +355,7 @@ class Type {
 
         // Add all interface methods to the list of inherited abstract methods
         ArrayList<Type> interfaces = interfaces();
-        for(Type iface : interfaces) {
+        for (Type iface : interfaces) {
             inheritedAbstractMethods.addAll(iface.abstractMethods());
         }
 
@@ -364,8 +365,8 @@ class Type {
 
         abstractMethods.addAll(declaredAbstractMethods);
         for (Method method : inheritedAbstractMethods) {
-            if(!containsMethod(declaredConcreteMethods, method) &&
-                !containsMethod(declaredAbstractMethods, method)) {
+            if (!containsMethod(declaredConcreteMethods, method) &&
+                    !containsMethod(declaredAbstractMethods, method)) {
                 abstractMethods.add(method);
             }
         }
@@ -426,16 +427,29 @@ class Type {
     }
 
     /**
+     * An assertion that this type inherits or matches from the the specified type. If there is no
+     * match, an error message is written.
+     *
+     * @author s154235, blame me for everything going wrong
+     * @param line       the line near which the mismatch occurs.
+     * @param superClass superclass with which to match
+     */
+    public void mustMatchOrInheritFrom(int line, Type superClass) {
+        if (this.equals(superClass)) return;
+        mustInheritFrom(line, superClass);
+    }
+
+    /**
      * An assertion that this type inherits from the the specified type. If there is no
      * match, an error message is written.
      *
-     * @param line         the line near which the mismatch occurs.
-     * @param superClass   superclass with which to match
+     * @param line       the line near which the mismatch occurs.
+     * @param superClass superclass with which to match
      */
     public void mustInheritFrom(int line, Type superClass) {
         Type t = this;
-        while(t.superClass() != null) {
-            if(t.superClass().equals(superClass)) {
+        while (t.superClass() != null) {
+            if (t.superClass().equals(superClass) || t == superClass) {
                 return;
             }
             t = t.superClass();
@@ -572,7 +586,7 @@ class Type {
      */
 
     private static String toJava(Class classRep) {
-        if(classRep == null){
+        if (classRep == null) {
             return "Null";
         }
         return classRep.isArray() ? toJava(classRep.getComponentType()) + "[]"
@@ -780,7 +794,7 @@ class Type {
             return true;
         }
         if (targetType.isArray()) {
-            return this.checkAccess(line, targetType.componentType(), interfaces );
+            return this.checkAccess(line, targetType.componentType(), interfaces);
         }
         return checkAccess(line, classRep, targetType.classRep, interfaces);
     }
@@ -800,7 +814,7 @@ class Type {
         java.lang.Package newClassPackage = referencingType.getPackage();
         java.lang.Package superClassPackage = type.getPackage();
 
-        if(!checkInterfaceAccess(line, referencingType,interfaces)){
+        if (!checkInterfaceAccess(line, referencingType, interfaces)) {
             return false;
         }
 
@@ -808,8 +822,7 @@ class Type {
                 || (newClassPackage == null ? "" : newClassPackage.getName()).equals((superClassPackage == null ? ""
                 : superClassPackage.getName()))) {
             return true;
-        }
-        else {
+        } else {
             JAST.compilationUnit.reportSemanticError(line, "The type, "
                     + type.getCanonicalName() + ", is not accessible from "
                     + referencingType.getCanonicalName());
@@ -817,7 +830,7 @@ class Type {
         }
     }
 
-    public static boolean checkInterfaceAccess(int line, Class referencingType, ArrayList<Type> interfaces){
+    public static boolean checkInterfaceAccess(int line, Class referencingType, ArrayList<Type> interfaces) {
         java.lang.Package newClassPackage = referencingType.getPackage();
 
         for (Type _interface : interfaces) {

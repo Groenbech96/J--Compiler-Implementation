@@ -13,7 +13,7 @@ public class ForStatements {
 
         int[] a = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
         String[] b = {"abc"};
-        for (String i : b) {
+        for (Object i : b) {
             // sum2 += i;
         }
 
@@ -30,7 +30,7 @@ public class ForStatements {
         // }
 
         TestClass[] arr = new TestClass[5];
-        for (TestClass tc : arr) {
+        for (Object tc : arr) {
         }
 
         for (; ; ) {
