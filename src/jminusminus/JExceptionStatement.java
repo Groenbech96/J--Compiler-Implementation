@@ -38,7 +38,7 @@ public class JExceptionStatement extends JStatement {
         for (ArrayList<JFormalParameter> parameters : parametersList) {
             for (JFormalParameter parameter : parameters) {
                 parameter = (JFormalParameter) parameter.analyze(context);
-                parameter.type().resolve(context).mustInheritFrom(line(), Type.THROWABLE);
+                parameter.type().resolve(context).mustMatchOrInheritFrom(line(), Type.THROWABLE);
             }
         }
         if(parametersList.size() != catchBlocks.size()){

@@ -58,8 +58,7 @@ class JArrayInitializer
             JExpression component = initials.get(i);
             initials.set(i, component = component.analyze(context));
             if (!(component instanceof JArrayInitializer)) {
-                component.type().mustMatchExpected(line,
-                        componentType);
+                component.type().mustMatchExpected(line, componentType);
             }
         }
         return this;

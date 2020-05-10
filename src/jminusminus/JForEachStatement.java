@@ -100,12 +100,13 @@ class JForEachStatement extends JStatement {
         else this.array = (JVariable) analyzedArray;
 
         if (array.type().isArray()) {
+            array.type().componentType().mustMatchOrInheritFrom(line(), this.parameter.type().resolve(this.context));
             this.parameter.type().resolve(this.context).mustMatchExpected(line(), array.type().componentType());
             this.counterDecl = (JVariableDeclaration) this.counterDecl.analyze(this.context);
             this.counterHasNext = (JLessThanOp) this.counterHasNext.analyze(this.context);
             this.counterGetNext = (JStatementExpression) this.counterGetNext.analyze(this.context);
         } else {
-            array.type().mustMatchExpected(line(), Type.ITERABLE);
+            array.type().mustMatchOrInheritFrom(line(), Type.ITERABLE);
             this.usingIterator = true;
             this.iteratorDecl = (JVariableDeclaration) this.iteratorDecl.analyze(this.context);
             this.iteratorHasNext = (JMessageExpression) this.iteratorHasNext.analyze(this.context);

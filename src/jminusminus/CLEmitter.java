@@ -958,10 +958,10 @@ public class CLEmitter {
         clFile.majorVersion = MAJOR_VERSION;
         clFile.minorVersion = MINOR_VERSION;
         if (!validInternalForm(thisClass)) {
-            reportEmitterError("'%s' is not in internal form", thisClass);
+            reportEmitterError("'%s' is not in internal form, addClass thisClass", thisClass);
         }
         if (!validInternalForm(superClass)) {
-            reportEmitterError("'%s' is not in internal form", superClass);
+            reportEmitterError("'%s' is not in internal form, addClass superClass", superClass);
         }
         if (accessFlags != null) {
             for (int i = 0; i < accessFlags.size(); i++) {
@@ -974,7 +974,7 @@ public class CLEmitter {
         clFile.superClass = constantPool.constantClassInfo(superClass);
         for (int i = 0; superInterfaces != null && i < superInterfaces.size(); i++) {
             if (!validInternalForm(superInterfaces.get(i))) {
-                reportEmitterError("'%s' is not in internal form",
+                reportEmitterError("'%s' is not in internal form, addClass superInterfaces " + i,
                         superInterfaces.get(i));
             }
             interfaces.add(new Integer(constantPool
@@ -1167,7 +1167,7 @@ public class CLEmitter {
     public void addExceptionHandler(String startLabel, String endLabel,
                                     String handlerLabel, String catchType) {
         if (catchType != null && !validInternalForm(catchType)) {
-            reportEmitterError("'%s' is not in internal form", catchType);
+            reportEmitterError("'%s' is not in internal form, addExceptionHandler catchType", catchType);
         }
         CLException e = new CLException(startLabel, endLabel, handlerLabel,
                 catchType);
@@ -1420,7 +1420,7 @@ public class CLEmitter {
     public void addMemberAccessInstruction(int opcode, String target,
                                            String name, String type) {
         if (!validInternalForm(target)) {
-            reportEmitterError("%s: '%s' is not in internal form",
+            reportEmitterError("eCurrentMethod: %s, target: '%s' is not in internal form, addMemberAccessInstruction",
                     eCurrentMethod, target);
         }
         CLInstruction instr = null;
