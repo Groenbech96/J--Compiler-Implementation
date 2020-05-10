@@ -2,13 +2,11 @@
 
 package jminusminus;
 
-import com.sun.org.apache.xpath.internal.operations.Mod;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
@@ -88,9 +86,9 @@ class Type {
     public static Type OBJECT = typeFor(java.lang.Object.class);
 
     /**
-     * The type java.util.Enumerable.
+     * The type java.lang.Iterable.
      */
-    public static Type ENUMERABLE = typeFor(java.util.Enumeration.class);
+    public static Type ITERABLE = typeFor(Iterable.class);
 
     /**
      * The void type.

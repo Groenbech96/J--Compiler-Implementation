@@ -99,6 +99,9 @@ class JMethodDeclaration
         this.isAbstract = mods.contains("abstract");
         this.isStatic = mods.contains("static");
         this.isPrivate = mods.contains("private");
+        if(this.exceptions == null){
+            this.exceptions = new ArrayList<>();
+        }
         this.exceptionJvmNames = (ArrayList<String>) this.exceptions.stream().map(Type::jvmName).collect(Collectors.toList());
     }
 
