@@ -1,6 +1,7 @@
 package pass;
 
 import java.lang.System;
+import java.util.Arrays;
 import java.lang.Iterable;
 import java.util.function.Consumer;
 import java.util.Iterator;
@@ -59,7 +60,7 @@ class List implements Iterable {
     int currentElement;
 
     public Iterator iterator() {
-        return Arrays.stream(this.elements).iterator();
+        return (Iterator) Arrays.stream(this.elements).iterator();
     }
 
     public void forEach(Consumer action) {

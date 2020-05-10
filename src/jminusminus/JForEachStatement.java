@@ -94,13 +94,10 @@ class JForEachStatement extends JStatement {
 
         this.parameterDecl = (JVariableDeclaration) this.parameterDecl.analyze(this.context);
         System.out.println("AAAA " + array.name());
-        try {
-            this.array = (JVariable) this.array.analyze(this.context);
-        } catch (ClassCastException e) {
-            JExpression er = (JFieldSelection) this.array.analyze(this.context);
-            System.out.println("ERROR " + er.type());
-        }
-        System.out.println("BBBB " + array.name());
+        JExpression analyzedArray = this.array.analyze(this.context);
+        if (analyzedArray instanceof JFieldSelection)
+            this.array = (JVariable) ((JFieldSelection) analyzedArray).target;
+        else this.array = (JVariable) analyzedArray;
 
         if (array.type().isArray()) {
             this.parameter.type().resolve(this.context).mustMatchExpected(line(), array.type().componentType());
@@ -175,7 +172,7 @@ class JForEachStatement extends JStatement {
 
         p.printf("<Array>\n");
         p.indentRight();
-        p.printf("%s\n",  array.name());
+        p.printf("%s\n", array.name());
         p.indentLeft();
         p.printf("</Array>\n");
 
