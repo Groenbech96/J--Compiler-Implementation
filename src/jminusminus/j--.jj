@@ -554,7 +554,7 @@ private JInterfaceDeclaration interfaceDeclaration( ArrayList<String> mods ): {
     String name = "";
     Type aType = null;
     ArrayList<JMember> interfaceBody = null;
-    ArrayList<Type> superInterfaces = null;
+    ArrayList<Type> superInterfaces = new ArrayList<Type>();
 }
 {
     try {

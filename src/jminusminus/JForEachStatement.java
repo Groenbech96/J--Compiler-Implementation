@@ -2,8 +2,6 @@
 
 package jminusminus;
 
-import java.util.ArrayList;
-
 /**
  * The AST node for a for-statement.
  */
@@ -50,7 +48,7 @@ class JForEachStatement extends JStatement {
         parameter = (JFormalParameter) parameter.analyze(context);
 
         if (!array.isArray())
-            parameter.type().mustMatchExpected(line(), Type.ENUMERABLE);
+            parameter.type().mustMatchExpected(line(), Type.ITERABLE);
         
         array.componentType().mustMatchExpected(line(), parameter.type());
 
