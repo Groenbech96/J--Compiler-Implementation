@@ -39,38 +39,45 @@ class JForEachStatement extends JStatement {
      * test expression, and the body.
      *
      * @param line      line in which the while-statement occurs in the source file.
-     * @param parameter the formal parameter on the left side of the for-each expression
+     * @param parameter the parameter on the left side of the for-each expression
      * @param array     the array parameter on the right side of the for-each expression
      * @param body      the body
      */
 
     public JForEachStatement(int line, JVariableDeclarator parameter, JVariable array, JStatement body) {
         super(line);
+        this.parameter = parameter;
         this.array = array;
         this.body = body;
 
-        this.parameter = parameter;
-
-        if (this.parameter.type() == Type.INT)
+        // Initialize parameter
+        if (this.parameter.type() == Type.CHAR)
+            this.parameter.setInitializer(new JLiteralChar(line, "0"));
+        else if (this.parameter.type() == Type.BOOLEAN)
+            this.parameter.setInitializer(new JLiteralFalse(line));
+        else if (this.parameter.type() == Type.INT)
             this.parameter.setInitializer(new JLiteralInt(line, "0"));
         else if (this.parameter.type() == Type.DOUBLE)
             this.parameter.setInitializer(new JLiteralDouble(line, "0.0"));
         else
             this.parameter.setInitializer(new JLiteralNull(line));
 
+        // Variable declaration for parameter on left side of for-each loop
         this.parameterDecl = new JVariableDeclaration(line, new ArrayList<>(), new ArrayList<JVariableDeclarator>() {{
             add(parameter);
         }});
 
-        //Artificial nodes
+        // Counter we use to track index in array
         this.counter = new JVariable(line, "0" + parameter.name());
         this.counterDecl = new JVariableDeclaration(line, new ArrayList<>(), new ArrayList<JVariableDeclarator>() {{
             add(new JVariableDeclarator(line, counter.name(), Type.INT, new JLiteralInt(line, "0")));
         }});
 
+        // Condition to check when to end loop
         JFieldSelection length = new JFieldSelection(line, array, "length");
         this.condition = new JLessThanOp(line, counter, length);
 
+        // Assign parameter to current index in array
         JExpression indexExpression = new JArrayExpression(line, array, counter);
         JExpression assign = new JAssignOp(line, new JVariable(line, parameter.name()), indexExpression);
         assign.isStatementExpression = true;
@@ -85,13 +92,13 @@ class JForEachStatement extends JStatement {
      */
     public JForEachStatement analyze(Context context) {
         this.context = new LocalContext(context);
+
         this.parameterDecl = (JVariableDeclaration) this.parameterDecl.analyze(this.context);
         this.array = (JVariable) this.array.analyze(this.context);
 
         if (!array.type().isArray())
             array.type().mustMatchExpected(line(), Type.ENUMERABLE);
-        this.parameter.type().resolve(this.context)
-                .mustMatchExpected(line(), array.type().componentType());
+        this.parameter.type().resolve(this.context).mustMatchExpected(line(), array.type().componentType());
 
         this.body = (JStatement) this.body.analyze(this.context);
 
@@ -99,7 +106,6 @@ class JForEachStatement extends JStatement {
 
         this.condition = (JLessThanOp) this.condition.analyze(this.context);
         this.setForCurrentIndex = (JStatementExpression) this.setForCurrentIndex.analyze(this.context);
-
 
         return this;
     }
@@ -119,22 +125,26 @@ class JForEachStatement extends JStatement {
         counterDecl.codegen(output);
         parameterDecl.codegen(output);
 
-        // Branch out of the loop on the test condition being false
+        // Label start of loop
         output.addLabel(startLabel);
+
+        // End loop if we reached end of array
         condition.codegen(output, endLabel, false);
+
+        // Assign parameter
         setForCurrentIndex.codegen(output);
 
-        // Codegen body
+        // Loop body
         body.codegen(output);
 
-        // Increment our counter
+        // Increment counter which points to index in array
         int offset = ((LocalVariableDefn) counter.iDefn()).offset();
         output.addIINCInstruction(offset, 1);
 
-        // Unconditional jump back up to branch
+        // Go to start of loop
         output.addBranchInstruction(GOTO, startLabel);
 
-        // The label below and outside the loop
+        // Label end of loop
         output.addLabel(endLabel);
     }
 
@@ -146,11 +156,11 @@ class JForEachStatement extends JStatement {
         p.printf("<JForEachStatement line=\"%d\">\n", line());
         p.indentRight();
 
-        p.printf("<FormalParameter>\n");
+        p.printf("<Parameter>\n");
         p.indentRight();
         parameter.writeToStdOut(p);
         p.indentLeft();
-        p.printf("</FormalParameter>\n");
+        p.printf("</Parameter>\n");
 
         p.printf("<Array>\n");
         p.indentRight();
