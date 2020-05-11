@@ -2,6 +2,7 @@ package pass;
 
 import java.lang.System;
 import java.util.Arrays;
+import java.lang.Integer;
 import java.lang.Iterable;
 import java.util.function.Consumer;
 import java.util.Iterator;
@@ -22,7 +23,7 @@ public class ForStatements {
 
         int[] a = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
         String[] b = {"abc"};
-        for (Object i : b) {
+        for (String i : b) {
             // sum2 += i;
         }
 
@@ -65,7 +66,7 @@ class List implements Iterable {
 
     public void forEach(Consumer action) {
         for(int element : elements){
-            action.accept(element);
+            action.accept((Integer) element);
         }
     }
 
