@@ -3,7 +3,6 @@
 package jminusminus;
 
 import java.util.ArrayList;
-import java.util.PrimitiveIterator;
 
 import static jminusminus.CLConstants.GOTO;
 
