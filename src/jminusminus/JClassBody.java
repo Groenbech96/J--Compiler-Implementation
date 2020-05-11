@@ -68,8 +68,7 @@ public class JClassBody extends JAST  {
         // class
         for (JMember member : members) {
             member.preAnalyze(context, partial);
-            if (member instanceof JConstructorDeclaration
-                    && ((JConstructorDeclaration) member).params.size() == 0) {
+            if (member instanceof JConstructorDeclaration) {
                 hasExplicitConstructor = true;
             }
         }
@@ -218,13 +217,15 @@ public class JClassBody extends JAST  {
 
     private void codegenPartialImplicitConstructor(CLEmitter partial) {
         // Invoke super constructor
-        ArrayList<String> mods = new ArrayList<String>();
+        ArrayList<String> mods = new ArrayList<>();
         mods.add("public");
         partial.addMethod(mods, "<init>", "()V", null, false);
         partial.addNoArgInstruction(ALOAD_0);
         partial.addMemberAccessInstruction(INVOKESPECIAL, classSuperType.jvmName(),
                 "<init>", "()V");
-
+        for(JFieldDeclaration instanceField : instanceFieldInitializations){
+            instanceField.codegen(partial);
+        }
         // Return
         partial.addNoArgInstruction(RETURN);
     }

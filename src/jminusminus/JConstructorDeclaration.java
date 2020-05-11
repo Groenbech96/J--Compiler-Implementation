@@ -22,6 +22,7 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
      * Defining class
      */
     JClassDeclaration definingClass;
+    private ArrayList<JFieldDeclaration> instanceBlocks = new ArrayList<>();
 
     /**
      * Construct an AST node for a constructor declaration given the line
@@ -143,6 +144,7 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
                     ((JTypeDecl) context.classContext().definition())
                             .superType().jvmName(), "<init>", "()V");
         }
+
         // Field initializations
         for (JFieldDeclaration field : definingClass
                 .instanceFieldInitializations()) {
