@@ -94,7 +94,6 @@ class JForEachStatement extends JStatement {
         this.context = new LocalContext(context);
 
         this.parameterDecl = (JVariableDeclaration) this.parameterDecl.analyze(this.context);
-        // TODO: figure out how to handle when this doesnt return JVariable
         JExpression analyzedArray = this.array.analyze(this.context);
 
         if (analyzedArray.type().isArray()) {
