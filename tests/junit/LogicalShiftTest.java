@@ -1,7 +1,7 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.LogicalRightShift;
+import pass.step5.LogicalRightShift;
 
 public class LogicalShiftTest extends TestCase {
 

@@ -1,7 +1,7 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.Division;
+import pass.step5.Division;
 
 public class DivisionTest extends TestCase {
 

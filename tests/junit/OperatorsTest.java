@@ -1,7 +1,7 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.Operators;
+import pass.step5.Operators;
 
 public class OperatorsTest extends TestCase {
 

@@ -91,12 +91,8 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     @Override
     public void codegen(CLEmitter output) {
         String packageName = JAST.compilationUnit.packageName();
-        String qualifiedName = packageName.equals("") ? name : packageName + "/" + name;
+        String qualifiedName = packageName.equals("") ? name : packageName.replace(".", "/") + "/" + name;
         ArrayList<String> superInterfaceNames = superInterfaces.stream().map(Type::jvmName).collect(Collectors.toCollection(ArrayList::new));
-
-        for(String t : superInterfaceNames) {
-            JAST.compilationUnit.reportSemanticError(0, "%s lol", t);
-        }
 
         output.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), superInterfaceNames, false);
 

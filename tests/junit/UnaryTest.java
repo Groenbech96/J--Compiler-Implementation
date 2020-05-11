@@ -1,9 +1,9 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.UnaryPlus;
+import pass.step5.UnaryPlus;
 
-public class UnaryPlusTest extends TestCase {
+public class UnaryTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
     }
@@ -12,8 +12,10 @@ public class UnaryPlusTest extends TestCase {
         super.tearDown();
     }
 
-    public void testUnaryPlus() {
+    public void testUnary() {
         assertEquals(UnaryPlus.unaryPlus(300), 300);
         assertEquals(UnaryPlus.unaryPlus(300.0), 300.0);
+        assertEquals(UnaryPlus.unaryMinus(300), -300);
+        assertEquals(UnaryPlus.unaryMinus(300.0), -300.0);
     }
 }

@@ -1,6 +1,6 @@
 package pass.step1;
 /**
- * MultiLineComment.java: tets the implementation of multi-line comment.
+ * pass.step5.MultiLineComment.java: tets the implementation of multi-line comment.
  */
 
 public class MultiLineComment {

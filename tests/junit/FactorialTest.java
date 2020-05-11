@@ -3,7 +3,7 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.Factorial;
+import pass.step5.Factorial;
 
 public class FactorialTest extends TestCase {
 
