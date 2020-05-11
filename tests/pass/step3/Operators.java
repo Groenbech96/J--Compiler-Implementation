@@ -1,4 +1,4 @@
-package pass;
+package pass.step3;
 
 public class Operators {
 
@@ -6,7 +6,7 @@ public class Operators {
         int x = 100;
         x -= 1;
         x %= 7;
-        boolean y = x >= 10 || False;
+        boolean y = x >= 10 || false;
         int z = y ? 2 : 0;
 
         int a = 5;

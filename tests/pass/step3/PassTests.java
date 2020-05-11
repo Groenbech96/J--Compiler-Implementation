@@ -1,11 +1,14 @@
+package pass.step3;
+import pass.SomeException;
+
 import java.lang.Math;
 import java.lang.System;
 
-interface A {
+interface APass {
     public double f(double x) throws SomeException;
 }
 
-class B implements A {
+class BPass implements APass {
     public double f(double x) throws SomeException {
         if (x > 0) { throw new SomeException(); }
         x -= 1.0;
@@ -20,7 +23,7 @@ public class PassTests {
     public static void main(String[] args) {
         int x = Integer.parseInt(args[0]);
         try {
-            B b = new B();
+            BPass b = new BPass();
             b.f(x > 3 ? x : 5 * x);
         } catch (SomeException e) {
             System.out.println("Error!");

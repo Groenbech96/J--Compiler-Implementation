@@ -77,7 +77,9 @@ class JPositiveOp extends JUnaryExpression {
 
     @Override
     public void codegen(CLEmitter output) {
+        //JAST.compilationUnit.reportSemanticError(0, "%s", arg.getClass());
         arg.codegen(output);
+
     }
 }
 

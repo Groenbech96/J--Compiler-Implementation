@@ -12,6 +12,12 @@ import java.util.ArrayList;
 
 class JVariableDeclaration extends JStatement {
 
+    public static JVariableDeclaration single(int line, JVariableDeclarator variable){
+        return new JVariableDeclaration(line, new ArrayList<>(), new ArrayList<JVariableDeclarator>(){{
+            add(variable);
+        }});
+    }
+
     /**
      * Modifiers.
      */
@@ -68,7 +74,7 @@ class JVariableDeclaration extends JStatement {
             // Local variables are declared here (fields are
             // declared
             // in preAnalyze())
-            int offset = ((LocalContext) context).nextOffset();
+            int offset = ((LocalContext) context).nextOffset(decl.type());
             LocalVariableDefn defn = new LocalVariableDefn(decl.type().resolve(
                     context), offset);
 

@@ -45,7 +45,7 @@ statement ::= block
             | FOR forExpression | forEachExpression statement
             | RETURN [expression] SEMI
             | SEMI
-            | TRY block {CATCH formalParameters block} [FINALLY block]
+            | TRY block {CATCH LPARAN type {BITWISE_OR type} IDENTIFIER RPARAN block} [FINALLY block]
             | THROW expression SEMI
             | statementExpression SEMI
 

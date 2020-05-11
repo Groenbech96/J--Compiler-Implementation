@@ -127,8 +127,8 @@ class JAssignOp extends JAssignment {
             lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
         }
         rhs = (JExpression) rhs.analyze(context);
-        rhs.type().mustMatchExpected(line(), lhs.type());
-        type = rhs.type();
+        rhs.type().mustMatchOrInheritFrom(line(), lhs.type());
+        type = lhs.type();
         if (lhs instanceof JVariable) {
             IDefn defn = ((JVariable) lhs).iDefn();
             if (defn != null) {

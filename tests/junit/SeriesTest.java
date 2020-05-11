@@ -3,7 +3,7 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.Series;
+import pass.step5.Series;
 
 public class SeriesTest extends TestCase {
 

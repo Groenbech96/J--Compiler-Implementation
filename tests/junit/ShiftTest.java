@@ -1,8 +1,8 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.LeftShift;
-import pass.RightShift;
+import pass.step5.LeftShift;
+import pass.step5.RightShift;
 
 public class ShiftTest extends TestCase {
 

@@ -1,7 +1,7 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.ExceptionHandlers;
+import pass.step5.ExceptionHandlers;
 
 public class ExceptionTest extends TestCase {
 

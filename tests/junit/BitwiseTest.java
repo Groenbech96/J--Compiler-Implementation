@@ -1,10 +1,10 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.And;
-import pass.ExclusiveOr;
-import pass.InclusiveOr;
-import pass.Not;
+import pass.step5.And;
+import pass.step5.ExclusiveOr;
+import pass.step5.InclusiveOr;
+import pass.step5.Not;
 
 public class BitwiseTest extends TestCase {
     protected void setUp() throws Exception {

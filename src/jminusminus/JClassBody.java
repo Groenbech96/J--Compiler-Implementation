@@ -1,6 +1,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import static jminusminus.CLConstants.*;
 import static jminusminus.CLConstants.RETURN;
@@ -83,19 +84,17 @@ public class JClassBody extends JAST  {
     @Override
     public JAST analyze(Context context) {
 
-        for(JBlock block : instanceBlocks) {
-            block.analyze(context);
-        }
+        instanceBlocks = instanceBlocks.stream()
+                .map(e -> e.analyze(context))
+                .collect(Collectors.toCollection(ArrayList::new));
 
-        for(JBlock block : staticBlocks) {
-            block.analyze(context);
-        }
+        staticBlocks = staticBlocks.stream()
+                .map(e -> e.analyze(context))
+                .collect(Collectors.toCollection(ArrayList::new));
 
-        // Analyze all members
-        for (JMember member : members) {
-            //Todo: Should we update the members?
-            ((JAST) member).analyze(context);
-        }
+        members = members.stream()
+                .map(e -> (JMember) ((JAST) e).analyze(context))
+                .collect(Collectors.toCollection(ArrayList::new));
 
         // Copy declared fields for purposes of initialization.
         for (JMember member : members) {
