@@ -14,5 +14,6 @@ public class UnaryPlusTest extends TestCase {
 
     public void testUnaryPlus() {
         assertEquals(UnaryPlus.unaryPlus(300), 300);
+        assertEquals(UnaryPlus.unaryPlus(300.0), 300.0);
     }
 }

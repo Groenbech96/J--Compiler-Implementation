@@ -17,5 +17,38 @@ public class DoubleTest {
         raw = raw + (double)i + (double)boxed;
         double[] arr = new double[5];
         raw = arr[2];
+
+        double a = 3.0;
+        double b = 4.0;
+
+        // Tests parsing for all operators
+        a = !(a == b) ? a : b;
+        a = (a != b) ? a : b;
+
+        a = a / b;
+        a /= b;
+        a = a + b;
+        a += b;
+        a++;
+        ++a;
+        a = a - b;
+        a -= b;
+        a--;
+        --a;
+        a = a * b;
+        a *= b;
+        a = a % b;
+        a %= b;
+
+        a = (a >= b) ? a : b;
+        a = (a > b) ? a : b;
+        a = (a < b) ? a : b;
+        a = (a <= b) ? a : b;
+
+        a = (true || false) ? a : b;
+        a = (true && false) ? a : b;
+
+
+
     }
 }
