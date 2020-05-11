@@ -1,4 +1,4 @@
-package pass;
+package pass.step3;
 
 public class DoubleTest {
     public static double func(double d) {
@@ -8,7 +8,7 @@ public class DoubleTest {
     public static void main(String[] args) {
         int i = 1;
         Double boxed = new Double(5.0);
-        double raw = 1.0D;
+        double raw = 1.0;
         raw += .0;
         raw += 5.;
         raw += boxed;

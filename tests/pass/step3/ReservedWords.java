@@ -1,3 +1,5 @@
+package pass.step3;
+
 public class ReservedWords extends SomeClass implements  SomeInterface {
     public static void main(String[] args) {
         //do {

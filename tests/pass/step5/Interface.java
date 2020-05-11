@@ -1,7 +1,8 @@
+package pass.step5;
+
 /**
  * Interface.java
  */
-
 interface A {
     public int f(int x);
     static int i = 5;

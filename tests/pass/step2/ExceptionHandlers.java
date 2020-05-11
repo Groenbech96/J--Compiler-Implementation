@@ -1,5 +1,8 @@
-package pass;
+package pass.step2;
 
+
+import pass.Exception1;
+import pass.Exception2;
 
 public class ExceptionHandlers {
     private static void f() throws Exception1, Exception2 {

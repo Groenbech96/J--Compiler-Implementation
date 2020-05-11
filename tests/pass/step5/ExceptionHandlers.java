@@ -1,4 +1,4 @@
-package pass;
+package pass.step5;
 import java.lang.Exception;
 
 public class ExceptionHandlers {

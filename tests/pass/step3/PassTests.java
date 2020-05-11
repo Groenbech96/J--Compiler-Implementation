@@ -1,3 +1,4 @@
+package pass.step3;
 import java.lang.Math;
 import java.lang.System;
 

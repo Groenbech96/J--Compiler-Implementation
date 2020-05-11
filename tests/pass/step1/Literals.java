@@ -1,3 +1,5 @@
+package pass.step1;
+
 public class Literals {
     public static void main(String[] args) {
         int a = 372;

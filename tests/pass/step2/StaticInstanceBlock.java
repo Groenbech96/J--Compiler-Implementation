@@ -1,4 +1,4 @@
-package pass;
+package pass.step2;
 
 public class StaticInstanceBlock {
     public static int test;
