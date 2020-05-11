@@ -3,7 +3,6 @@
 package jminusminus;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static jminusminus.CLConstants.*;
@@ -172,14 +171,14 @@ class JMethodDeclaration
 
         if (!isStatic) {
             // Offset 0 is used to address "this".
-            this.context.nextOffset();
+            this.context.nextOffset(Type.ANY);
         }
 
         // Declare the parameters. We consider a formal parameter 
         // to be always initialized, via a function call.
         for (JFormalParameter param : params) {
             LocalVariableDefn defn = new LocalVariableDefn(param.type(),
-                    this.context.nextOffset());
+                    this.context.nextOffset(param.type()));
             defn.initialize();
             this.context.addEntry(param.line(), param.name(), defn);
         }

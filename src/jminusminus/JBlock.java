@@ -95,14 +95,6 @@ class JBlock extends JStatement {
         p.printf("</JBlock>\n");
     }
 
-    public int getNextOffset(){
-        return this.context.nextOffset();
-    }
-
-    public void addEntry(String name, IDefn defintion) {
-        this.context.addEntry(line, name, defintion);
-    }
-
     public LocalContext getContext(){
         return this.context;
     }

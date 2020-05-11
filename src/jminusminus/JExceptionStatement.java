@@ -62,7 +62,7 @@ public class JExceptionStatement extends JStatement {
             JBlock currentBlock = catchBlocks.get(i.get());
             String currentCatchParameter = catchNames.get(i.get());
 
-            LocalVariableDefn localVariableDefn = new LocalVariableDefn(commonType, this.context.nextOffset());
+            LocalVariableDefn localVariableDefn = new LocalVariableDefn(commonType, this.context.nextOffset(commonType));
             localVariableDefn.initialize();
 
             this.context.addEntry(line, currentCatchParameter, localVariableDefn);
@@ -126,7 +126,7 @@ public class JExceptionStatement extends JStatement {
         output.addLabel(finallyLabel);
         if(finalBlock != null){
             output.addExceptionHandler(startLabel,endLabel,finallyLabel, null);
-            int nextOffset = this.context.nextOffset();
+            int nextOffset = this.context.nextOffset(Type.ANY);
             output.addOneArgInstruction(CLConstants.ASTORE, nextOffset);
             finalBlock.codegen(output);
             output.addOneArgInstruction(CLConstants.ALOAD, nextOffset);
