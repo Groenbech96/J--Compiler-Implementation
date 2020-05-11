@@ -23,9 +23,7 @@ public class DivisionTest extends TestCase {
         this.assertEquals(2, Division.divide(4,2));
         this.assertEquals(1,Division.divide(3,2));
         this.assertEquals(3,Division.divide(3,1));
-
-        this.assertEquals(2.0, Division.divide(ad, bd));
-
+        
     }
 
     public void testRemainder(){
@@ -37,8 +35,6 @@ public class DivisionTest extends TestCase {
         this.assertEquals(1,Division.remainder(3,2));
 //        this.assertEquals(1,Division.remainder(-1,2)); //Negative numbers apparently doesn't work yet.
         this.assertEquals(4, Division.remainder(9,5));
-
-        this.assertEquals(0, Division.remainder(ad, bd));
 
     }
 }
