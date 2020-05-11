@@ -109,7 +109,6 @@ class JForEachStatement extends JStatement {
             this.usingIterator = true;
             this.iteratorDecl = (JVariableDeclaration) this.iteratorDecl.analyze(this.context);
             this.iteratorHasNext = (JMessageExpression) this.iteratorHasNext.analyze(this.context);
-            System.out.println(analyzedArray.type());
             this.iteratorGetNextAndIncrement = (JStatementExpression) this.iteratorGetNextAndIncrement.analyze(this.context);
         }
 
