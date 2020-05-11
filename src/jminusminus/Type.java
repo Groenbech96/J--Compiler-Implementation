@@ -441,7 +441,8 @@ class Type {
     public boolean matchesOrInheritFrom(Type superClass) {
         Type t = this;
         for(; t != null; t = t.superClass())
-            if (t.equals(superClass)) return true;
+            if (t.matchesExpected(superClass) || t.interfaces().stream().anyMatch(e -> e.matchesOrInheritFrom(superClass)))
+                return true;
         return false;
     }
 
@@ -454,8 +455,9 @@ class Type {
      * @param superClass superclass with which to match
      */
     public void mustMatchOrInheritFrom(int line, Type superClass) {
-        if (equals(superClass)) return;
-        mustInheritFrom(line, superClass);
+        if (matchesOrInheritFrom(superClass)) return;
+        JAST.compilationUnit.reportSemanticError(line,
+                "Type %s doesn't inherit from type %s", this, superClass);
     }
 
     /**
