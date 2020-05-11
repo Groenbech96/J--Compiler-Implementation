@@ -4,8 +4,6 @@ package jminusminus;
 
 import static jminusminus.CLConstants.*;
 
-// TODO: code gen for double
-
 /**
  * The AST node for a unary expression. A unary expression has a single operand.
  */

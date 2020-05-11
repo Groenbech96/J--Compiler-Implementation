@@ -127,8 +127,8 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
         if(members != null) {
             p.println("<Method declarations>");
             for (JMember member: members) {
-                if(member instanceof JMethodInterface){
-                ((JMethodInterface) member).writeToStdOut(p);
+                if(member instanceof JMethodDeclaration){
+                    ((JMethodDeclaration) member).writeToStdOut(p);
                 } else if (member instanceof  JFieldDeclaration){
                     ((JFieldDeclaration) member).writeToStdOut(p);
                 }
