@@ -36,7 +36,7 @@ abstract class JComparison extends JBooleanBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        lhs.type().mustMatchExpected(line(), Type.INT);
+        lhs.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
         rhs.type().mustMatchExpected(line(), lhs.type());
         type = Type.BOOLEAN;
         return this;
@@ -77,8 +77,13 @@ class JGreaterThanOp extends JComparison {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
-        output.addBranchInstruction(onTrue ? IF_ICMPGT : IF_ICMPLE,
-                        targetLabel);
+        if (lhs.type() == Type.DOUBLE) {
+            output.addNoArgInstruction(DCMPG);
+            output.addBranchInstruction(onTrue ? IFGT : IFLE, targetLabel);
+        } else if (lhs.type() == Type.INT) {
+            output.addBranchInstruction(onTrue ? IF_ICMPGT : IF_ICMPLE,
+                    targetLabel);
+        }
     }
 
 }
@@ -96,7 +101,15 @@ class JGreaterEqualOp extends JComparison {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
-        output.addBranchInstruction(onTrue ? IF_ICMPGE : IF_ICMPLT, targetLabel);
+
+        if (lhs.type() == Type.DOUBLE) {
+            output.addNoArgInstruction(DCMPG);
+            output.addBranchInstruction(onTrue ? IFGE : IFLT, targetLabel);
+        } else if (lhs.type() == Type.INT) {
+            output.addBranchInstruction(onTrue ? IF_ICMPGE : IF_ICMPLT, targetLabel);
+        }
+
+
     }
 }
 
@@ -113,7 +126,13 @@ class JLessThanOp extends JComparison {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
-        output.addBranchInstruction(onTrue ? IF_ICMPLT : IF_ICMPGE, targetLabel);
+        if (lhs.type() == Type.DOUBLE) {
+            output.addNoArgInstruction(DCMPG);
+            output.addBranchInstruction(onTrue ? IFLT : IFGE, targetLabel);
+        } else if (lhs.type() == Type.INT) {
+            output.addBranchInstruction(onTrue ? IF_ICMPLT : IF_ICMPGE, targetLabel);
+        }
+
     }
 }
 
@@ -150,8 +169,14 @@ class JLessEqualOp extends JComparison {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
-        output.addBranchInstruction(onTrue ? IF_ICMPLE : IF_ICMPGT,
-                        targetLabel);
+        if (lhs.type() == Type.DOUBLE) {
+            output.addNoArgInstruction(DCMPG);
+            output.addBranchInstruction(onTrue ? IFLE : IFGT, targetLabel);
+        } else if (lhs.type() == Type.INT) {
+            output.addBranchInstruction(onTrue ? IF_ICMPLE : IF_ICMPGT,
+                    targetLabel);
+        }
+
     }
 
 }

@@ -81,6 +81,7 @@ class JEqualOp extends JBooleanBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
+        lhs.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
         lhs.type().mustMatchExpected(line(), rhs.type());
         type = Type.BOOLEAN;
         return this;
@@ -101,10 +102,14 @@ class JEqualOp extends JBooleanBinaryExpression {
         if (lhs.type().isReference()) {
             output.addBranchInstruction(onTrue ? IF_ACMPEQ : IF_ACMPNE,
                     targetLabel);
-        } else {
+        } else if (lhs.type() == Type.INT) {
             output.addBranchInstruction(onTrue ? IF_ICMPEQ : IF_ICMPNE,
                     targetLabel);
+        } else if (lhs.type() == Type.DOUBLE) {
+            output.addNoArgInstruction(DCMPG); // Compare two doubles on stack --> push int to stack (1, -1, 0)
+            output.addBranchInstruction(onTrue ? IFEQ : IFNE, targetLabel);
         }
+
     }
 
 }
@@ -140,6 +145,7 @@ class JNEqualOp extends JBooleanBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
+        lhs.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
         lhs.type().mustMatchExpected(line(), rhs.type());
         type = Type.BOOLEAN;
         return this;
@@ -162,9 +168,12 @@ class JNEqualOp extends JBooleanBinaryExpression {
         if (lhs.type().isReference()) {
             output.addBranchInstruction(onTrue ? IF_ACMPNE : IF_ACMPEQ,
                     targetLabel);
-        } else {
+        } else if (lhs.type() == Type.INT) {
             output.addBranchInstruction(onTrue ? IF_ICMPNE : IF_ICMPEQ,
                     targetLabel);
+        } else if (lhs.type() == Type.DOUBLE) {
+            output.addNoArgInstruction(DCMPG); // Compare two doubles on stack --> push int to stack (1, -1, 0)
+            output.addBranchInstruction(onTrue ? IFNE : IFEQ, targetLabel);
         }
 
     }

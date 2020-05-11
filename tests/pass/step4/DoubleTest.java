@@ -40,14 +40,14 @@ public class DoubleTest {
         a = a % b;
         a %= b;
 
-/*        a = (a >= b) ? a : b;
+        a = (a >= b) ? a : b;
         a = (a > b) ? a : b;
         a = (a < b) ? a : b;
         a = (a <= b) ? a : b;
 
         a = (true || false) ? a : b;
         a = (true && false) ? a : b;
-*/
+
 
 
     }
