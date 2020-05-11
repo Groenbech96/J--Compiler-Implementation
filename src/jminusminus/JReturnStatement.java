@@ -76,7 +76,7 @@ class JReturnStatement
                     // type must match the return type of the
                     // method
                     expr = expr.analyze(context);
-                    expr.type().mustMatchExpected(line(), returnType);
+                    expr.type().mustMatchOrInheritFrom(line(), returnType);
                 }
             } else {
                 // The method better have void as return type

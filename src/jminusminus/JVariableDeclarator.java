@@ -95,6 +95,22 @@ class JVariableDeclarator extends JAST {
     }
 
     /**
+     * Sets this variable to declare with default value, either 0 or null depending on type
+     */
+    public void useDefaultInitializer() {
+        if (this.type() == Type.CHAR)
+            this.setInitializer(new JLiteralChar(line, "0"));
+        else if (this.type() == Type.BOOLEAN)
+            this.setInitializer(new JLiteralFalse(line));
+        else if (this.type() == Type.INT)
+            this.setInitializer(new JLiteralInt(line, "0"));
+        else if (this.type() == Type.DOUBLE)
+            this.setInitializer(new JLiteralDouble(line, "0.0"));
+        else
+            this.setInitializer(new JLiteralNull(line));
+    }
+
+    /**
      * No analysis is done here.
      *
      * @param context context in which names are resolved.
