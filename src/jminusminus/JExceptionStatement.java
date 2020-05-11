@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 public class JExceptionStatement extends JStatement {
 
+    private LocalContext context;
     private JBlock tryBlock;
     private ArrayList<JBlock> catchBlocks;
     ArrayList<ArrayList<Type>> catchParameters;
@@ -35,52 +36,57 @@ public class JExceptionStatement extends JStatement {
 
     @Override
     public JAST analyze(Context context) {
-        tryBlock = tryBlock.analyze(context);
-
-
-        ArrayList<JBlock> resolvedBlocks = new ArrayList<>();
-        for (JBlock block : catchBlocks) {
-            resolvedBlocks.add(block.analyze(context));
-        }
-        catchBlocks.clear();
-        catchBlocks.addAll(resolvedBlocks);
+        this.context = new LocalContext(context);
 
         if(catchParameters.size() != catchBlocks.size()){
             JAST.compilationUnit.reportSemanticError(line, "Mismatch in size of catch parameters and catch blocks");
         }
 
+        tryBlock = tryBlock.analyze(this.context);
+
         AtomicInteger i = new AtomicInteger();
         catchParameters = catchParameters.stream().map(cp -> {
-            cp = cp.stream().map(p -> p.resolve(context)).collect(Collectors.toCollection(ArrayList::new));
+            cp = cp.stream().map(p -> p.resolve(this.context)).collect(Collectors.toCollection(ArrayList::new));
             for (Type parameter : cp) {
                 parameter.mustMatchOrInheritFrom(line(), Type.THROWABLE);
             }
             Type commonType;
             if(cp.size() > 1){
                 commonType = Type.typeFor(Exception.class);
-            } else{
+            } 
+            else {
                 commonType = cp.get(0);
             }
-            commonType = commonType.resolve(context);
+            commonType = commonType.resolve(this.context);
+
             JBlock currentBlock = catchBlocks.get(i.get());
             String currentCatchParameter = catchNames.get(i.get());
 
-            LocalVariableDefn localVariableDefn = new LocalVariableDefn(commonType, currentBlock.getNextOffset());
+            LocalVariableDefn localVariableDefn = new LocalVariableDefn(commonType, this.context.nextOffset());
             localVariableDefn.initialize();
-            currentBlock.addEntry(currentCatchParameter,localVariableDefn);
+
+            this.context.addEntry(line, currentCatchParameter, localVariableDefn);
+
             JVariable variable = new JVariable(line, currentCatchParameter);
-            variable = (JVariable) variable.analyzeLhs( currentBlock.getContext());
+            variable = (JVariable) variable.analyzeLhs(this.context);
+
             this.catchVariables.add(variable);
             i.getAndIncrement();
             return cp;
         }).collect(Collectors.toCollection(ArrayList::new));
 
+        ArrayList<JBlock> resolvedBlocks = new ArrayList<>();
+        for (JBlock block : catchBlocks) {
+            resolvedBlocks.add(block.analyze(this.context));
+        }
+        catchBlocks.clear();
+        catchBlocks.addAll(resolvedBlocks);
 
         if(catchBlocks.size() == 0 && finalBlock == null){
             JAST.compilationUnit.reportSemanticError(line, "A try statement must have minimum 1 catch or final block");
         }
         if(finalBlock != null){
-            finalBlock = finalBlock.analyze(context);
+            finalBlock = finalBlock.analyze(this.context);
         }
 
         return this;
@@ -94,11 +100,14 @@ public class JExceptionStatement extends JStatement {
         output.addLabel(startLabel);
         tryBlock.codegen(output);
         String finallyLabel = "finally"+line;
-        output.addBranchInstruction(CLConstants.GOTO, endCatch);
+        String returnLabel = "return"+line;
         output.addLabel(endLabel);
-        JAST.compilationUnit.reportSemanticError(line, "Exception codeGen, amount of catchBLocks: %d", catchBlocks.size());
+        if(finalBlock != null) {
+            finalBlock.codegen(output);
+        }
+        output.addBranchInstruction(CLConstants.GOTO, returnLabel);
 
-        for (int i = 0; i< catchBlocks.size(); i++){
+        for (int i = 0; i < catchBlocks.size(); i++){
             String catchLabel = "catchNr"+i+"Line"+line;
             JBlock catchBlock = catchBlocks.get(i);
             output.addLabel(catchLabel);
@@ -108,20 +117,23 @@ public class JExceptionStatement extends JStatement {
             }
             this.catchVariables.get(i).codegenStore(output);
             catchBlock.codegen(output);
-            output.addBranchInstruction(CLConstants.GOTO, endCatch);
+            if(finalBlock != null) {
+                finalBlock.codegen(output);
+            }
+            output.addBranchInstruction(CLConstants.GOTO, returnLabel);
         }
 
-        output.addLabel(endCatch);
-        String endMethodLabel = output.createLabel();
+        output.addLabel(finallyLabel);
         if(finalBlock != null){
-            output.addLabel(finallyLabel);
             output.addExceptionHandler(startLabel,endLabel,finallyLabel, null);
+            int nextOffset = this.context.nextOffset();
+            output.addOneArgInstruction(CLConstants.ASTORE, nextOffset);
             finalBlock.codegen(output);
-            output.addBranchInstruction(CLConstants.GOTO, endMethodLabel);
+            output.addOneArgInstruction(CLConstants.ALOAD, nextOffset);
+            output.addNoArgInstruction(CLConstants.ATHROW);
         }
 
-        output.addLabel(endMethodLabel);
-
+        output.addLabel(returnLabel);
     }
 
     @Override

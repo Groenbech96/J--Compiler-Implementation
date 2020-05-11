@@ -3,8 +3,6 @@ package jminusminus;
 
 public class JThrowStatement extends JStatement {
 
-
-
     private JExpression expression;
 
     /**
@@ -19,7 +17,7 @@ public class JThrowStatement extends JStatement {
 
     @Override
     public JAST analyze(Context context) {
-        expression.analyze(context);
+        expression = expression.analyze(context);
         return this;
     }
 

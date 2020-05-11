@@ -99,7 +99,7 @@ class JBlock extends JStatement {
         return this.context.nextOffset();
     }
 
-    public void addEntry(String name, LocalVariableDefn defintion ){
+    public void addEntry(String name, IDefn defintion) {
         this.context.addEntry(line, name, defintion);
     }
 
