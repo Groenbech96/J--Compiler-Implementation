@@ -104,6 +104,8 @@ class JForEachStatement extends JStatement {
             this.counterGetNext = (JStatementExpression) this.counterGetNext.analyze(this.context);
         } else {
             analyzedArray.type().mustMatchOrInheritFrom(line(), Type.ITERABLE);
+            // We ignore generic, so iterator must give of type object
+            Type.OBJECT.mustMatchOrInheritFrom(line, parameter.type().resolve(this.context));
             this.usingIterator = true;
             this.iteratorDecl = (JVariableDeclaration) this.iteratorDecl.analyze(this.context);
             this.iteratorHasNext = (JMessageExpression) this.iteratorHasNext.analyze(this.context);
