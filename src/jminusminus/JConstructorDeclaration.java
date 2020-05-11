@@ -90,7 +90,7 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
 
         if (!isStatic) {
             // Offset 0 is used to address "this"
-            this.context.nextOffset();
+            this.context.nextOffset(Type.ANY);
         }
 
         // Declare the parameters. We consider a formal parameter
@@ -98,7 +98,7 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
         for (JFormalParameter param : params) {
             LocalVariableDefn defn =
                     new LocalVariableDefn(param.type(),
-                            this.context.nextOffset());
+                            this.context.nextOffset(param.type()));
             defn.initialize();
             this.context.addEntry(param.line(), param.name(), defn);
         }

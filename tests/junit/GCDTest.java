@@ -3,7 +3,7 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.GCD;
+import pass.step5.GCD;
 
 public class GCDTest extends TestCase {
 

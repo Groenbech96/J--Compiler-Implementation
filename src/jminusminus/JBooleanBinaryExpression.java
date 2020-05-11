@@ -81,6 +81,7 @@ class JEqualOp extends JBooleanBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
+        lhs.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
         lhs.type().mustMatchExpected(line(), rhs.type());
         type = Type.BOOLEAN;
         return this;
@@ -101,10 +102,14 @@ class JEqualOp extends JBooleanBinaryExpression {
         if (lhs.type().isReference()) {
             output.addBranchInstruction(onTrue ? IF_ACMPEQ : IF_ACMPNE,
                     targetLabel);
-        } else {
+        } else if (lhs.type() == Type.INT) {
             output.addBranchInstruction(onTrue ? IF_ICMPEQ : IF_ICMPNE,
                     targetLabel);
+        } else if (lhs.type() == Type.DOUBLE) {
+            output.addNoArgInstruction(DCMPG); // Compare two doubles on stack --> push int to stack (1, -1, 0)
+            output.addBranchInstruction(onTrue ? IFEQ : IFNE, targetLabel);
         }
+
     }
 
 }
@@ -140,6 +145,7 @@ class JNEqualOp extends JBooleanBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
+        lhs.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
         lhs.type().mustMatchExpected(line(), rhs.type());
         type = Type.BOOLEAN;
         return this;
@@ -155,6 +161,21 @@ class JNEqualOp extends JBooleanBinaryExpression {
      */
 
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
+
+        lhs.codegen(output);
+        rhs.codegen(output);
+
+        if (lhs.type().isReference()) {
+            output.addBranchInstruction(onTrue ? IF_ACMPNE : IF_ACMPEQ,
+                    targetLabel);
+        } else if (lhs.type() == Type.INT) {
+            output.addBranchInstruction(onTrue ? IF_ICMPNE : IF_ICMPEQ,
+                    targetLabel);
+        } else if (lhs.type() == Type.DOUBLE) {
+            output.addNoArgInstruction(DCMPG); // Compare two doubles on stack --> push int to stack (1, -1, 0)
+            output.addBranchInstruction(onTrue ? IFNE : IFEQ, targetLabel);
+        }
+
     }
 
 }
@@ -241,6 +262,18 @@ class JLogicalOrOp extends JBooleanBinaryExpression {
     }
 
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
+        if (onTrue) {
+            String falseLabel = output.createLabel();
+            lhs.codegen(output, targetLabel, true); // Jump into scope // Short circuiting
+            rhs.codegen(output, falseLabel, false); // If false, then jump over scope
+            output.addLabel(falseLabel);
+        } else {
+            String trueLabel = output.createLabel();
+            lhs.codegen(output, trueLabel, true);
+            rhs.codegen(output, trueLabel, true);
+            output.addLabel(targetLabel);
+            output.addLabel(trueLabel);
+        }
 
     }
 

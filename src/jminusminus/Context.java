@@ -332,9 +332,15 @@ class LocalContext extends Context {
      * Allocate a new offset (eg for a parameter or local variable).
      *
      * @return the next allocated offset.
+     * @param type
      */
 
-    public int nextOffset() {
+    public int nextOffset(Type type) {
+        if(type == Type.DOUBLE ){
+            int returnValue = offset;
+            offset +=2;
+            return returnValue;
+        }
         return offset++;
     }
 

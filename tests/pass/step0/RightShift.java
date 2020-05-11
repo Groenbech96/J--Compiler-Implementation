@@ -1,4 +1,4 @@
-package pass;
+package pass.step0;
 
 import java.lang.Integer;
 import java.lang.System;

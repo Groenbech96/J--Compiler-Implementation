@@ -80,11 +80,10 @@ class JVariable extends JExpression implements JLhs {
                 // Rewrite a variable denoting a field as an
                 // explicit field selection
                 type = field.type();
-                JExpression newTree = new JFieldSelection(line(), field
-                        .isStatic()
-                        || (context.methodContext() != null && context
-                        .methodContext().isStatic()) ? new JVariable(
-                        line(), definingType.toString()) : new JThis(line),
+                JExpression newTree = new JFieldSelection(line(),
+                        field.isStatic() || (context.methodContext() != null && context.methodContext().isStatic())
+                                ? new JVariable(line(), definingType.toString())
+                                : new JThis(line),
                         name);
                 return (JExpression) newTree.analyze(context);
             }
@@ -169,6 +168,27 @@ class JVariable extends JExpression implements JLhs {
                             output.addOneArgInstruction(ILOAD, offset);
                             break;
                     }
+                } else if (type == Type.DOUBLE) {
+                    switch (offset) {
+                        case 0:
+                            output.addNoArgInstruction(DLOAD_0);
+                            break;
+                        case 1:
+                            output.addNoArgInstruction(DLOAD_1);
+                            break;
+                        case 2:
+                            output.addNoArgInstruction(DLOAD_2);
+                            break;
+                        case 3:
+                            output.addNoArgInstruction(DLOAD_3);
+                            break;
+                        default:
+                            output.addOneArgInstruction(DLOAD, offset);
+                            break;
+                    }
+
+
+
                 }
             }
         }

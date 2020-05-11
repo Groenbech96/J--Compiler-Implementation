@@ -95,4 +95,9 @@ class JBlock extends JStatement {
         p.printf("</JBlock>\n");
     }
 
+    public LocalContext getContext(){
+        return this.context;
+    }
+
+
 }

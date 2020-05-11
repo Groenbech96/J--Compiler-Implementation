@@ -332,7 +332,7 @@
             </classpath>
         </javac>
         <junit printsummary="yes" haltonfailure="no" showoutput="yes">
-            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_DIR}" />
+            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_STEP5_DIR}" />
             <sysproperty key="FAIL_TESTS_DIR" value="${FAIL_TESTS_DIR}" />
             <sysproperty key="GEN_CLASS_DIR" value="${GEN_CLASS_DIR}" />
             <classpath>
@@ -440,7 +440,7 @@
             </classpath>
         </javac>
         <junit printsummary="yes" haltonfailure="no" showoutput="yes">
-            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_DIR}" />
+            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_STEP1_DIR}" />
             <classpath>
                 <pathelement location="${LIB_DIR}/junit.jar" />
                 <pathelement location="${basedir}/${CLASS_DIR}" />
@@ -470,7 +470,7 @@
             </classpath>
         </javac>
         <junit printsummary="yes" haltonfailure="no" showoutput="yes">
-            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_DIR}" />
+            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_STEP3_DIR}" />
             <classpath>
                 <pathelement location="${LIB_DIR}/junit.jar" />
                 <pathelement location="${basedir}/${CLASS_DIR}" />
@@ -526,7 +526,7 @@
             </classpath>
         </javac>
         <junit printsummary="yes" haltonfailure="no" showoutput="yes">
-            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_DIR}" />
+            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_STEP2_DIR}" />
             <classpath>
                 <pathelement location="${LIB_DIR}/junit.jar" />
                 <pathelement location="${basedir}/${CLASS_DIR}" />

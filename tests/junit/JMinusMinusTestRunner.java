@@ -2,11 +2,8 @@
 
 package junit;
 
-import java.io.File;
-import junit.framework.TestCase;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import pass.*;
 
 /**
  * JUnit test suite for running the j-- programs in tests/pass.
@@ -26,7 +23,8 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(ShiftTest.class);
         suite.addTestSuite(ExceptionTest.class);
         suite.addTestSuite(ForTest.class);
-        suite.addTestSuite(UnaryPlusTest.class);
+        suite.addTestSuite(UnaryTest.class);
+        suite.addTestSuite(AnimalsTest.class);
         return suite;
     }
 
