@@ -5,7 +5,7 @@ import java.lang.Exception;
 
 public class ExceptionFail {
 
-    public static void f() throws ExceptionB {
+    public static void f() throws ExceptionA {
       throw new ExceptionB();
     }
 

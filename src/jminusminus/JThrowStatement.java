@@ -25,12 +25,8 @@ public class JThrowStatement extends JStatement {
 
     @Override
     public void codegen(CLEmitter output) {
-        //String endLabel = output.createLabel();
-
         expression.codegen(output);
         output.addNoArgInstruction(CLConstants.ATHROW);
-        //output.addBranchInstruction(CLConstants.GOTO, endLabel);
-        //output.addLabel(endLabel);
     }
 
     @Override

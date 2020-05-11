@@ -921,7 +921,8 @@ private JStatement statement(): {
     JExpression expr = null;
     JBlock tryBlock = null;
     ArrayList<JBlock> catchBlocks = null;
-    ArrayList<ArrayList<JFormalParameter>> catchParameters = null;
+    ArrayList<ArrayList<Type>> catchParameters = null;
+    ArrayList<String> catchNames = null;
     JBlock finallyBlock = null;
 
 }
@@ -965,16 +966,18 @@ private JStatement statement(): {
         { statement = new JEmptyStatement( line ); } |
         <TRY>
         tryBlock = block()
-        { catchParameters = new ArrayList<ArrayList<JFormalParameter>>(); catchBlocks = new ArrayList<JBlock>(); }
+        { catchParameters = new ArrayList<ArrayList<Type>>(); catchBlocks = new ArrayList<JBlock>(); catchNames = new ArrayList<String>(); }
         (
             <CATCH>
-            { catchParameters.add ( formalParameters() );   catchBlocks.add( block() ); }
+            { catchParameters.add ( catchParameters() );} <IDENTIFIER>  {catchNames.add(token.image); }
+             <RPAREN>
+             {  catchBlocks.add( block() ); }
         )*
         [
             <FINALLY>
             finallyBlock = block()
         ]
-        { statement = new JExceptionStatement(line, tryBlock, catchBlocks, catchParameters, finallyBlock); } |
+        { statement = new JExceptionStatement(line, tryBlock, catchBlocks, catchParameters,catchNames, finallyBlock); } |
         <THROW>
         expr = expression()
         <SEMI>
@@ -987,6 +990,37 @@ private JStatement statement(): {
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
     { return statement; }
+}
+
+/**
+ * Parse catch parameters.
+ *
+ * <pre>
+ *   catchParameters ::= LPAREN
+ *                          type ( | type)*
+ *                        RPAREN
+ * </pre>
+ *
+ * @return a list of formal parameters.
+ */
+private ArrayList<Type> catchParameters(): {
+    ArrayList<Type> catchParameters = null;
+    Type curType = null;
+}
+{
+    try{
+        <LPAREN>
+        curType = type()
+        { catchParameters = new ArrayList<Type>(); catchParameters.add(curType);}
+        (
+            <BITWISE_OR> curType = type()
+            { catchParameters.add(curType); }
+        )*
+        {return catchParameters;}
+
+    } catch( ParseException e ) {
+              recoverFromError( new int[] { SEMI, EOF }, e );
+          }
 }
 
 private JStatement forOrForEachStatement(int line):{
