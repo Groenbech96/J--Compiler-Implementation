@@ -58,6 +58,7 @@ public class JExceptionStatement extends JStatement {
     public void codegen(CLEmitter output) {
         String startLabel = "tryStart"+line;
         String endLabel = "tryEnd"+line;
+        String endCatch = output.createLabel();
         output.addLabel(startLabel);
         tryBlock.codegen(output);
         output.addLabel(endLabel);
@@ -69,13 +70,14 @@ public class JExceptionStatement extends JStatement {
             ArrayList<JFormalParameter> catchParameters = parametersList.get(i);
             for (JFormalParameter catchParameter : catchParameters) {
                 output.addExceptionHandler(startLabel,endLabel,catchLabel,catchParameter.type().jvmName());
-                catchParameter.codegen(output);
             }
             catchBlock.codegen(output);
+            output.addBranchInstruction(CLConstants.GOTO, endCatch);
         }
 
-        output.addLabel("finally"+line);
+        output.addLabel(endCatch);
         if(finalBlock != null){
+            output.addLabel("finally"+line);
             output.addExceptionHandler(startLabel,endLabel,"finally"+line, null);
             finalBlock.codegen(output);
         }
