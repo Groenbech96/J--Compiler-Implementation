@@ -492,6 +492,10 @@ class Scanner {
             sb.append(ch);
             nextCh();
         }
+        if (ch == 'D' || ch == 'd') {
+            sb.append(ch);
+            nextCh();
+        }
         if (sb.length() == 0 && intPart.length() == 0)
             reportScannerError("Double requires more than just a dot");
         return new TokenInfo(DOUBLE_LITERAL, intPart + "." + sb.toString(), line);

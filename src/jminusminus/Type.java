@@ -2,13 +2,10 @@
 
 package jminusminus;
 
-import com.sun.org.apache.xpath.internal.operations.Mod;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
@@ -88,9 +85,9 @@ class Type {
     public static Type OBJECT = typeFor(java.lang.Object.class);
 
     /**
-     * The type java.util.Enumerable.
+     * The type java.lang.Iterable.
      */
-    public static Type ENUMERABLE = typeFor(java.util.Enumeration.class);
+    public static Type ITERABLE = typeFor(java.lang.Iterable.class);
 
     /**
      * The void type.
@@ -429,6 +426,26 @@ class Type {
     }
 
     /**
+     * An assertion that this type inherits from the the specified type. If there is no
+     * match, an error message is written.
+     *
+     * @param line         the line near which the mismatch occurs.
+     * @param superClass   superclass with which to match
+     */
+    public void mustInheritFrom(int line, Type superClass) {
+        Type t = this;
+        while(t.superClass() != null) {
+            if(t.superClass().equals(superClass)) {
+                return;
+            }
+            t = t.superClass();
+        }
+
+        JAST.compilationUnit.reportSemanticError(line,
+                "Type %s doesn't inherit from type %s", this, superClass);
+    }
+
+    /**
      * An assertion that this type matches the specified type. If there is no
      * match, an error message is written.
      *
@@ -527,7 +544,9 @@ class Type {
                 : cls.isArray() ? "[" + descriptorFor(cls.getComponentType())
                 : cls.isPrimitive() ? (cls == int.class ? "I"
                 : cls == char.class ? "C"
-                : cls == boolean.class ? "Z" : "?")
+                : cls == boolean.class ? "Z"
+                : cls == double.class ? "D"
+                : "?")
                 : "L" + cls.getName().replace('.', '/') + ";";
     }
 

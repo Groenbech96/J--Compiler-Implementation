@@ -3,6 +3,8 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static jminusminus.CLConstants.*;
 
@@ -65,9 +67,10 @@ class JMethodDeclaration
 
 
     /**
-     * Exceptions thrown from methid
+     * Exceptions thrown from method
      */
     protected ArrayList<Type> exceptions;
+    protected ArrayList<Type> resolvedExceptions;
 
     /**
      * Construct an AST node for a method declaration given the
@@ -96,6 +99,10 @@ class JMethodDeclaration
         this.isAbstract = mods.contains("abstract");
         this.isStatic = mods.contains("static");
         this.isPrivate = mods.contains("private");
+        if (this.exceptions == null) {
+            this.exceptions = new ArrayList<Type>();
+        }
+        this.resolvedExceptions = new ArrayList<Type>();
     }
 
     /**
@@ -110,6 +117,11 @@ class JMethodDeclaration
         // Resolve types of the formal parameters
         for (JFormalParameter param : params) {
             param.setType(param.type().resolve(context));
+        }
+
+        // Resolve types of the exceptions
+        for (Type type : exceptions) {
+            resolvedExceptions.add(type.resolve(context));
         }
 
         // Resolve return type
@@ -193,7 +205,8 @@ class JMethodDeclaration
         // Generate a method with an empty body; need a return to
         // make
         // the class verifier happy.
-        partial.addMethod(mods, name, descriptor, null, false);
+        ArrayList<String> exceptionNames = (ArrayList<String>)this.resolvedExceptions.stream().map(Type::jvmName).collect(Collectors.toList());
+        partial.addMethod(mods, name, descriptor, exceptionNames, false);
 
         // Add implicit RETURN
         if (returnType == Type.VOID) {
@@ -202,6 +215,9 @@ class JMethodDeclaration
                 || returnType == Type.BOOLEAN || returnType == Type.CHAR) {
             partial.addNoArgInstruction(ICONST_0);
             partial.addNoArgInstruction(IRETURN);
+        } else if (returnType == Type.DOUBLE) {
+            partial.addNoArgInstruction(DCONST_0);
+            partial.addNoArgInstruction(DRETURN);
         } else {
             // A reference type.
             partial.addNoArgInstruction(ACONST_NULL);
@@ -217,7 +233,8 @@ class JMethodDeclaration
      */
 
     public void codegen(CLEmitter output) {
-        output.addMethod(mods, name, descriptor, null, false);
+        ArrayList<String> exceptionNames = (ArrayList<String>)this.resolvedExceptions.stream().map(Type::jvmName).collect(Collectors.toList());
+        output.addMethod(mods, name, descriptor, exceptionNames, false);
         if (body != null) {
             body.codegen(output);
         }

@@ -21,8 +21,11 @@ public class JExceptionStatement extends JStatement {
         this.catchBlocks = catchBlocks;
         this.parametersList = parameters;
         this.finalBlock = finalBlock;
-    }
 
+        if(this.catchBlocks == null){
+            this.catchBlocks = new ArrayList<>();
+        }
+    }
 
     @Override
     public JAST analyze(Context context) {
@@ -35,17 +38,47 @@ public class JExceptionStatement extends JStatement {
         for (ArrayList<JFormalParameter> parameters : parametersList) {
             for (JFormalParameter parameter : parameters) {
                 parameter = (JFormalParameter) parameter.analyze(context);
-                parameter.type().mustMatchExpected(line(), Type.THROWABLE);
+                parameter.type().resolve(context).mustInheritFrom(line(), Type.THROWABLE);
             }
         }
-
-        finalBlock = finalBlock.analyze(context);
+        if(parametersList.size() != catchBlocks.size()){
+            JAST.compilationUnit.reportSemanticError(line, "Mismatch in size of catch parameters and catch blocks");
+        }
+        if(catchBlocks.size() == 0 && finalBlock == null){
+            JAST.compilationUnit.reportSemanticError(line, "A try statement must have minimum 1 catch or final block");
+        }
+        if(finalBlock != null){
+            finalBlock = finalBlock.analyze(context);
+        }
 
         return this;
     }
 
     @Override
     public void codegen(CLEmitter output) {
+        String startLabel = "tryStart"+line;
+        String endLabel = "tryEnd"+line;
+        output.addLabel(startLabel);
+        tryBlock.codegen(output);
+        output.addLabel(endLabel);
+
+
+        for (int i = 0; i< catchBlocks.size(); i++){
+            String catchLabel = "catchNr"+i+"Line"+line;
+            JBlock catchBlock = catchBlocks.get(i);
+            output.addLabel(catchLabel);
+            ArrayList<JFormalParameter> catchParameters = parametersList.get(i);
+            for (JFormalParameter catchParameter : catchParameters) {
+                output.addExceptionHandler(startLabel,endLabel,catchLabel,catchParameter.name());
+                catchParameter.codegen(output);
+            }
+            catchBlock.codegen(output);
+        }
+
+        if(finalBlock != null){
+            output.addExceptionHandler(startLabel,endLabel,"finally"+line, null);
+            finalBlock.codegen(output);
+        }
 
     }
 

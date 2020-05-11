@@ -107,13 +107,12 @@ public class JClassBody extends JAST  {
                 }
             }
         }
-
+        
         return this;
     }
 
     @Override
     public void codegen(CLEmitter output) {
-
         // The members
         for (JMember member : members) {
             ((JAST) member).codegen(output);
@@ -128,7 +127,6 @@ public class JClassBody extends JAST  {
         if (staticFieldInitializations.size() > 0 || staticBlocks.size() > 0) {
             codegenClassInit(output);
         }
-
     }
 
     @Override
@@ -173,8 +171,10 @@ public class JClassBody extends JAST  {
         output.addMemberAccessInstruction(INVOKESPECIAL, classSuperType.jvmName(),
                 "<init>", "()V");
 
-        for(JFieldDeclaration instanceField : instanceFieldInitializations){
-            instanceField.codegen(output);
+        // If there are instance field initializations, generate
+        // code for them
+        for (JFieldDeclaration instanceField : instanceFieldInitializations) {
+            instanceField.codegenInitializations(output);
         }
 
         // Return
@@ -195,8 +195,7 @@ public class JClassBody extends JAST  {
         mods.add("static");
         output.addMethod(mods, "<clinit>", "()V", null, false);
 
-        // If there are instance initializations, generate code
-        // for them
+        // If there are instance initializations, generate code for them
         for (JFieldDeclaration staticField : staticFieldInitializations) {
             staticField.codegenInitializations(output);
         }

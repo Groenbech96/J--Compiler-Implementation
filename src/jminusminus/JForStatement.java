@@ -8,6 +8,8 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
 
+import static jminusminus.CLConstants.*;
+
 /**
  * The AST node for a for-statement.
  */
@@ -27,6 +29,11 @@ class JForStatement extends JStatement {
      * The body.
      */
     private JStatement body;
+
+    /**
+     * The new context (built in analyze()) represented by this for statement
+     */
+    private LocalContext context;
 
     /**
      * Construct an AST node for a while-statement given its line number, the
@@ -57,18 +64,22 @@ class JForStatement extends JStatement {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
     public JForStatement analyze(Context context) {
-        initVariableDecls = (JVariableDeclaration) initVariableDecls.analyze(context);
-        initStatements = (ArrayList<JStatement>) initStatements.stream()
-                .map(statement -> (JStatement) statement.analyze(context)).collect(toList());
+        this.context = new LocalContext(context);
 
-        condition = condition.analyze(context);
+        initVariableDecls = (JVariableDeclaration) initVariableDecls.analyze(this.context);
+        initStatements = (ArrayList<JStatement>) initStatements.stream()
+                .map(statement -> (JStatement) statement.analyze(this.context)).collect(toList());
+
+        if (condition != null) {
+            condition = condition.analyze(this.context);
+            condition.type().mustMatchExpected(line(), Type.BOOLEAN);
+        }
 
         updateStatements = (ArrayList<JStatement>) updateStatements.stream()
-                .map(statement -> (JStatement) statement.analyze(context)).collect(toList());
+                .map(statement -> (JStatement) statement.analyze(this.context)).collect(toList());
 
-        body = (JStatement) body.analyze(context);
+        body = (JStatement) body.analyze(this.context);
 
-        condition.type().mustMatchExpected(line(), Type.BOOLEAN);
         return this;
     }
 
@@ -80,6 +91,38 @@ class JForStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
+        // Create labels to label start and end of for-loop
+        String startLabel = output.createLabel();
+        String endLabel = output.createLabel();
+
+        // Initialize variables declarations
+        initVariableDecls.codegen(output);
+
+        // Initialize variables
+        for (JStatement statement : initStatements) {
+            statement.codegen(output);
+        }
+
+        // Label start of for-loop
+        output.addLabel(startLabel);
+
+        // End for loop if condition is false
+        if (condition != null)
+            condition.codegen(output, endLabel, false);
+
+        // For-loop body
+        body.codegen(output);
+
+        // Update increment expressions
+        for (JStatement statement : updateStatements) {
+            statement.codegen(output);
+        }
+
+        // Go to start of for-loop
+        output.addBranchInstruction(GOTO, startLabel);
+
+        // Label end of for-loop
+        output.addLabel(endLabel);
     }
 
     /**
