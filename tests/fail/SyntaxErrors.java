@@ -14,7 +14,7 @@ public class SyntaxErrors {
         for (int i = 1; i <= n; i++) {
             result *= i;
         }
-        return result;
+        return result
     }
 
     public static void main(String[] args) {

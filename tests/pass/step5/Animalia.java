@@ -36,11 +36,13 @@ class Tiger extends Animal {
 
 public class Animalia {
 
-    public static void main(String[] args) {
-        FruitFly fruitFly = new FruitFly();
-        Tiger tiger = new Tiger();
-        System.out.println(fruitFly.scientificName());
-        System.out.println(tiger.scientificName());
+    public static String getFly() {
+        Animal fruitFly = new FruitFly();
+        return fruitFly.scientificName();
+    }
+    public static String getTiger() {
+        Animal tiger = new Tiger();
+        return tiger.scientificName();
     }
 
 }

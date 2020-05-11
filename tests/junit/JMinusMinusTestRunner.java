@@ -24,6 +24,7 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(ExceptionTest.class);
         suite.addTestSuite(ForTest.class);
         suite.addTestSuite(UnaryTest.class);
+        suite.addTestSuite(AnimalsTest.class);
         return suite;
     }
 
