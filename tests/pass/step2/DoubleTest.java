@@ -1,4 +1,4 @@
-package pass;
+package pass.step2;
 
 public class DoubleTest {
     public static double func(double d) {

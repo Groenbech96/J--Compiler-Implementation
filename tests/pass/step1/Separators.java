@@ -1,3 +1,5 @@
+package pass.step1;
+
 public class Separators {
     public static void main(String[] args) {
         switch(args[0]) {

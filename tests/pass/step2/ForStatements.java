@@ -1,4 +1,4 @@
-package pass;
+package pass.step2;
 
 import java.lang.System;
 import java.util.ArrayList;

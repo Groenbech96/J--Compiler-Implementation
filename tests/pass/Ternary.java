@@ -1,5 +1,8 @@
 package pass;
 
+import java.lang.System;
+
+
 public class Ternary {
     public static int ternary(boolean b, int x, int y) { return b ? x : y; }
 

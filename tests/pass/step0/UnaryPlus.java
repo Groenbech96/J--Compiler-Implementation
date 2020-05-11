@@ -1,4 +1,4 @@
-package pass;
+package pass.step0;
 
 public class UnaryPlus {
 

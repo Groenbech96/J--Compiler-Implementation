@@ -1,13 +1,13 @@
 package pass;
 import java.lang.Exception;
 
-class SomeClass{
+public class SomeClass{
 
 }
-interface SomeInterface {
+public interface SomeInterface {
 
 }
-class SomeException extends Exception{
+public class SomeException extends Exception{
 
 }
 
