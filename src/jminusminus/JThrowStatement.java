@@ -3,6 +3,8 @@ package jminusminus;
 
 public class JThrowStatement extends JStatement {
 
+
+
     private JExpression expression;
 
     /**
@@ -39,5 +41,9 @@ public class JThrowStatement extends JStatement {
         p.indentLeft();
         p.printf("</JThrowStatement>\n");
 
+    }
+
+    public JExpression getExpression() {
+        return expression;
     }
 }

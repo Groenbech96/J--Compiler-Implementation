@@ -189,7 +189,25 @@ class JMethodDeclaration
                 JAST.compilationUnit.reportSemanticError(line(),
                         "Non-void method must have a return statement");
             }
+
+            // make sure that exceptions is handled by sorounding
+            for (JStatement statement : this.body.statements()) {
+                if (statement instanceof JThrowStatement) {
+                    JThrowStatement s = (JThrowStatement) statement;
+                    Type exceptionType = s.getExpression().type.resolve(context);
+                    boolean matched = this.resolvedExceptions.stream().anyMatch(exceptionType::matchesOrInheritFrom);
+                    if(!matched) {
+                        JAST.compilationUnit.reportSemanticError(line, "Exception is not handled: %s", exceptionType.jvmName());
+                    }
+
+                }
+            }
+
         }
+
+
+
+
         return this;
     }
 
