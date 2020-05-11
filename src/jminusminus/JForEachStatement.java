@@ -3,6 +3,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.PrimitiveIterator;
 
 import static jminusminus.CLConstants.GOTO;
 
@@ -57,14 +58,15 @@ class JForEachStatement extends JStatement {
 
         // Variable declaration for parameter on left side of for-each loop
         this.parameter.useDefaultInitializer();
+        JVariable localParameter = new JVariable(line, this.parameter.name());
         this.parameterDecl = JVariableDeclaration.single(line, parameter);
 
         // Artificial variable either holding Iterator or integer counter
         this.freeVariable = new JVariable(line, "0" + this.parameter.name());
 
-        JMessageExpression getIterator = new JMessageExpression(line, this.array, "iterator", new ArrayList<>());
+        JMessageExpression getIterator = new JMessageExpression(line, array, "iterator", new ArrayList<>());
         JMessageExpression iteratorNext = new JMessageExpression(line, freeVariable, "next", new ArrayList<>());
-        JAssignOp iteratorAssign = new JAssignOp(line, new JVariable(line, parameter.name()), iteratorNext);
+        JAssignOp iteratorAssign = new JAssignOp(line, localParameter, iteratorNext);
         iteratorAssign.isStatementExpression = true;
 
         this.iteratorHasNext = new JMessageExpression(line, freeVariable, "hasNext", new ArrayList<>());
@@ -74,7 +76,7 @@ class JForEachStatement extends JStatement {
 
         JFieldSelection length = new JFieldSelection(line, array, "length");
         JExpression indexExpression = new JArrayExpression(line, array, freeVariable);
-        JAssignOp assign = new JAssignOp(line, new JVariable(line, parameter.name()), indexExpression);
+        JAssignOp assign = new JAssignOp(line, localParameter, indexExpression);
         assign.isStatementExpression = true;
 
         this.counterHasNext = new JLessThanOp(line, freeVariable, length);
@@ -93,23 +95,20 @@ class JForEachStatement extends JStatement {
         this.context = new LocalContext(context);
 
         this.parameterDecl = (JVariableDeclaration) this.parameterDecl.analyze(this.context);
-        System.out.println("AAAA " + array.name());
+        // TODO: figure out how to handle when this doesnt return JVariable
         JExpression analyzedArray = this.array.analyze(this.context);
-        if (analyzedArray instanceof JFieldSelection)
-            this.array = (JVariable) ((JFieldSelection) analyzedArray).target;
-        else this.array = (JVariable) analyzedArray;
 
-        if (array.type().isArray()) {
-            array.type().componentType().mustMatchOrInheritFrom(line(), this.parameter.type().resolve(this.context));
-            this.parameter.type().resolve(this.context).mustMatchExpected(line(), array.type().componentType());
+        if (analyzedArray.type().isArray()) {
+            analyzedArray.type().componentType().mustMatchOrInheritFrom(line(), this.parameter.type().resolve(this.context));
             this.counterDecl = (JVariableDeclaration) this.counterDecl.analyze(this.context);
             this.counterHasNext = (JLessThanOp) this.counterHasNext.analyze(this.context);
             this.counterGetNext = (JStatementExpression) this.counterGetNext.analyze(this.context);
         } else {
-            array.type().mustMatchOrInheritFrom(line(), Type.ITERABLE);
+            analyzedArray.type().mustMatchOrInheritFrom(line(), Type.ITERABLE);
             this.usingIterator = true;
             this.iteratorDecl = (JVariableDeclaration) this.iteratorDecl.analyze(this.context);
             this.iteratorHasNext = (JMessageExpression) this.iteratorHasNext.analyze(this.context);
+            System.out.println(analyzedArray.type());
             this.iteratorGetNextAndIncrement = (JStatementExpression) this.iteratorGetNextAndIncrement.analyze(this.context);
         }
 
