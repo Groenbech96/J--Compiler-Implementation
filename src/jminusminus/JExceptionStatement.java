@@ -38,7 +38,7 @@ public class JExceptionStatement extends JStatement {
         for (ArrayList<JFormalParameter> parameters : parametersList) {
             for (JFormalParameter parameter : parameters) {
                 parameter = (JFormalParameter) parameter.analyze(context);
-                parameter.type().resolve(context).mustMatchOrInheritFrom(line(), Type.THROWABLE);
+                parameter.setType(parameter.type().resolve(context)).mustMatchOrInheritFrom(line(), Type.THROWABLE);
             }
         }
         if(parametersList.size() != catchBlocks.size()){
@@ -62,19 +62,19 @@ public class JExceptionStatement extends JStatement {
         tryBlock.codegen(output);
         output.addLabel(endLabel);
 
-
         for (int i = 0; i< catchBlocks.size(); i++){
             String catchLabel = "catchNr"+i+"Line"+line;
             JBlock catchBlock = catchBlocks.get(i);
             output.addLabel(catchLabel);
             ArrayList<JFormalParameter> catchParameters = parametersList.get(i);
             for (JFormalParameter catchParameter : catchParameters) {
-                output.addExceptionHandler(startLabel,endLabel,catchLabel,catchParameter.name());
+                output.addExceptionHandler(startLabel,endLabel,catchLabel,catchParameter.type().jvmName());
                 catchParameter.codegen(output);
             }
             catchBlock.codegen(output);
         }
 
+        output.addLabel("finally"+line);
         if(finalBlock != null){
             output.addExceptionHandler(startLabel,endLabel,"finally"+line, null);
             finalBlock.codegen(output);

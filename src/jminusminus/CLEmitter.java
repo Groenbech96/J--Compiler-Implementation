@@ -10,11 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.DataOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Stack;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
+import java.util.*;
 
 import static jminusminus.CLConstants.*;
 import static jminusminus.CLConstants.Category.*;
@@ -218,6 +214,7 @@ public class CLEmitter {
             ArrayList<CLExceptionInfo> exceptionTable = new ArrayList<CLExceptionInfo>();
             for (int i = 0; i < mExceptionHandlers.size(); i++) {
                 CLException e = mExceptionHandlers.get(i);
+
                 if (!e.resolveLabels(mLabels)) {
                     reportEmitterError(
                             "%s: Unable to resolve exception handler "
