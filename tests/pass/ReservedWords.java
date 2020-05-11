@@ -1,15 +1,6 @@
 package pass;
 import java.lang.Exception;
 
-public class SomeClass{
-
-}
-public interface SomeInterface {
-
-}
-public class SomeException extends Exception{
-
-}
 
 public class ReservedWords extends SomeClass implements SomeInterface {
     //TODO: Uncomment stuff as they are added for parsing support
@@ -17,7 +8,11 @@ public class ReservedWords extends SomeClass implements SomeInterface {
         // do {
         //     /* do nothing */
         // } 
-        while (5==4);
+        while (4==4) {
+            if(true){
+                break;
+            }
+        }
         for (;;) {
             try {
                 // if (true) { continue; }

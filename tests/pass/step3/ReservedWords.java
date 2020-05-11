@@ -1,6 +1,10 @@
 package pass.step3;
 
-public class ReservedWords extends SomeClass implements  SomeInterface {
+import pass.SomeClass;
+import pass.SomeException;
+import pass.SomeInterface;
+
+public class ReservedWords extends SomeClass implements SomeInterface {
     public static void main(String[] args) {
         //do {
         //    /* do nothing */
@@ -8,6 +12,7 @@ public class ReservedWords extends SomeClass implements  SomeInterface {
         for (;;) {
             try {
                 if (true) { continue; }
+                throw new SomeException();
             }
             catch (SomeException e) {
                 /* do nothing */
