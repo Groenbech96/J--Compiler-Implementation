@@ -151,6 +151,12 @@ class Scanner {
                     nextCh();
                     char prevCh;
                     do {
+                        // Check if we reached end of file
+                        if (ch == EOFCH){
+                            reportScannerError("Unexpected end of file found in multi-line comment");
+                            break;
+                        }
+
                         prevCh = ch;
                         nextCh();
                     } while (prevCh != '*' || ch != '/');

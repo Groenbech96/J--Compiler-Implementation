@@ -1,3 +1,4 @@
+package pass.step3;
 /**
  * Interface.java
  */

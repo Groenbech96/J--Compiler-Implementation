@@ -4,7 +4,7 @@ package junit;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import pass.Classes;
+import pass.step5.Classes;
 
 public class ClassesTest extends TestCase {
 

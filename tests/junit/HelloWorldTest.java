@@ -3,7 +3,7 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.HelloWorld;
+import pass.step5.HelloWorld;
 
 public class HelloWorldTest extends TestCase {
 

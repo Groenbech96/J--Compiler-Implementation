@@ -1,4 +1,4 @@
-package pass;
+package pass.step5;
 import java.lang.Double;
 
 public class DoubleTest {

@@ -41,7 +41,8 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
         CLEmitter clEmitter = new CLEmitter(false);
         String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
-                : JAST.compilationUnit.packageName() + "/" + name;
+                : JAST.compilationUnit.packageName().replace(".", "/") + "/" + name;
+
 
         ArrayList<String> interfaceNames = superInterfaces.stream().map(Type::jvmName).collect(Collectors.toCollection(ArrayList::new));
         clEmitter.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), interfaceNames, false);
@@ -90,9 +91,10 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     @Override
     public void codegen(CLEmitter output) {
         String packageName = JAST.compilationUnit.packageName();
-        String qualifiedName = packageName.equals("") ? name : packageName + "/" + name;
+        String qualifiedName = packageName.equals("") ? name : packageName.replace(".", "/") + "/" + name;
         ArrayList<String> superInterfaceNames = superInterfaces.stream().map(Type::jvmName).collect(Collectors.toCollection(ArrayList::new));
-        output.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), superInterfaceNames, false); 
+
+        output.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), superInterfaceNames, false);
 
         // Generate code for the interface members
         for (JMember member : members) {
@@ -139,10 +141,13 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     @Override
     public void declareThisType(Context context) {
         String packageName = JAST.compilationUnit.packageName();
-        String qualifiedName = packageName.equals("") ? name : packageName + "/" + name;
+
+        String qualifiedName = packageName.equals("") ? name : packageName.replace(".", "/") + "/" + name;
         CLEmitter partial = new CLEmitter(false);
-        ArrayList<String> superInterfaceNames = superInterfaces.stream().map(Type::jvmName).collect(Collectors.toCollection(ArrayList::new));
+
+        ArrayList<String> superInterfaceNames = superInterfaces.stream().map(t -> packageName.replace(".", "/") + "/"+ t.jvmName()).collect(Collectors.toCollection(ArrayList::new));
         partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), superInterfaceNames, false);
+
         thisType = Type.typeFor(partial.toClass());
         context.addType(line, thisType);
     }

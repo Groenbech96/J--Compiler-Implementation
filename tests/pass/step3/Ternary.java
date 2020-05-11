@@ -1,4 +1,4 @@
-package pass;
+package pass.step3;
 
 public class Ternary {
     public static int ternary(boolean b, int x, int y) { return b ? x : y; }

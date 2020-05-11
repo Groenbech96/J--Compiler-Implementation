@@ -834,14 +834,15 @@ public class Parser {
      * Parse a statement.
      *
      * <pre>
-     *   statement ::= block
-     *               | IF parExpression statement [ELSE statement]
-     *               | WHILE parExpression statement
-     *               | FOR forExpression statement
-     *               | RETURN [expression] SEMI
-     *               | THROW expression SEMI
-     *               | SEMI
-     *               | statementExpression SEMI
+     *  statement ::= block
+     *      | IF parExpression statement [ELSE statement]
+     *      | WHILE parExpression statement
+     *      | FOR forExpression | forEachExpression statement
+     *      | RETURN [expression] SEMI
+     *      | SEMI
+     *      | TRY block {CATCH LPARAN type {BITWISE_OR type} IDENTIFIER RPARAN block} [FINALLY block]
+     *      | THROW expression SEMI
+     *      | statementExpression SEMI
      * </pre>
      *
      * @return an AST for a statement.
@@ -917,17 +918,21 @@ public class Parser {
         } else if (have(TRY)) {
             JBlock tryBlock = block();
             JBlock finalBlock = null;
-            ArrayList<ArrayList<JFormalParameter>> catchParamslist = new ArrayList<>();
+            ArrayList<ArrayList<Type>> catchParamslist = new ArrayList<>();
             ArrayList<JBlock> catchBlocks = new ArrayList<>();
+            ArrayList<String> catchVariables = new ArrayList<>();
             while (see(CATCH)) {
                 mustBe(CATCH);
-                catchParamslist.add(formalParameters());
+                catchParamslist.add(catchParameters());
+                mustBe(IDENTIFIER);
+                catchVariables.add(scanner.previousToken().image());
+                mustBe(RPAREN);
                 catchBlocks.add(block());
             }
             if (have(FINALLY)) {
                 finalBlock = block();
             }
-            return new JExceptionStatement(line, tryBlock, catchBlocks, catchParamslist, finalBlock);
+            return new JExceptionStatement(line, tryBlock, catchBlocks, catchParamslist, catchVariables, finalBlock);
         } else if (have(THROW)) {
             JExpression expression = expression();
             mustBe(SEMI);
@@ -937,6 +942,31 @@ public class Parser {
             mustBe(SEMI);
             return statement;
         }
+    }
+
+    /**
+     * Parse catch parameters.
+     *
+     * <pre>
+     *   catchParameters ::= LPAREN
+     *                          type ( | type)*
+     *                        RPAREN
+     * </pre>
+     *
+     * @return a list of formal parameters.
+     */
+    private ArrayList<Type> catchParameters() {
+        ArrayList<Type> catchParameters = new ArrayList<>();
+        Type curType = null;
+
+        mustBe(LPAREN);
+        curType = type();
+        catchParameters.add(curType);
+        while (have(OR)) {
+            catchParameters.add(type());
+        }
+        return catchParameters;
+
     }
 
     /**

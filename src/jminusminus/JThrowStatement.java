@@ -1,5 +1,6 @@
 package jminusminus;
 
+
 public class JThrowStatement extends JStatement {
 
     private JExpression expression;
@@ -16,17 +17,14 @@ public class JThrowStatement extends JStatement {
 
     @Override
     public JAST analyze(Context context) {
-        expression.analyze(context);
+        expression = expression.analyze(context);
         return this;
     }
 
     @Override
     public void codegen(CLEmitter output) {
-        String endLabel = output.createLabel();
-
         expression.codegen(output);
-        output.addBranchInstruction(CLConstants.GOTO, endLabel);
-        output.addLabel(endLabel);
+        output.addNoArgInstruction(CLConstants.ATHROW);
     }
 
     @Override
@@ -37,5 +35,9 @@ public class JThrowStatement extends JStatement {
         p.indentLeft();
         p.printf("</JThrowStatement>\n");
 
+    }
+
+    public JExpression getExpression() {
+        return expression;
     }
 }

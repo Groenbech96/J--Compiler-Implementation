@@ -3,7 +3,6 @@
 package jminusminus;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static jminusminus.CLConstants.*;
@@ -172,14 +171,14 @@ class JMethodDeclaration
 
         if (!isStatic) {
             // Offset 0 is used to address "this".
-            this.context.nextOffset();
+            this.context.nextOffset(Type.ANY);
         }
 
         // Declare the parameters. We consider a formal parameter 
         // to be always initialized, via a function call.
         for (JFormalParameter param : params) {
             LocalVariableDefn defn = new LocalVariableDefn(param.type(),
-                    this.context.nextOffset());
+                    this.context.nextOffset(param.type()));
             defn.initialize();
             this.context.addEntry(param.line(), param.name(), defn);
         }
@@ -189,7 +188,25 @@ class JMethodDeclaration
                 JAST.compilationUnit.reportSemanticError(line(),
                         "Non-void method must have a return statement");
             }
+
+            // make sure that exceptions is handled by sorounding
+            for (JStatement statement : this.body.statements()) {
+                if (statement instanceof JThrowStatement) {
+                    JThrowStatement s = (JThrowStatement) statement;
+                    Type exceptionType = s.getExpression().type.resolve(context);
+                    boolean matched = this.resolvedExceptions.stream().anyMatch(exceptionType::matchesOrInheritFrom);
+                    if(!matched) {
+                        JAST.compilationUnit.reportSemanticError(line, "Exception is not handled: %s", exceptionType.jvmName());
+                    }
+
+                }
+            }
+
         }
+
+
+
+
         return this;
     }
 
