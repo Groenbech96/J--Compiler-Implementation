@@ -80,7 +80,6 @@ class JVariable extends JExpression implements JLhs {
                 // Rewrite a variable denoting a field as an
                 // explicit field selection
                 type = field.type();
-                System.out.println("AAAA " + (field.isStatic() || (context.methodContext() != null && context.methodContext().isStatic())));
                 JExpression newTree = new JFieldSelection(line(),
                         field.isStatic() || (context.methodContext() != null && context.methodContext().isStatic())
                                 ? new JVariable(line(), definingType.toString())
