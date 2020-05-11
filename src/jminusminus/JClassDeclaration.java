@@ -220,38 +220,16 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
         // Finally, ensure that a non-abstract class has
         // no abstract methods.
-        if (!thisType.isAbstract() && thisType.abstractMethods().size() > 0) {
+        ArrayList<Method> abstractMethods = thisType.abstractMethods();
+        if (!thisType.isAbstract() && abstractMethods.size() > 0) {
             StringBuilder methods = new StringBuilder();
-            for (Method method : thisType.abstractMethods()) {
+            for (Method method : abstractMethods) {
                 methods.append("\n").append(method);
             }
             JAST.compilationUnit.reportSemanticError(line,
                     "Class %s must be declared abstract since it defines "
                             + "the following abstract methods: %s", name, methods);
-
         }
-
-        // Make sure that all interface methods are implemented
-        // StringBuilder missingInterfaceMethods = new StringBuilder();
-        // for (Type _interface: this.interfaces) {
-        //     Class<? extends Type> classRep = _interface.getClass();
-        //     java.lang.reflect.Method[] methods = classRep.getDeclaredMethods();
-        //     for (java.lang.reflect.Method member: methods) {
-        //         Method method = thisType.methodFor(member.getName(),
-        //                     new Type[]{Type.typeFor(member.getReturnType())});
-        //         if(method == null){
-        //             missingInterfaceMethods.append("\n").append(_interface.simpleName()).append(".")
-        //                 .append(member.getName());
-        //         }
-        //     }
-        // }
-
-
-        // if(!missingInterfaceMethods.toString().equals("")){
-        //     JAST.compilationUnit.reportSemanticError(line,
-        //             "Not all interfaces are implemented. Missing functions are: %s",
-        //             missingInterfaceMethods.toString());
-        // }
 
         return this;
     }
